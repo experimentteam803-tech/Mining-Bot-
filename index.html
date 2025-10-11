@@ -202,6 +202,24 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 
     <section id="task" class="section">
         <div id="taskList">
+            <!-- New Notice Box Added Here -->
+            <div class="task-notice" style="background: #2a2a2a; border-left: 4px solid #ffd700; padding: 15px; border-radius: 8px; margin: 0 0 25px 0;">
+                <h4 style="color: #ffd700; margin-bottom: 10px;">After Completing a Task:</h4>
+                <p style="font-size: 14px; color: #ccc; line-height: 1.6;">
+                    Please send your <strong>User ID</strong> and the <strong>Task Name</strong> to our Customer Service Team for quick verification and reward processing.
+                </p>
+                <div class="user-id-actions" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: #1c1c1c; padding: 8px 12px; border-radius: 6px; font-size: 14px;">
+                        Your User ID: <span id="taskUserId" style="font-weight: bold; color: #90ee90;"></span>
+                    </div>
+                    <div>
+                        <button onclick="copyUserId()" style="background: #555; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copy UID</button>
+                        <a href="https://t.me/Costumer_123" target="_blank" style="background: #32cd32; color: #000; text-decoration: none; padding: 8px 15px; border-radius: 6px; font-weight: 600;">✉️ Send Msg</a>
+                    </div>
+                </div>
+            </div>
+            <!-- End of New Notice Box -->
+
             <h2 style="text-align: center;">🧩 Daily Tasks</h2>
             <p style="margin-bottom: 20px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
             <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
@@ -424,10 +442,8 @@ function loadLiveTasks() {
     onValue(TASKS_REF, (snapshot) => {
         const tasks = snapshot.val();
         
-        let html = `
-            <h2 style="text-align: center;">🧩 Daily Tasks</h2>
-            <p style="margin-bottom: 20px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
-        `;
+        // Keep the notice and header, clear only the task list itself
+        let taskHtml = '';
         let activeTasksFound = false;
 
         if (tasks) {
@@ -436,7 +452,7 @@ function loadLiveTasks() {
                 if (task.active) {
                     activeTasksFound = true;
                     // Render the task item using the admin panel data structure
-                    html += `
+                    taskHtml += `
                         <div class="referral-details" style="border-left: 5px solid #ffd700; padding: 15px; margin-bottom: 15px; background: #1c1c1c;">
                             <h3 style="color: #90ee90; margin-bottom: 5px;">${task.name}</h3>
                             <p style="color: #fff; font-weight: 600;">Reward: <span style="color: #ffd700;">${task.reward.toLocaleString()} Coins</span></p>
@@ -457,10 +473,15 @@ function loadLiveTasks() {
         }
         
         if (!activeTasksFound) {
-            html += '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
+            taskHtml += '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
         }
 
-        taskListDiv.innerHTML = html;
+        // Find the placeholder and inject the generated task HTML
+        const placeholder = taskListDiv.querySelector('p[style*="Loading tasks..."]');
+        if (placeholder) {
+            placeholder.outerHTML = taskHtml;
+        }
+
     });
 }
 
@@ -849,10 +870,23 @@ window.shareReferralLink = () => {
     WebApp.shareURL(link, shareText);
 }
 
+// --- NEW FUNCTION TO COPY USER ID ---
+window.copyUserId = () => {
+    const userId = TELEGRAM_USER_ID;
+    navigator.clipboard.writeText(userId).then(() => {
+        WebApp.showAlert('User ID Copied: ' + userId);
+    }).catch(err => {
+        console.error('Failed to copy User ID: ', err);
+        WebApp.showAlert('Failed to copy User ID.');
+    });
+}
 
 // --- INIT and NAVIGATION FUNCTIONS ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Populate the User ID in the task section notice
+    document.getElementById('taskUserId').innerText = TELEGRAM_USER_ID;
+    
     // 1. Load Admin Settings (must be first to set ADS_REQUIRED/AD_REWARD_COINS)
     loadAdminSettings();
     
