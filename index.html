@@ -40,7 +40,7 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
   padding-top:70px;
   padding-bottom: 90px;
 }
-.section{display:none;width:100%;padding:20px;animation:fadeIn 0.3s ease;}
+.section{display:none;width:100%;height:100%;padding:20px;animation:fadeIn 0.3s ease;}
 #home{display:block;}
 
 /* Home Section Styles (Mining) */
@@ -175,7 +175,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 </head>
 <body>
 
-<div id="app-content" style="width: 100%;">
+<div id="app-content" style="width: 100%; height: 100vh; display: flex; flex-direction: column;">
     <header>
     <div class="profile" onclick="showProfile()">
     <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
@@ -266,10 +266,20 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
             </button>
         </div>
     </section>
+    
+    <!-- REQUIREMENT 2: GIFT PAGE SECTION -->
+    <section id="gift" class="section" style="padding: 0; overflow: hidden;">
+        <iframe id="giftPageFrame" style="width: 100%; height: 100%; border: none;"></iframe>
+    </section>
+
     </main>
     <nav class="navbar">
     <button class="nav-btn active" onclick="showSection('home', this)">🏠 Home</button>
     <button class="nav-btn" onclick="showSection('task', this)">🧩 Task</button>
+    
+    <!-- REQUIREMENT 1: "GIFT" BUTTON ADDED -->
+    <button class="nav-btn" onclick="showSection('gift', this)">🎁 Gift</button>
+    
     <button class="nav-btn" onclick="showSection('wallet', this)">💼 Wallet</button>
     <button class="nav-btn" onclick="showSection('referral', this)">🔗 Referral</button>
     </nav>
@@ -303,7 +313,6 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase
 import { getDatabase, ref, set, onValue, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // --- TELEGRAM MINI APP INITIALIZATION ---
-// Initialize the Telegram WebApp and get user data
 const WebApp = window.Telegram.WebApp;
 WebApp.ready();
 
@@ -316,7 +325,6 @@ if (!telegramUser || !telegramUser.id) {
 const TELEGRAM_USER_ID = telegramUser.id.toString();
 const USER_NAME = telegramUser.first_name + (telegramUser.last_name ? ' ' + telegramUser.last_name : '');
 
-// Set UI elements with Telegram Data
 document.getElementById('username').innerText = USER_NAME;
 document.getElementById('refLink').innerText = `https://coinmine.app/ref?user=${TELEGRAM_USER_ID}`;
 // End of Telegram Init
@@ -332,12 +340,11 @@ const firebaseConfig = {
     measurementId: "G-2FWW2SVSLR"
 };
 
-// Initialize Firebase services
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase(app);
 
-// --- DYNAMIC USER SETUP (USING TELEGRAM ID) ---
+// --- DYNAMIC USER SETUP ---
 const DB_NODE_PATH = 'users/' + TELEGRAM_USER_ID; 
 
 // --- GLOBAL REFERENCES ---
@@ -357,9 +364,8 @@ const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
-// These are now dynamic, loaded from Admin Panel:
-window.ADS_REQUIRED = 10; // Default
-window.AD_REWARD_COINS = 5; // Default
+window.ADS_REQUIRED = 10;
+window.AD_REWARD_COINS = 5;
 
 // UI Elements 
 const mineButton = document.getElementById('mineBtn');
@@ -371,13 +377,12 @@ const withdrawalModal = document.getElementById('withdrawalModal');
 const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 
 
-// --- FIREBASE DATA HANDLING FUNCTIONS ---
+// --- FIREBASE DATA HANDLING ---
 
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
         const data = snapshot.val();
         
-        // Initial setup for the Telegram user node
         if (!data) {
             console.log("Setting up initial data for Telegram user.");
             const initialData = {
@@ -387,25 +392,21 @@ function loadUserData() {
                 adsWatched: 0,
                 adsWatchedTimestamp: 0,
                 upiId: '',
-                telegramId: TELEGRAM_USER_ID, // Store ID
-                userName: USER_NAME,         // Store Name
+                telegramId: TELEGRAM_USER_ID,
+                userName: USER_NAME,
                 lastActive: Date.now()
             };
-            set(window.dbRef, initialData); // Write initial data
+            set(window.dbRef, initialData);
             updateGlobalState(initialData);
             return;
         }
-
-        // Update global state with fetched data, and update lastActive
-        update(window.dbRef, { lastActive: Date.now(), userName: USER_NAME }); // Update for dashboard and ensure name is current
-        updateGlobalState(data);
         
-        // Apply mining logic after data sync
+        update(window.dbRef, { lastActive: Date.now(), userName: USER_NAME });
+        updateGlobalState(data);
         processDataForStateUpdate();
 
     }, (error) => {
         console.error("Firebase Read Error (User Data):", error);
-        // Use Telegram notification for error
         WebApp.showAlert("Failed to load user data. Check Firebase rules.");
     });
 }
@@ -414,21 +415,16 @@ function loadAdminSettings() {
     onValue(ADMIN_SETTINGS_REF, (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
-            // 1. Update Mining Ad Settings (required ads)
             if (settings.miningAds && settings.miningAds.required) {
                 window.ADS_REQUIRED = settings.miningAds.required;
             } else {
-                 window.ADS_REQUIRED = 10; // Fallback
+                 window.ADS_REQUIRED = 10;
             }
-            
-            // 2. Update Ad Task Reward
             if (settings.adTasks && settings.adTasks.reward) {
                 window.AD_REWARD_COINS = settings.adTasks.reward;
             } else {
-                window.AD_REWARD_COINS = 5; // Fallback
+                window.AD_REWARD_COINS = 5;
             }
-
-            // Re-run the update logic since core constants might have changed
             updateMiningButtonState();
             updateAdStatus();
         }
@@ -441,8 +437,6 @@ function loadLiveTasks() {
     const taskListDiv = document.getElementById('taskList');
     onValue(TASKS_REF, (snapshot) => {
         const tasks = snapshot.val();
-        
-        // Keep the notice and header, clear only the task list itself
         let taskHtml = '';
         let activeTasksFound = false;
 
@@ -451,7 +445,6 @@ function loadLiveTasks() {
                 const task = tasks[taskId];
                 if (task.active) {
                     activeTasksFound = true;
-                    // Render the task item using the admin panel data structure
                     taskHtml += `
                         <div class="referral-details" style="border-left: 5px solid #ffd700; padding: 15px; margin-bottom: 15px; background: #1c1c1c;">
                             <h3 style="color: #90ee90; margin-bottom: 5px;">${task.name}</h3>
@@ -476,7 +469,6 @@ function loadLiveTasks() {
             taskHtml += '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
         }
 
-        // Find the placeholder and inject the generated task HTML
         const placeholder = taskListDiv.querySelector('p[style*="Loading tasks..."]');
         if (placeholder) {
             placeholder.outerHTML = taskHtml;
@@ -496,14 +488,11 @@ function updateGlobalState(data) {
 }
 
 function processDataForStateUpdate() {
-    // Check if mining session ended while offline
     if (window.miningEndTime !== 0 && window.miningEndTime <= Date.now()) {
         stopMining(false); 
     }
 
-    // Cooldown/Reset check logic
     if (window.dailyMinedTimestamp !== 0 && window.canMineToday()) {
-        // Cooldown is finished, reset data for new cycle
         updateDatabase({ 
             dailyMinedTimestamp: 0, 
             adsWatched: 0, 
@@ -514,14 +503,11 @@ function processDataForStateUpdate() {
         window.adsWatchedTimestamp = 0;
     }
 
-    // Update UI and button state based on current global variables
     updateCoinDisplays();
     updateMiningButtonState();
 }
 
-// Function to update only specific fields in the database
 window.updateDatabase = (updates) => {
-    // Merge existing state (for robust updates)
     const allUpdates = { 
         coins: window.coins, 
         dailyMinedTimestamp: window.dailyMinedTimestamp, 
@@ -534,7 +520,6 @@ window.updateDatabase = (updates) => {
         ...updates 
     };
     
-    // Using set() to overwrite the static user node (as in original code)
     set(window.dbRef, allUpdates)
         .catch(error => console.error("Database Write Error:", error));
 };
@@ -594,7 +579,6 @@ window.watchAd = () => {
     watchAdBtn.disabled = true;
     watchAdBtn.innerText = '🎥 Ad Playing... (3s)';
 
-    // In a real app, you'd show a video ad here
     setTimeout(() => {
         window.adsWatched++;
         window.coins += window.AD_REWARD_COINS; 
@@ -700,12 +684,11 @@ window.startDailyMining = () => {
 
   window.miningInterval = setInterval(()=>{
     window.coins+=1;
-    // We update the DB less frequently to save on writes, but the UI is updated on every interval.
     if (window.coins % 10 === 0) { 
         window.updateDatabase({ coins: window.coins });
     }
     startMiningAnimation();
-    updateCoinDisplays(); // Update UI instantly
+    updateCoinDisplays();
   }, MINING_RATE_MS); 
 
   window.remainingTimeInterval = setInterval(updateCountdown, 1000); 
@@ -776,7 +759,7 @@ function updateMiningButtonState() {
 window.showWithdrawalModal = () => {
     withdrawalModal.style.display = "block";
     document.getElementById('upiAmount').value = '';
-    document.getElementById('upiId').value = window.upiId; // Pre-fill UPI
+    document.getElementById('upiId').value = window.upiId;
     document.getElementById('inrValueText').innerText = '';
     submitWithdrawalBtn.disabled = true;
 }
@@ -827,19 +810,17 @@ window.submitWithdrawal = () => {
     }
 
     window.coins -= amount;
-    window.upiId = upiId; // Save UPI ID for next time
+    window.upiId = upiId;
     
-    // 1. Update user's coin balance and UPI ID
     window.updateDatabase({ coins: window.coins, upiId: window.upiId });
     
-    // 2. Push withdrawal request to Admin Panel's node
     const withdrawalRequest = {
         userId: TELEGRAM_USER_ID,
         userName: USER_NAME,
         amount: amount,
         upiId: upiId,
         timestamp: Date.now(),
-        status: 'Pending' // Admin panel reads only 'Pending'
+        status: 'Pending'
     };
 
     push(WITHDRAWALS_REF, withdrawalRequest).then(() => {
@@ -847,9 +828,8 @@ window.submitWithdrawal = () => {
         WebApp.showAlert(`Withdrawal of ${amount} Coins (₹${(amount/1000).toFixed(2)}) to UPI ID ${upiId} submitted successfully. Coins deducted. Processing in 24 hours.`);
     }).catch(error => {
          WebApp.showAlert("Withdrawal failed to submit. Please try again. Error: " + error.message);
-         // Important: If push fails, you might want to reverse coin deduction!
          window.coins += amount;
-         window.updateDatabase({ coins: window.coins }); // Revert deduction
+         window.updateDatabase({ coins: window.coins });
     });
 }
 
@@ -863,10 +843,7 @@ window.onclick = function(event) {
 
 window.shareReferralLink = () => {
     const link = document.getElementById('refLink').innerText;
-    // Updated share message
     const shareText = `💰 CoinMine में शामिल हों और कमाना शुरू करें! मेरा रेफरल लिंक उपयोग करें: ${link}। आपको तुरंत 700 Coin और मेरे द्वारा कमाए गए Coins पर 5% आजीवन कमीशन मिलेगा!`;
-
-    // Use WebApp.shareUrl for native Telegram sharing functionality
     WebApp.shareURL(link, shareText);
 }
 
@@ -881,20 +858,203 @@ window.copyUserId = () => {
     });
 }
 
+// --- REQUIREMENTS 3 & 5: GIFT PAGE INTEGRATION AND COIN SYNC ---
+
+// This is the full code of the Gift Page, modified for integration.
+const giftPageHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redeem Gift Code</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #6a11cb; --secondary-color: #2575fc; --text-color: #222;
+      --subtle-text-color: #555; --background-gradient-start: #f06; --background-gradient-end: #4a00e0;
+      --card-background: #fff; --highlight-color: #ff5722; --accent-color: #009688;
+      --success-color: #4CAF50; --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    body {
+      font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
+      min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; padding: 20px; box-sizing: border-box;
+    }
+    .container {
+      background: var(--card-background); padding: 30px; border-radius: 12px; box-shadow: var(--box-shadow);
+      text-align: center; width: 100%; max-width: 420px; transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .container:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); }
+    h2 { margin-top: 0; margin-bottom: 5px; color: var(--primary-color); font-weight: 700; font-size: 1.8em; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+    .sub-text { font-size: 0.9em; color: var(--accent-color); margin-bottom: 5px; font-weight: 500; }
+    .highlight { font-size: 1em; color: var(--highlight-color); margin-bottom: 20px; font-weight: 600; padding: 5px 0; border-bottom: 1px solid #eee; border-top: 1px solid #eee; background: linear-gradient(to right, #fffaf0, #fff); }
+    input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; font-size: 1em; color: var(--text-color); box-sizing: border-box; transition: border-color 0.3s; }
+    input:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.25); }
+    button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+    .redeem-btn { background: var(--primary-color); color: white; box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3); }
+    .redeem-btn:hover { background: #500e9f; box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4); transform: translateY(-2px); }
+    .claim-btn { background: var(--secondary-color); color: white; margin-bottom: 0 !important; box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3); }
+    .claim-btn:hover { background: #1a62d0; box-shadow: 0 8px 20px rgba(37, 117, 252, 0.4); transform: translateY(-2px); }
+    p { color: var(--text-color); }
+    p[style*="— OR GET A FREE CODE —"] { color: #607d8b !important; font-weight: 500; }
+    .note { margin-top: 20px; font-size: 0.9em; color: var(--accent-color); padding-top: 10px; border-top: 1px dashed #eee; font-weight: 500; }
+    #claimButtonContainer { display: block; }
+    .redeemed-message { display: none; padding: 15px; border-radius: 8px; background: var(--success-color); color: white; font-weight: 600; text-align: center; margin-bottom: 20px; font-size: 1.1em; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); letter-spacing: 0.3px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"><\/script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"><\/script>
+</head>
+<body>
+  <div class="container">
+    <h2><span style="color: #FFD700;">★</span> Redeem Gift Code</h2>
+    <p class="sub-text">A new gift code will be available every 6 hours.</p>
+    <p class="highlight">You can win up to <span style="font-size: 1.1em;">10,000</span> coins from gift codes!</p>
+    <input type="text" id="giftCode" placeholder="Enter your gift code here">
+    <button class="redeem-btn" onclick="redeemCode()">Redeem Code</button>
+    <p style="font-size: 0.9em; margin: 15px 0;">— OR GET A FREE CODE —</p>
+    <div id="claimButtonContainer">
+      <button class="claim-btn" id="claimBtn1" onclick="claimCode(this, 'placeholder')">Claim Free Gift Code 🚀</button>
+    </div>
+    <div id="redeemedMessage" class="redeemed-message">Code successfully redeemed! 🥳</div>
+    <p class="note">Claim a code and redeem it to earn coins 💰</p>
+  </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcgl31JqffVd8bW8G23UurFhxH8IFlEfM", authDomain: "mining-bot-276d0.firebaseapp.com",
+      databaseURL: "https://mining-bot-276d0-default-rtdb.firebaseio.com", projectId: "mining-bot-276d0",
+      storageBucket: "mining-bot-276d0.firebasestorage.app", messagingSenderId: "263688973305",
+      appId: "1:263688973305:web:9346d02b16f8b386ec2b28", measurementId: "G-T38M420DC0"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = app.database();
+    let lastClickedButton = null;
+    let claimSettings = {};
+    
+    // MODIFIED: Get User ID from URL parameter to sync with main app user.
+    function getTelegramUserIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('userId');
+    }
+    const clientID = getTelegramUserIdFromUrl();
+
+    if (!clientID) {
+        document.body.innerHTML = '<h2 style="color:white;text-align:center;">Error: User ID not found. Please access from the main app.</h2>';
+        throw new Error("User ID is missing from iframe URL.");
+    }
+
+    async function checkClaimStatus() {
+      const claimContainer = document.getElementById('claimButtonContainer');
+      const redeemedMsg = document.getElementById('redeemedMessage');
+      const claimCode = claimSettings.claim1 ? claimSettings.claim1.code : null;
+      if (!claimCode) return;
+      const snapshot = await database.ref('redemptions_by_user/' + clientID).once('value');
+      const userRedemptions = snapshot.val();
+      let claimRedeemed = false;
+      if (userRedemptions) {
+        for (const key in userRedemptions) {
+          if (userRedemptions[key].code === claimCode) {
+            claimRedeemed = true;
+            break;
+          }
+        }
+      }
+      claimContainer.style.display = claimRedeemed ? 'none' : 'block';
+      redeemedMsg.style.display = claimRedeemed ? 'block' : 'none';
+    }
+    function loadClaimSettings() {
+      database.ref('claim_settings').once('value', (snapshot) => {
+        claimSettings = snapshot.val() || {};
+        const btn = document.getElementById('claimBtn1');
+        const setting = claimSettings.claim1;
+        if (setting && setting.url) {
+          btn.onclick = function() { claimCode(this, setting.url); };
+        } else {
+          btn.onclick = function() { claimCode(this, 'placeholder'); };
+        }
+        checkClaimStatus();
+      });
+    }
+    window.onload = loadClaimSettings;
+    async function redeemCode() {
+      let code = document.getElementById("giftCode").value.trim().toUpperCase();
+      if (code === "") { alert("Please enter a gift code!"); return; }
+      try {
+        let codeData = null;
+        const setting1 = claimSettings.claim1;
+        if (setting1 && setting1.code === code) codeData = setting1;
+        if (!codeData && claimSettings.common && claimSettings.common.code === code) codeData = claimSettings.common;
+        if (!codeData) { alert("Invalid Gift Code! Please enter a correct code."); return; }
+        const redemptionSnapshot = await database.ref('redemptions_by_user/' + clientID).once('value');
+        const userRedemptions = redemptionSnapshot.val();
+        let alreadyRedeemed = false;
+        if (userRedemptions) {
+          for (const key in userRedemptions) {
+            if (userRedemptions[key].code === code) { alreadyRedeemed = true; break; }
+          }
+        }
+        if (alreadyRedeemed) { alert("You have already redeemed the code '" + code + "'. Each code can be redeemed only once."); return; }
+        
+        const coinsAwarded = codeData.coins;
+        const timestamp = new Date().toISOString();
+        const redemptionData = { code, coins: coinsAwarded, redeemedAt: timestamp, clientID };
+        await database.ref('redeemed_codes').push(redemptionData);
+        await database.ref('redemptions_by_user/' + clientID).push({ code, coins: coinsAwarded });
+        
+        // MODIFIED: Send message to parent app to update coin balance
+        window.parent.postMessage({ type: 'COIN_UPDATE', coins: coinsAwarded }, '*');
+        alert("Code '" + code + "' successfully redeemed! 🎉\\nYou won " + coinsAwarded + " coins!");
+        
+        document.getElementById("giftCode").value = "";
+        if (code === setting1?.code) checkClaimStatus();
+      } catch (error) {
+        console.error("Redemption Error:", error);
+        alert("Redemption failed! Please try again later. (Error: " + error.message + ")");
+      }
+    }
+    function claimCode(button, url) {
+      if (!url || url === 'placeholder') { alert("Admin has not set this claim link yet! Please wait."); return; }
+      lastClickedButton = button;
+      window.open(url, '_blank'); // Open in a new tab to not navigate away from the mini app
+    }
+  <\/script>
+</body>
+</html>
+`;
+
+function setupGiftPage() {
+    const frame = document.getElementById('giftPageFrame');
+    // Use srcdoc to embed the HTML directly, passing the user ID as a URL parameter for the iframe's context.
+    // This creates a self-contained environment for the gift page.
+    const blob = new Blob([giftPageHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    frame.src = `${url}?userId=${TELEGRAM_USER_ID}`;
+}
+
+// Listen for messages from the Gift Page iframe
+window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (data && data.type === 'COIN_UPDATE') {
+        const earnedCoins = parseInt(data.coins, 10);
+        if (!isNaN(earnedCoins) && earnedCoins > 0) {
+            window.coins += earnedCoins;
+            // Use the app's existing functions to update the database and UI
+            window.updateDatabase({ coins: window.coins });
+            updateCoinDisplays();
+            WebApp.showPopup({ message: `🎁 You received ${earnedCoins} coins from a gift code!` });
+        }
+    }
+});
+
+
 // --- INIT and NAVIGATION FUNCTIONS ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Populate the User ID in the task section notice
     document.getElementById('taskUserId').innerText = TELEGRAM_USER_ID;
     
-    // 1. Load Admin Settings (must be first to set ADS_REQUIRED/AD_REWARD_COINS)
     loadAdminSettings();
-    
-    // 2. Load User Data (waits for admin settings if needed)
     loadUserData(); 
-
-    // 3. Load Live Tasks
     loadLiveTasks();
+    setupGiftPage(); // Initialize the Gift Page iframe
 });
 
 window.showSection = (sectionId, button) => {
@@ -903,7 +1063,7 @@ window.showSection = (sectionId, button) => {
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
   button.classList.add('active');
 }
-// Updated showProfile message to show Telegram user details
+
 window.showProfile = () => { 
     WebApp.showAlert(`Telegram User Details:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); 
 } 
