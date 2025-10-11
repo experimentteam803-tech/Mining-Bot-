@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CoinMine App - Firebase Static User</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+
 /* Basic Reset and Global Styles */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif}
 body{
@@ -16,6 +16,7 @@ body{
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 /* Header (Navigation Bar) */
 header{
@@ -30,57 +31,9 @@ header{
   top:0;
   z-index:100;
 }
-/* --- UPDATED PROFILE & COPY BUTTON LAYOUT --- */
-header .profile-container {
-    display: flex;
-    flex-direction: column; /* Stack profile info and details */
-    align-items: flex-start;
-}
-header .profile{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    cursor: pointer; /* Make the profile area clickable */
-    z-index: 101; /* Ensure profile is above details for click */
-}
+header .profile{cursor:pointer;display:flex;align-items:center;gap:10px}
 header .profile img{width:45px;height:45px;border-radius:50%;border:2px solid #32cd32}
 header .profile span{font-weight:600;color:#90ee90}
-
-#profileDetails {
-    display: none; /* Initially hidden */
-    background: #333;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin-top: 5px; /* Space below the main profile info */
-    position: absolute;
-    top: 60px; /* Position below the header */
-    left: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-    z-index: 99;
-    white-space: nowrap; /* Keep content on one line */
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-}
-
-#profileIdText {
-    color: #ffd700;
-    margin-right: 10px;
-}
-
-#copyIdIcon {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    font-size: 18px; /* Icon size */
-    padding: 2px 5px;
-    transition: color 0.2s;
-}
-#copyIdIcon:hover {
-    color: #90ee90;
-}
-
 header .msg-icon{cursor:pointer;font-size:26px;color:#32cd32}
 
 /* Main Content Area */
@@ -92,72 +45,173 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 .section{display:none;width:100%;padding:20px;animation:fadeIn 0.3s ease;}
 #home{display:block;}
 
-/* --- ADJUSTED Home Section Styles --- */
-#home .balance-display {
-    text-align: center;
-    margin-bottom: 20px;
+/* --- NEW PROFESSIONAL MINING SECTION STYLES --- */
+#home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: calc(100vh - 160px); /* Full viewport height minus header/footer */
 }
-#totalCoins{font-size:48px;color:#ffd700;font-weight:700;text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);}
-#home .balance-display h2{font-size:24px;color:#90ee90; margin-top: -10px;}
+
+#totalCoins {
+    font-size: 48px;
+    color: #ffd700;
+    font-weight: 700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    transition: transform 0.2s ease;
+}
+#totalCoins.pop {
+    transform: scale(1.15);
+}
 
 .mining-hub {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    padding: 25px 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 300px;
+}
+
+.circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #101820 0%, #0d0d0d 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    border: 3px solid rgba(50, 205, 50, 0.2);
+    box-shadow: inset 0 0 40px rgba(50, 205, 50, 0.3), 0 0 30px rgba(0,0,0,0.5);
+    transition: all 0.3s ease-out;
+}
+
+.central-core {
+    width: 80px;
+    height: 80px;
+    background: #32cd32;
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 0 20px #32cd32, 0 0 40px #32cd32, 0 0 60px rgba(50, 205, 50, 0.5);
+    animation: pulseCore 2s infinite ease-in-out;
+}
+
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid;
+}
+.ring-1 {
+    width: 100%; height: 100%;
+    border-color: rgba(50, 205, 50, 0.3);
+    animation: rotate 20s linear infinite;
+}
+.ring-2 {
+    width: 120%; height: 120%;
+    border-color: rgba(50, 205, 50, 0.2);
+    animation: rotate-reverse 30s linear infinite;
+}
+.ring-3 {
+    width: 140%; height: 140%;
+    border-color: rgba(50, 205, 50, 0.1);
+    animation: rotate 40s linear infinite;
+}
+
+.mining-data {
+    z-index: 10;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 5px black;
+}
+.mining-data span {
+    font-size: 36px;
+    font-weight: 700;
+    display: block;
+    color: #ffdd57;
+}
+.mining-data small {
+    font-size: 14px;
+    color: #90ee90;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.circle.mining-active-glow .central-core { animation: pulseCore 1s infinite ease-in-out; }
+.circle.mining-active-glow .ring { border-style: solid; }
+.circle.mining-active-glow .ring-1 { animation-duration: 10s; }
+.circle.mining-active-glow .ring-2 { animation-duration: 15s; }
+.circle.mining-active-glow .ring-3 { animation-duration: 20s; }
+
+.floating-coin {
+    position: fixed;
+    z-index: 9999;
+    font-size: 24px;
+    opacity: 1;
+    transition: transform 1s ease-out, opacity 1s ease-out;
+    pointer-events: none; /* So it doesn't interfere with clicks */
+}
+
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes rotate-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes pulseCore {
+    0%, 100% { transform: scale(0.95); box-shadow: 0 0 20px #32cd32, 0 0 40px #32cd32, 0 0 60px rgba(50, 205, 50, 0.5); }
+    50% { transform: scale(1.05); box-shadow: 0 0 30px #90ee90, 0 0 60px #90ee90, 0 0 90px rgba(144, 238, 144, 0.7); }
+}
+
+
+/* --- NEW MINING CONTROLS STYLES --- */
+.mining-controls {
     width: 100%;
-    max-width: 380px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    padding: 0 20px;
     text-align: center;
 }
+#miningStatus {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+#miningCountdown {color: #90ee90; font-size: 16px; font-weight: 600;}
+#adStatus {color: #ffd700; font-size: 14px; margin-top: 5px;}
 
-.circle-container{position:relative;display:flex;align-items:center;justify-content:center;width: 100%;}
-.circle {width:250px; height:250px; border-radius:50%; background: #0d0d0d; display:flex; align-items:center; justify-content:center; position: relative; cursor:pointer; overflow:hidden; box-shadow: inset 0 0 50px rgba(50, 205, 50, 0.5), 0 0 60px rgba(50, 205, 50, 0.8), 0 0 100px rgba(50, 205, 50, 0.4); transition: box-shadow 0.3s ease-out; margin-bottom: 20px;}
-.circle span{font-size:28px; font-weight:700; color: #ffdd57; z-index:10;}
-.circle.mining-active-glow {animation: pulseGlow 2s infinite alternate;}
-@keyframes pulseGlow {
-    0% {box-shadow: inset 0 0 50px rgba(50, 205, 50, 0.5), 0 0 60px rgba(50, 205, 50, 0.8), 0 0 100px rgba(50, 205, 50, 0.4);}
-    100% {box-shadow: inset 0 0 70px rgba(0, 255, 0, 0.7), 0 0 80px rgba(0, 255, 0, 1), 0 0 120px rgba(0, 255, 0, 0.6);}
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
 }
 
-/* --- NEW PROFESSIONAL MINING ANIMATION --- */
-.coin-particle {
-    position: absolute;
-    font-size: 24px;
-    z-index: 1000;
-    animation: fly-up 2s ease-out forwards;
-    pointer-events: none; /* Prevent particles from being clickable */
+button.action-btn{
+    padding: 14px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor:pointer;
+    transition: all 0.3s;
+    border: none;
+    flex-grow: 1;
+    max-width: 200px;
 }
-@keyframes fly-up {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-200px) scale(0.5);
-        opacity: 0;
-    }
-}
+button.action-btn:hover:enabled{filter: brightness(1.2); transform: translateY(-2px);}
+button.action-btn:disabled{cursor: not-allowed; background: #555 !important; color: #999 !important; box-shadow: none; }
 
-/* Common button style for mine and watch ad */
-button.action-btn{width: 100%; padding:14px 28px;border-radius:30px;font-weight:700;font-size:18px;cursor:pointer;margin-top:0;transition:0.3s;display: block; border: none;}
-button.action-btn:hover:enabled{filter: brightness(1.1);}
-button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
-
-.mining-hub .ad-btn {
-    background: #ffd700;
+.mine-btn {
+    background: linear-gradient(45deg, #32cd32, #90ee90);
     color: #000;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
-    margin-bottom: 8px;
+    box-shadow: 0 4px 15px rgba(50, 205, 50, 0.4);
 }
-.mining-hub .mine-btn {
-    background: #32cd32;
+.ad-btn {
+    background: linear-gradient(45deg, #ffd700, #ffec8b);
     color: #000;
-    box-shadow: 0 4px 15px rgba(50, 205, 50, 0.5);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
-#adStatus {color: #ffd700; font-size: 16px; margin-bottom: 15px; font-weight: 600; text-align: center;}
-#miningCountdown {color: #90ee90; font-size: 16px; margin-top: 8px; font-weight: 600; text-align: center; min-height: 24px;}
-
+/* --- END OF NEW STYLES --- */
 
 .wallet-summary {
     background: #282828;
@@ -274,51 +328,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .history-amount { color: #90ee90; font-weight: 600; }
 
 
-/* --- NEW TASK VERIFICATION BOX STYLES --- */
-.task-verification-box {
-    background: #1c1c1c;
-    border: 1px solid #ffd700;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 25px;
-    text-align: center;
-}
-.task-verification-box p {
-    color: #ccc;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-.task-verification-box .button-container {
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-}
-.task-verification-box .task-action-btn {
-    flex: 1;
-    padding: 10px;
-    border-radius: 20px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    transition: filter 0.2s;
-}
-.task-verification-box .task-action-btn:hover {
-    filter: brightness(1.15);
-}
-.task-verification-box .copy-btn {
-    background-color: #32cd32;
-    color: #000;
-}
-.task-verification-box .send-btn {
-    background-color: #2575fc;
-    color: #fff;
-}
-
-
 /* Footer Navigation Bar */
 .navbar{display:flex;justify-content:space-around;background:rgba(0,0,0,0.9);padding:15px 0;border-top:2px solid #32cd32;position:fixed;bottom:0;width:100%;z-index:100;}
 .nav-btn{background:none;border:none;color:white;font-size:18px;padding:8px 12px;border-radius:10px;cursor:pointer;transition:0.2s;font-weight:600;}
@@ -326,235 +335,62 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 
-
-/* --- NEW GIFT SECTION STYLES --- */
-#gift {
-  --primary-color: #6a11cb;
-  --secondary-color: #2575fc;
-  --text-color: #222;
-  --subtle-text-color: #555;
-  --background-gradient-start: #f06;
-  --background-gradient-end: #4a00e0;
-  --card-background: #fff;
-  --highlight-color: #ff5722;
-  --accent-color: #009688;
-  --success-color: #4CAF50;
-  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
-  display: flex; /* Overriding .section display:none when active */
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-#gift .container {
-  background: var(--card-background);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: var(--box-shadow);
-  text-align: center;
-  width: 100%;
-  max-width: 420px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-#gift .container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-}
-#gift h2 {
-  margin-top: 0;
-  margin-bottom: 5px;
-  color: var(--primary-color);
-  font-weight: 700;
-  font-size: 1.8em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-#gift .sub-text {
-  font-size: 0.9em;
-  color: var(--accent-color);
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-#gift .highlight {
-  font-size: 1em;
-  color: var(--highlight-color);
-  margin-bottom: 20px;
-  font-weight: 600;
-  padding: 5px 0;
-  border-bottom: 1px solid #eee;
-  border-top: 1px solid #eee;
-  background: linear-gradient(to right, #fffaf0, #fff);
-}
-#gift input {
-  width: 100%;
-  padding: 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 1em;
-  color: var(--text-color);
-  box-sizing: border-box;
-  transition: border-color 0.3s;
-}
-#gift input:focus {
-  border-color: var(--primary-color);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.25);
-}
-#gift button {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-#gift .redeem-btn {
-  background: var(--primary-color);
-  color: white;
-  box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
-}
-#gift .redeem-btn:hover {
-  background: #500e9f;
-  box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
-  transform: translateY(-2px);
-}
-#gift .claim-btn {
-  background: var(--secondary-color);
-  color: white;
-  margin-bottom: 0 !important;
-  box-shadow: 0 5px 15px rgba(37, 117, 252, 0.3);
-}
-#gift .claim-btn:hover {
-  background: #1a62d0;
-  box-shadow: 0 8px 20px rgba(37, 117, 252, 0.4);
-  transform: translateY(-2px);
-}
-#gift p {
-  color: var(--text-color);
-}
-#gift p[style*="— OR GET A FREE CODE —"] {
-  color: #607d8b !important;
-  font-weight: 500;
-}
-#gift .note {
-  margin-top: 20px;
-  font-size: 0.9em;
-  color: var(--accent-color);
-  padding-top: 10px;
-  border-top: 1px dashed #eee;
-  font-weight: 500;
-}
-#gift #claimButtonContainer {
-  display: block;
-}
-#gift .redeemed-message {
-  display: none;
-  padding: 15px;
-  border-radius: 8px;
-  background: var(--success-color);
-  color: white;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.1em;
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-  letter-spacing: 0.3px;
-}
-
-
 </style>
 </head>
 <body>
 
 <div id="app-content" style="width: 100%;">
     <header>
-    <div class="profile-container">
-        <div class="profile" onclick="showProfileDetails()">
-            <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
-            <span id="username">Username</span>
-        </div>
-
-        <div id="profileDetails">
-            <span id="profileIdText">ID: Loading...</span>
-            <button id="copyIdIcon" onclick="copyUserId()">
-                📋
-            </button>
-        </div>
-    </div>
+    <div class="profile" onclick="showProfile()">
+    <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
+    <span id="username">Username</span> </div>
     <div class="msg-icon" onclick="showMsg()">💬</div>
     </header>
     <main>
     <section id="home" class="section">
-        <div class="balance-display">
-            <div id="totalCoins"><span id="coinCount">0</span></div>
-            <h2>Your Coins</h2>
+        
+        <!-- Total Coins Display -->
+        <div>
+            <h2 style="text-align: center; color: #aaa; font-weight: 400; font-size: 18px;">Total Balance</h2>
+            <div id="totalCoins">0</div>
         </div>
 
+        <!-- NEW Mining Hub Structure -->
         <div class="mining-hub">
-            <div class="circle-container">
-                <div class="circle" id="mineCircle">
+            <div class="circle" id="mineCircle">
+                <div class="ring ring-1"></div>
+                <div class="ring ring-2"></div>
+                <div class="ring ring-3"></div>
+                <div class="central-core"></div>
+                <div class="mining-data">
                     <span id="coinInsideCircle">0</span>
+                    <small>Coins</small>
                 </div>
             </div>
-            
-            <button class="action-btn ad-btn" id="watchAdBtn" onclick="watchAd()">🎬 Watch Ad</button>
-            <div id="adStatus">Ads Watched: 0/10</div>
-        
-            <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">🪙 Start Mining</button>
-            <div id="miningCountdown">Click to start 1 hour session</div>
+        </div>
+
+        <!-- NEW Mining Controls Structure -->
+        <div class="mining-controls">
+            <div id="miningStatus">
+                <div id="miningCountdown">Click to start 1 hour session</div>
+                <div id="adStatus">Ads Watched: 0/10</div>
+            </div>
+            <div class="button-group">
+                 <button class="action-btn ad-btn" id="watchAdBtn" onclick="watchAd()">🎬 Watch Ad</button>
+                 <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">⛏️ Start Mining</button>
+            </div>
         </div>
     </section>
 
     <section id="task" class="section">
-        <!-- ================== NEW TASK VERIFICATION BOX ================== -->
-        <div class="task-verification-box">
-            <p><strong>After Completing a Task:</strong><br>Please send your User ID and Task Name to our Customer Service Team for quick verification and reward processing.</p>
-            <div class="button-container">
-                <button class="task-action-btn copy-btn" onclick="window.copyUserId()">📋 Copy User ID</button>
-                <a href="https://t.me/Costumer_123" target="_blank" class="task-action-btn send-btn">✉️ Send Message</a>
-            </div>
-        </div>
-        <!-- ============================================================= -->
-
         <div id="taskList">
             <h2 style="text-align: center;">🧩 Daily Tasks</h2>
             <p style="margin-bottom: 20px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
             <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
         </div>
+        <div id="taskDetail" style="display:none;">
+            </div>
     </section>
-    
-    <!-- ================== NEW GIFT SECTION ================== -->
-    <section id="gift" class="section">
-      <div class="container">
-        <h2><span style="color: #FFD700;">★</span> Redeem Gift Code</h2>
-        <p class="sub-text">A new gift code will be available every 6 hours.</p>
-        <p class="highlight">You can win up to <span style="font-size: 1.1em;">10,000</span> coins from gift codes!</p>
-    
-        <input type="text" id="giftCode" placeholder="Enter your gift code here">
-        <button class="redeem-btn" onclick="redeemCode()">Redeem Code</button>
-        <p style="font-size: 0.9em; margin: 15px 0;">— OR GET A FREE CODE —</p>
-    
-        <div id="claimButtonContainer">
-          <button class="claim-btn" id="claimBtn1" onclick="claimCode(this, 'placeholder')">
-            Claim Free Gift Code 🚀
-          </button>
-        </div>
-    
-        <div id="redeemedMessage" class="redeemed-message">
-          Code successfully redeemed! 🥳
-        </div>
-    
-        <p class="note">Claim a code and redeem it to earn coins 💰</p>
-      </div>
-    </section>
-    <!-- ======================================================= -->
-
     <section id="wallet" class="section">
         <h2 style="text-align: center;">💼 Wallet</h2>
         <div class="wallet-summary">
@@ -568,7 +404,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
                 Minimum withdrawal amount is **10,000 Coins** (₹10.00).
             </div>
         </div>
-
+        
         <div class="history-container">
             <h3>Withdrawal History</h3>
             <div id="withdrawalHistoryList">
@@ -580,7 +416,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
         <h2 style="text-align: center;">🔗 Referral Program</h2>
         <div id="referral-content">
             <p style="text-align: center; color: #ccc; margin-bottom: 25px;">Invite your friends to CoinMine and earn substantial rewards!</p>
-
+            
             <div class="referral-box">
                 <div style="font-size: 16px; color: #90ee90; font-weight: 600;">Your Unique Referral Link:</div>
                 <p id="refLink">https://coinmine.app/ref?user=DemoUser</p>
@@ -601,12 +437,10 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
             </button>
         </div>
     </section>
-
     </main>
     <nav class="navbar">
     <button class="nav-btn active" onclick="showSection('home', this)">🏠 Home</button>
     <button class="nav-btn" onclick="showSection('task', this)">🧩 Task</button>
-    <button class="nav-btn" onclick="showSection('gift', this)">🎁 Gift</button>
     <button class="nav-btn" onclick="showSection('wallet', this)">💼 Wallet</button>
     <button class="nav-btn" onclick="showSection('referral', this)">🔗 Ref</button>
     </nav>
@@ -633,12 +467,12 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     </div>
 </div>
 
-<!-- ================== MAIN APP SCRIPT ================== -->
 <script type="module">
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-import { getDatabase, ref, set, onValue, update, push, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, update, push, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+// NOTE: I've added 'get', 'query', 'orderByChild', and 'equalTo' imports for history logic.
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -658,20 +492,20 @@ const database = getDatabase(app);
 
 // --- STATIC USER SETUP (NO AUTH) ---
 const STATIC_USER_ID = 'static_demo_user';
-const DB_NODE_PATH = 'users/' + STATIC_USER_ID;
+const DB_NODE_PATH = 'users/' + STATIC_USER_ID; 
 
 // --- GLOBAL REFERENCES ---
 const ADMIN_SETTINGS_REF = ref(database, 'admin_settings');
 const TASKS_REF = ref(database, 'tasks');
 const WITHDRAWALS_REF = ref(database, 'withdrawals');
 
-// --- GLOBAL VARIABLES & CONSTANTS ---
-window.coins = 0;
-window.dailyMinedTimestamp = 0;
-window.miningEndTime = 0;
+// --- GLOBAL VARIABLES & CONSTANTS (Now dynamic or linked to Firebase data) ---
+window.coins = 0; 
+window.dailyMinedTimestamp = 0; 
+window.miningEndTime = 0; 
 window.adsWatched = 0;
 window.adsWatchedTimestamp = 0;
-window.dbRef = ref(database, DB_NODE_PATH);
+window.dbRef = ref(database, DB_NODE_PATH); 
 
 const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -681,7 +515,7 @@ const MIN_WITHDRAWAL_COINS = 10000;
 window.ADS_REQUIRED = 10; // Default
 window.AD_REWARD_COINS = 5; // Default
 
-// UI Elements
+// UI Elements (remain the same)
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
 const adStatusDisplay = document.getElementById('adStatus');
@@ -690,17 +524,13 @@ const countdownDisplay = document.getElementById('miningCountdown');
 const withdrawalModal = document.getElementById('withdrawalModal');
 const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 
-// User ID Display Elements
-const profileDetailsDiv = document.getElementById('profileDetails');
-const profileIdTextSpan = document.getElementById('profileIdText');
-
 
 // --- FIREBASE DATA HANDLING FUNCTIONS ---
 
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
         const data = snapshot.val();
-
+        
         // Initial setup for the static user node
         if (!data) {
             console.log("Setting up initial data for static user.");
@@ -721,10 +551,7 @@ function loadUserData() {
         // Update global state with fetched data, and update lastActive
         update(window.dbRef, { lastActive: Date.now() }); // Update for dashboard
         updateGlobalState(data);
-
-        // Update the hidden ID text with the real ID
-        profileIdTextSpan.innerText = `ID: ${STATIC_USER_ID}`;
-
+        
         // Apply mining logic after data sync
         processDataForStateUpdate();
 
@@ -744,7 +571,7 @@ function loadAdminSettings() {
             } else {
                  window.ADS_REQUIRED = 10; // Fallback
             }
-
+            
             // 2. Update Ad Task Reward
             if (settings.adTasks && settings.adTasks.reward) {
                 window.AD_REWARD_COINS = settings.adTasks.reward;
@@ -765,7 +592,7 @@ function loadLiveTasks() {
     const taskListDiv = document.getElementById('taskList');
     onValue(TASKS_REF, (snapshot) => {
         const tasks = snapshot.val();
-
+        
         let html = `
             <h2 style="text-align: center;">🧩 Daily Tasks</h2>
             <p style="margin-bottom: 20px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
@@ -797,7 +624,7 @@ function loadLiveTasks() {
                 }
             }
         }
-
+        
         if (!activeTasksFound) {
             html += '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
         }
@@ -806,8 +633,10 @@ function loadLiveTasks() {
     });
 }
 
+// NEW: Function to load withdrawal history
 function loadWithdrawalHistory() {
     const historyList = document.getElementById('withdrawalHistoryList');
+    // Query the 'withdrawals' node for items where 'userId' equals STATIC_USER_ID
     const userWithdrawalsQuery = query(WITHDRAWALS_REF, orderByChild('userId'), equalTo(STATIC_USER_ID));
 
     onValue(userWithdrawalsQuery, (snapshot) => {
@@ -816,6 +645,7 @@ function loadWithdrawalHistory() {
         let withdrawalFound = false;
 
         if (withdrawals) {
+            // Convert to array and sort by timestamp (newest first)
             const sortedWithdrawals = Object.values(withdrawals).sort((a, b) => b.timestamp - a.timestamp);
 
             sortedWithdrawals.forEach(item => {
@@ -840,7 +670,7 @@ function loadWithdrawalHistory() {
                 `;
             });
         }
-
+        
         if (!withdrawalFound) {
             html = '<p style="text-align: center; color: #777;">No withdrawal requests found yet.</p>';
         }
@@ -864,16 +694,16 @@ function updateGlobalState(data) {
 function processDataForStateUpdate() {
     // Check if mining session ended while offline
     if (window.miningEndTime !== 0 && window.miningEndTime <= Date.now()) {
-        stopMining(false);
+        stopMining(false); 
     }
 
     // Cooldown/Reset check logic
     if (window.dailyMinedTimestamp !== 0 && window.canMineToday()) {
         // Cooldown is finished, reset data for new cycle
-        updateDatabase({
-            dailyMinedTimestamp: 0,
-            adsWatched: 0,
-            adsWatchedTimestamp: 0
+        updateDatabase({ 
+            dailyMinedTimestamp: 0, 
+            adsWatched: 0, 
+            adsWatchedTimestamp: 0 
         });
         window.dailyMinedTimestamp = 0;
         window.adsWatched = 0;
@@ -885,27 +715,30 @@ function processDataForStateUpdate() {
     updateMiningButtonState();
 }
 
+// Function to update only specific fields in the database
 window.updateDatabase = (updates) => {
-    const allUpdates = {
-        coins: window.coins,
-        dailyMinedTimestamp: window.dailyMinedTimestamp,
-        miningEndTime: window.miningEndTime,
-        adsWatched: window.adsWatched,
+    // Merge existing state (for robust updates)
+    const allUpdates = { 
+        coins: window.coins, 
+        dailyMinedTimestamp: window.dailyMinedTimestamp, 
+        miningEndTime: window.miningEndTime, 
+        adsWatched: window.adsWatched, 
         adsWatchedTimestamp: window.adsWatchedTimestamp,
         upiId: window.upiId,
-        ...updates
+        ...updates 
     };
-
+    
+    // Using set() to overwrite the static user node (as in original code)
     set(window.dbRef, allUpdates)
         .catch(error => console.error("Database Write Error:", error));
 };
 
 
-// --- HELPER FUNCTIONS ---
+// --- HELPER FUNCTIONS (Adjusted to use window.ADS_REQUIRED) ---
 
 function updateCoinDisplays() {
     const inrValue = (window.coins / 1000).toFixed(2);
-    document.getElementById('coinCount').innerText = window.coins.toLocaleString();
+    document.getElementById('totalCoins').innerText = window.coins.toLocaleString();
     document.getElementById('coinInsideCircle').innerText = window.coins.toLocaleString();
     document.getElementById('walletCoins').innerText = window.coins.toLocaleString();
     document.getElementById('walletValue').innerText = inrValue;
@@ -916,11 +749,11 @@ function formatTime(ms) {
     const seconds = Math.floor((ms / 1000) % 60);
     const minutes = Math.floor((ms / (1000 * 60)) % 60);
     const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-
+    
     const h = String(hours).padStart(2, '0');
     const m = String(minutes).padStart(2, '0');
     const s = String(seconds).padStart(2, '0');
-
+    
     return `${h}:${m}:${s}`;
 }
 
@@ -929,7 +762,7 @@ window.canMineToday = () => {
 }
 
 
-// --- AD-BASED MINING LOGIC ---
+// --- AD-BASED MINING LOGIC (Using dynamic window.ADS_REQUIRED and window.AD_REWARD_COINS) ---
 
 window.watchAd = () => {
     if (window.adsWatched >= window.ADS_REQUIRED && !window.canMineToday()) {
@@ -937,15 +770,15 @@ window.watchAd = () => {
         updateMiningButtonState();
         return;
     }
-
+    
     if (window.adsWatched >= window.ADS_REQUIRED && window.canMineToday()) {
         alert("A new session is ready to start. Please click 'Start Mining'.");
         updateMiningButtonState();
         return;
     }
-
-    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0;
-    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0;
+    
+    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0; 
+    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
 
     if (miningStillActive || isInCooldown) {
         alert("Cannot watch ads while mining is active or in cooldown.");
@@ -953,18 +786,19 @@ window.watchAd = () => {
     }
 
     watchAdBtn.disabled = true;
-    watchAdBtn.innerText = '🎥 Ad Playing... (3s)';
+    watchAdBtn.innerText = '🎥 Playing...';
 
+    // In a real app, you'd show a video ad here
     setTimeout(() => {
         window.adsWatched++;
-        window.coins += window.AD_REWARD_COINS;
-
+        window.coins += window.AD_REWARD_COINS; 
+        
         window.updateDatabase({
             coins: window.coins,
             adsWatched: window.adsWatched,
             adsWatchedTimestamp: Date.now()
         });
-
+        
         if (window.adsWatched < window.ADS_REQUIRED) {
             watchAdBtn.disabled = false;
             watchAdBtn.innerText = '🎬 Watch Ad';
@@ -973,57 +807,61 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             alert(`Congratulations! You have watched ${window.ADS_REQUIRED} ads. You can now start mining!`);
         }
-    }, 3000);
+    }, 3000); 
 }
 
 function updateAdStatus() {
-    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0;
-    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0;
-
+    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0; 
+    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
+    
     if (window.adsWatched >= window.ADS_REQUIRED) {
         adStatusDisplay.innerText = `Ads Complete! Mining unlocked.`;
         watchAdBtn.disabled = true;
-        watchAdBtn.innerText = '✅ Ads Complete';
+        watchAdBtn.innerText = '✅ Ads Done';
         if (isInCooldown) {
             const remainingCooldown = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
             adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime(remainingCooldown)}`;
         }
     } else {
         adStatusDisplay.innerText = `Ads Watched: ${window.adsWatched}/${window.ADS_REQUIRED}`;
-        watchAdBtn.disabled = miningStillActive || isInCooldown;
+        watchAdBtn.disabled = miningStillActive || isInCooldown; 
         watchAdBtn.innerText = '🎬 Watch Ad';
     }
 }
 
 // --- MINING FUNCTIONS ---
 
-function startMiningAnimation() {
-    const numParticles = 5;
-    const mainContainer = document.querySelector('main');
-    const circleRect = mineCircle.getBoundingClientRect();
+// NEW: Animate coin flying to total balance
+function animateCoinGain() {
+    const mineCircleEl = document.getElementById('mineCircle');
+    const totalCoinsDisplay = document.getElementById('totalCoins');
 
-    for (let i = 0; i < numParticles; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'coin-particle';
-        particle.innerText = '🪙';
-        
-        // Start position centered on the circle, with a random offset
-        const startX = circleRect.left + circleRect.width / 2 + (Math.random() - 0.5) * 80;
-        const startY = circleRect.top + circleRect.height / 2 + (Math.random() - 0.5) * 80;
-        
-        particle.style.left = `${startX}px`;
-        particle.style.top = `${startY}px`;
-        
-        // Stagger animation start
-        particle.style.animationDelay = `${Math.random() * 0.5}s`;
+    const coinEl = document.createElement('div');
+    coinEl.className = 'floating-coin';
+    coinEl.innerHTML = '🪙';
+    document.body.appendChild(coinEl);
 
-        mainContainer.appendChild(particle);
+    const startRect = mineCircleEl.getBoundingClientRect();
+    const endRect = totalCoinsDisplay.getBoundingClientRect();
 
-        // Remove particle after animation ends
-        setTimeout(() => {
-            particle.remove();
-        }, 2000);
-    }
+    const startX = startRect.left + startRect.width / 2;
+    const startY = startRect.top + startRect.height / 2;
+    const endX = endRect.left + endRect.width / 2;
+    const endY = endRect.top + endRect.height / 2;
+
+    coinEl.style.left = `${startX - 12}px`; // Adjust for icon size
+    coinEl.style.top = `${startY - 12}px`;
+
+    requestAnimationFrame(() => {
+        coinEl.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(0.5)`;
+        coinEl.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+        coinEl.remove();
+        totalCoinsDisplay.classList.add('pop');
+        setTimeout(() => totalCoinsDisplay.classList.remove('pop'), 200);
+    }, 1000);
 }
 
 window.stopMining = (doUpdateState = true) => {
@@ -1032,24 +870,23 @@ window.stopMining = (doUpdateState = true) => {
     window.miningInterval = null;
     window.remainingTimeInterval = null;
     mineCircle.classList.remove('mining-active-glow');
-
+    
     window.miningEndTime = 0;
-    window.updateDatabase({ miningEndTime: 0 });
-
-    if (doUpdateState) updateMiningButtonState();
+    window.updateDatabase({ miningEndTime: 0 }); 
+    
+    if (doUpdateState) updateMiningButtonState(); 
 }
 
 function updateCountdown() {
     const remainingSessionTime = window.miningEndTime - Date.now();
-
+    
     if (remainingSessionTime <= 0) {
         window.stopMining();
         return;
     }
     mineCircle.classList.add('mining-active-glow');
     mineButton.disabled = true;
-    mineButton.innerText = '⛏️ Mining Active';
-    mineButton.style.background = '#808080';
+    mineButton.innerText = '⛏️ Mining...';
     countdownDisplay.innerText = 'Time Left: ' + formatTime(remainingSessionTime);
 }
 
@@ -1058,17 +895,17 @@ window.startDailyMining = () => {
       alert(`Please watch the required ${window.ADS_REQUIRED} ads before starting the mining session.`);
       return;
   }
-  if (window.miningInterval) return;
+  if (window.miningInterval) return; 
   if (!window.canMineToday()){
     startCooldownCountdown();
     return;
   }
-
+  
   const currentTime = Date.now();
   const endTime = currentTime + ONE_HOUR_MS;
-
-  window.dailyMinedTimestamp = currentTime;
-  window.miningEndTime = endTime;
+  
+  window.dailyMinedTimestamp = currentTime; 
+  window.miningEndTime = endTime; 
 
   window.updateDatabase({
     dailyMinedTimestamp: currentTime,
@@ -1078,73 +915,70 @@ window.startDailyMining = () => {
   window.miningInterval = setInterval(()=>{
     window.coins+=1;
     window.updateDatabase({ coins: window.coins });
-    startMiningAnimation();
-  }, MINING_RATE_MS);
+    animateCoinGain(); // NEW Call to the coin animation
+  }, MINING_RATE_MS); 
 
-  window.remainingTimeInterval = setInterval(updateCountdown, 1000);
+  window.remainingTimeInterval = setInterval(updateCountdown, 1000); 
   setTimeout(window.stopMining, ONE_HOUR_MS);
-  updateCountdown();
+  updateCountdown(); 
 }
 
 function startCooldownCountdown() {
     if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
-
+    
     window.remainingTimeInterval = setInterval(() => {
         const remainingCooldown = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
-
+        
         if (remainingCooldown <= 0) {
             clearInterval(window.remainingTimeInterval);
             window.remainingTimeInterval = null;
             if (window.dailyMinedTimestamp !== 0) {
-                 window.updateDatabase({
-                    dailyMinedTimestamp: 0,
-                    adsWatched: 0,
-                    adsWatchedTimestamp: 0
+                 window.updateDatabase({ 
+                    dailyMinedTimestamp: 0, 
+                    adsWatched: 0, 
+                    adsWatchedTimestamp: 0 
                 });
             }
-            updateMiningButtonState();
+            updateMiningButtonState(); 
             return;
         }
         mineButton.disabled = true;
-        mineButton.innerText = '⏳ Cooldown Active';
-        mineButton.style.background = '#808080';
+        mineButton.innerText = '⏳ Cooldown';
         countdownDisplay.innerText = 'Next Mine in: ' + formatTime(remainingCooldown);
-        updateAdStatus();
+        updateAdStatus(); 
     }, 1000);
 }
 
 function updateMiningButtonState() {
-    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0;
+    const miningStillActive = window.miningEndTime > Date.now() && window.miningEndTime !== 0; 
     const isAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
-
-    updateAdStatus();
-
+    
+    updateAdStatus(); 
+    
     if (miningStillActive) {
-        updateCountdown();
+        updateCountdown(); 
     } else if (!window.canMineToday() && window.dailyMinedTimestamp !== 0) {
         startCooldownCountdown();
     } else if (isAdsComplete) {
         if (window.miningInterval) clearInterval(window.miningInterval);
         if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
         mineCircle.classList.remove('mining-active-glow');
-
+        
         mineButton.disabled = false;
-        mineButton.innerText = '🪙 Start Mining';
-        mineButton.style.background = '#32cd32';
-        countdownDisplay.innerText = 'Ads Complete! Click to start 1 hour session';
+        mineButton.innerText = '⛏️ Start Mining';
+        countdownDisplay.innerText = 'Ready to start 1 hour session!';
     } else {
         if (window.miningInterval) clearInterval(window.miningInterval);
         if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = true;
-        mineButton.innerText = `🔒 Watch ${window.ADS_REQUIRED} Ads to Unlock Mining`;
-        mineButton.style.background = '#808080';
-        countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED} ads to start a new session.`;
+        mineButton.innerText = '🔒 Locked';
+        countdownDisplay.innerText = `Watch ads to start a new session.`;
     }
 }
 
 
-// --- WITHDRAWAL FUNCTIONS ---
+// --- WITHDRAWAL FUNCTIONS (Modified to push request to 'withdrawals' node) ---
 
 window.showWithdrawalModal = () => {
     withdrawalModal.style.display = "block";
@@ -1162,7 +996,7 @@ window.checkWithdrawalEligibility = () => {
     const amountInput = document.getElementById('upiAmount');
     const amount = Number(amountInput.value);
     const inrValueText = document.getElementById('inrValueText');
-
+    
     inrValueText.style.color = '#90ee90';
 
     if (amount > 0) {
@@ -1201,26 +1035,29 @@ window.submitWithdrawal = () => {
 
     window.coins -= amount;
     window.upiId = upiId; // Save UPI ID for next time
-
+    
+    // 1. Update user's coin balance and UPI ID
     window.updateDatabase({ coins: window.coins, upiId: window.upiId });
-
+    
+    // 2. Push withdrawal request to Admin Panel's node
     const withdrawalRequest = {
         userId: STATIC_USER_ID,
         userName: document.getElementById('username').innerText,
         amount: amount,
         upiId: upiId,
         timestamp: Date.now(),
-        status: 'Pending'
+        status: 'Pending' // Admin panel reads only 'Pending'
     };
 
     push(WITHDRAWALS_REF, withdrawalRequest).then(() => {
         closeWithdrawalModal();
         alert(`Withdrawal of ${amount} Coins (₹${(amount/1000).toFixed(2)}) to UPI ID ${upiId} submitted successfully. Coins deducted. Processing in 24 hours.`);
+        // Note: loadWithdrawalHistory is called in the main DOMContentLoaded and uses onValue, so it will update automatically.
     }).catch(error => {
          alert("Withdrawal failed to submit. Please try again. Error: " + error.message);
-         // Revert coin deduction if push fails
+         // Important: If push fails, you might want to reverse coin deduction!
          window.coins += amount;
-         window.updateDatabase({ coins: window.coins });
+         window.updateDatabase({ coins: window.coins }); // Revert deduction
     });
 }
 
@@ -1230,30 +1067,38 @@ window.onclick = function(event) {
     }
 }
 
-// --- REFERRAL FUNCTIONS ---
+// --- REFERRAL FUNCTIONS (Updated for better copy/share) ---
 
 window.shareReferralLink = () => {
     const link = document.getElementById('refLink').innerText;
+    // Updated share message
     const shareText = `💰 CoinMine में शामिल हों और कमाना शुरू करें! मेरा रेफरल लिंक उपयोग करें: ${link}। आपको तुरंत 700 Coin और मेरे द्वारा कमाए गए Coins पर 5% आजीवन कमीशन मिलेगा!`;
 
     if (navigator.share) {
+        // Use Web Share API for better native sharing on mobile
         navigator.share({
             title: 'CoinMine Referral',
             text: shareText,
             url: link,
+        }).then(() => {
+            console.log('Successful share');
         }).catch((error) => {
+            // Fallback to copy if sharing fails or is cancelled
             console.log('Error sharing or cancelled, falling back to copy:', error);
             fallbackShare(shareText);
         });
     } else {
+        // Fallback for desktop or non-supported devices
         fallbackShare(shareText);
     }
 }
 
 function fallbackShare(text) {
+    // Uses the modern Clipboard API
     navigator.clipboard.writeText(text).then(() => {
-        alert("रेफरल संदेश और लिंक सफलतापूर्वक कॉपी कर लिया गया है! इसे साझा करें।");
+        alert("रेफरल संदेश और लिंक सफलतापूर्वक कॉपी कर लिया गया है! इसे साझा करें।"); // Updated alert message
     }).catch(err => {
+        // Fallback if Clipboard API fails
         const textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
@@ -1274,9 +1119,16 @@ function fallbackShare(text) {
 // --- INIT and NAVIGATION FUNCTIONS ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Load Admin Settings 
     loadAdminSettings();
-    loadUserData();
+    
+    // 2. Load User Data 
+    loadUserData(); 
+
+    // 3. Load Live Tasks
     loadLiveTasks();
+
+    // 4. NEW: Load Withdrawal History
     loadWithdrawalHistory();
 });
 
@@ -1285,234 +1137,13 @@ window.showSection = (sectionId, button) => {
   document.getElementById(sectionId).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
   button.classList.add('active');
-  // <<<--- SCROLL CORRECTION ADDED HERE --->>>
-  window.scrollTo(0, 0);
 }
-
-window.showProfileDetails = () => {
-    if (profileDetailsDiv.style.display === 'none' || profileDetailsDiv.style.display === '') {
-        profileDetailsDiv.style.display = 'flex';
-    } else {
-        profileDetailsDiv.style.display = 'none';
-    }
-}
-
-function fallbackCopyTextToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.top = '0';
-    textArea.style.left = '0';
-    textArea.style.opacity = '0';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        return successful;
-    } catch (err) {
-        document.body.removeChild(textArea);
-        return false;
-    }
-}
-
-window.copyUserId = async () => {
-    const profileId = STATIC_USER_ID;
-    const copyIcon = document.getElementById('copyIdIcon');
-    const originalContent = copyIcon ? copyIcon.innerHTML : '📋'; // Handle null case for task button
-
-    let copySuccessful = false;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-            await navigator.clipboard.writeText(profileId);
-            copySuccessful = true;
-        } catch (err) {
-            console.error('Modern copy failed, attempting fallback:', err);
-        }
-    }
-
-    if (!copySuccessful) {
-        copySuccessful = fallbackCopyTextToClipboard(profileId);
-    }
-
-    if (copySuccessful) {
-        if (copyIcon) {
-            copyIcon.innerHTML = '✅';
-            setTimeout(() => {
-                copyIcon.innerHTML = originalContent;
-            }, 1500);
-        }
-         alert(`✅ User ID "${profileId}" Copied Successfully!`);
-    } else {
-        alert(`❌ Failed to copy. Please copy the ID manually: "${profileId}"`);
-    }
-}
+// Updated showProfile message to reflect 'Username' change
+window.showProfile = () => { alert(`User: Username (Shared Account)\nID: ${STATIC_USER_ID}\nNote: All users share this single account data.`); } 
 window.showMsg = () => { alert('Notifications: Welcome to CoinMine!'); }
+window.hideTaskDetails = () => { document.getElementById('taskDetail').style.display = 'none'; document.getElementById('taskList').style.display = 'block'; }
+window.showTaskDetails = (name, reward, desc, logoUrl, instructions, buttonText, buttonLink) => {}
 
-</script>
-
-<!-- ================== GIFT SECTION SCRIPT ================== -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<script>
-    const giftFirebaseConfig = {
-      apiKey: "AIzaSyCcgl31JqffVd8bW8G23UurFhxH8IFlEfM",
-      authDomain: "mining-bot-276d0.firebaseapp.com",
-      databaseURL: "https://mining-bot-276d0-default-rtdb.firebaseio.com",
-      projectId: "mining-bot-276d0",
-      storageBucket: "mining-bot-276d0.firebasestorage.app",
-      messagingSenderId: "263688973305",
-      appId: "1:263688973305:web:9346d02b16f8b386ec2b28",
-      measurementId: "G-T38M420DC0"
-    };
-
-    // Initialize a separate Firebase app for the gift functionality
-    const giftApp = firebase.initializeApp(giftFirebaseConfig, "giftApp");
-    const giftDatabase = giftApp.database();
-
-    let lastClickedButton = null;
-    let claimSettings = {};
-    let clientID = getClientID();
-
-    function getClientID() {
-      let id = localStorage.getItem('clientID');
-      if (!id) {
-        id = 'client-' + Math.random().toString(36).substring(2, 15)
-          + Math.random().toString(36).substring(2, 15);
-        localStorage.setItem('clientID', id);
-      }
-      return id;
-    }
-
-    async function checkClaimStatus() {
-      const claimContainer = document.getElementById('claimButtonContainer');
-      const redeemedMsg = document.getElementById('redeemedMessage');
-      const claimCode = claimSettings.claim1 ? claimSettings.claim1.code : null;
-      if (!claimCode) return;
-
-      const snapshot = await giftDatabase.ref('redemptions_by_user/' + clientID).once('value');
-      const userRedemptions = snapshot.val();
-
-      let claimRedeemed = false;
-      if (userRedemptions) {
-        for (const key in userRedemptions) {
-          if (userRedemptions[key].code === claimCode) {
-            claimRedeemed = true;
-            break;
-          }
-        }
-      }
-
-      claimContainer.style.display = claimRedeemed ? 'none' : 'block';
-      redeemedMsg.style.display = claimRedeemed ? 'block' : 'none';
-    }
-
-    function loadClaimSettings() {
-      giftDatabase.ref('claim_settings').once('value', (snapshot) => {
-        claimSettings = snapshot.val() || {};
-        const btn = document.getElementById('claimBtn1');
-        const setting = claimSettings.claim1;
-
-        if (setting && setting.url) {
-          btn.onclick = function() { claimCode(this, setting.url); };
-        } else {
-          btn.onclick = function() { claimCode(this, 'placeholder'); };
-        }
-        checkClaimStatus();
-      });
-    }
-
-    // Load claim settings when the gift section becomes visible
-    document.addEventListener('DOMContentLoaded', () => {
-        const giftSection = document.getElementById('gift');
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                if (mutation.attributeName === 'style' && giftSection.style.display === 'block') {
-                    loadClaimSettings();
-                }
-            });
-        });
-        observer.observe(giftSection, { attributes: true });
-    });
-
-
-    async function redeemCode() {
-      let code = document.getElementById("giftCode").value.trim().toUpperCase();
-      if (code === "") {
-        alert("Please enter a gift code!");
-        return;
-      }
-
-      try {
-        let codeData = null;
-        const setting1 = claimSettings.claim1;
-        if (setting1 && setting1.code === code) codeData = setting1;
-        if (!codeData && claimSettings.common && claimSettings.common.code === code)
-          codeData = claimSettings.common;
-
-        if (!codeData) {
-          alert("Invalid Gift Code! Please enter a correct code.");
-          return;
-        }
-
-        const redemptionSnapshot = await giftDatabase.ref('redemptions_by_user/' + clientID).once('value');
-        const userRedemptions = redemptionSnapshot.val();
-
-        let alreadyRedeemed = false;
-        if (userRedemptions) {
-          for (const key in userRedemptions) {
-            if (userRedemptions[key].code === code) {
-              alreadyRedeemed = true;
-              break;
-            }
-          }
-        }
-
-        if (alreadyRedeemed) {
-          alert("You have already redeemed the code '" + code + "'. Each code can be redeemed only once.");
-          return;
-        }
-
-        const coinsAwarded = codeData.coins;
-        const timestamp = new Date().toISOString();
-        const redemptionData = {
-          code, coins: coinsAwarded, redeemedAt: timestamp, clientID
-        };
-
-        await giftDatabase.ref('redeemed_codes').push(redemptionData);
-        await giftDatabase.ref('redemptions_by_user/' + clientID).push({ code, coins: coinsAwarded });
-
-        // <<<--- 1. ADD COINS TO THE MAIN APP'S BALANCE --->>>
-        if (window.coins !== undefined && typeof window.updateDatabase === 'function') {
-            window.coins += coinsAwarded;
-            window.updateDatabase({ coins: window.coins });
-            alert("Code '" + code + "' successfully redeemed! 🎉\nYou won " + coinsAwarded + " coins and they have been added to your balance!");
-        } else {
-            alert("Code '" + code + "' successfully redeemed! 🎉\nYou won " + coinsAwarded + " coins!");
-            console.warn('Main app coin balance or update function not found.');
-        }
-        
-        // <<<--- 2. HIDE THE CLAIM BUTTON AFTER REDEEMING --->>>
-        document.getElementById('claimButtonContainer').style.display = 'none';
-
-        document.getElementById("giftCode").value = "";
-        if (code === setting1?.code) checkClaimStatus();
-
-      } catch (error) {
-        console.error("Redemption Error:", error);
-        alert("Redemption failed! Please try again later. (Error: " + error.message + ")");
-      }
-    }
-
-    function claimCode(button, url) {
-      if (!url || url === 'placeholder') {
-        alert("Admin has not set this claim link yet! Please wait.");
-        return;
-      }
-      lastClickedButton = button;
-      window.location.href = url;
-    }
 </script>
 </body>
 </html>
