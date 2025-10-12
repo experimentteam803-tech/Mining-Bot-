@@ -557,7 +557,7 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
 window.ADS_REQUIRED = 10;
 window.AD_REWARD_COINS = 5;
-window.miningAdLinks = []; // <<<<<<<<<<<<< नई वेरिएबल लिंक्स को स्टोर करने के लिए
+window.miningAdLinks = []; 
 let claimSettings = {};
 
 // UI Elements 
@@ -596,18 +596,16 @@ function loadUserData() {
     });
 }
 
-// <<<<<<<<<<<<< सिर्फ यह फंक्शन बदला गया है
 function loadAdminSettings() {
     onValue(ADMIN_SETTINGS_REF, (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
             window.ADS_REQUIRED = settings.miningAds?.required || 10;
             
-            // एडमिन पैनल से विज्ञापन लिंक्स को पढ़ें
             if (settings.miningAds?.links && Array.isArray(settings.miningAds.links)) {
                 window.miningAdLinks = settings.miningAds.links;
             } else {
-                window.miningAdLinks = []; // अगर लिंक नहीं हैं तो खाली रखें
+                window.miningAdLinks = [];
             }
 
             window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
@@ -616,7 +614,6 @@ function loadAdminSettings() {
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
-// >>>>>>>>>>>>> बदलाव यहाँ खत्म होता है
 
 // --- TASK SYSTEM FIXED ---
 function loadLiveTasks() {
@@ -766,23 +763,29 @@ window.watchAd = () => {
         return;
     }
 
-    // --- विज्ञापन लिंक खोलने का लॉजिक ---
     if (window.miningAdLinks && window.miningAdLinks.length > 0) {
-        // सूची से एक रैंडम लिंक चुनें
         const randomIndex = Math.floor(Math.random() * window.miningAdLinks.length);
         const adLink = window.miningAdLinks[randomIndex];
-        // टेलीग्राम के तरीके से लिंक खोलें
         WebApp.openLink(adLink);
-    } else {
-        // यदि कोई लिंक सेट नहीं है, तो एक चेतावनी दिखाएँ (वैकल्पिक)
-        // WebApp.showAlert("No ad link available right now.");
-    }
-    // --- नए लॉजिक का अंत ---
+    } 
 
     watchAdBtn.disabled = true;
-    watchAdBtn.innerText = '🎥 Ad Playing... (3s)';
+    
+    // बटन पर 15 सेकंड का काउंटडाउन दिखाएं
+    let countdown = 15;
+    watchAdBtn.innerText = `🎥 Ad Playing... (${countdown}s)`;
+    const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            watchAdBtn.innerText = `🎥 Ad Playing... (${countdown}s)`;
+        } else {
+            clearInterval(interval);
+        }
+    }, 1000);
 
+    // इनाम 15 सेकंड के बाद दें
     setTimeout(() => {
+        clearInterval(interval); // सुनिश्चित करें कि इंटरवल बंद हो गया है
         window.adsWatched++;
         window.coins += window.AD_REWARD_COINS; 
         
@@ -796,9 +799,10 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
         }
-    }, 3000); 
+    }, 15000); // <<<<<<<<<<<<< समय 15000ms (15 सेकंड) पर सेट
 }
 // >>>>>>>>>>>>> बदलाव यहाँ खत्म होता है
+
 
 function updateAdStatus() {
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
@@ -1105,4 +1109,4 @@ window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
 
 </script>
 </body>
-</html>
+</html>```
