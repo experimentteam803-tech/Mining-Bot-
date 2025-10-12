@@ -428,7 +428,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
                 <h3 style="color: #fff; margin-bottom: 15px;">How It Works:</h3>
                 <ul class="referral-instruction-list">
                     <li><strong>Share:</strong> Share your unique link with friends and family.</li>
-                    <li><strong>Signup Bonus:</strong> You earn **700 Coins** immediately when your friend successfully signs up using your link.</li>
+                    <li><strong>Signup Bonus:</strong> You earn **500 Coins** immediately when your friend successfully signs up using your link.</li>
                     <li><strong>Lifetime Commission:</strong> You earn a **5% commission** on all coins your referred users mine, forever!</li>
                 </ul>
                 <p style="text-align: center; color: #ffd700; font-weight: 600; margin-bottom: 20px;">The more you share, the more you earn!</p>
@@ -583,6 +583,21 @@ function loadUserData() {
                 userName: USER_NAME, lastActive: Date.now()
             };
             set(window.dbRef, initialData);
+
+            // --- AÑADIDO: LÓGICA DE BONIFICACIÓN POR REFERIDO ---
+            const referrerId = WebApp.initDataUnsafe.start_param;
+            if (referrerId && referrerId !== TELEGRAM_USER_ID) {
+                const referrerRef = ref(database, 'users/' + referrerId);
+                get(referrerRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const referrerData = snapshot.val();
+                        const newBalance = (referrerData.coins || 0) + 500; // Otorgar 500 monedas
+                        update(referrerRef, { coins: newBalance });
+                    }
+                }).catch(error => console.error("Error al otorgar el bono de referido:", error));
+            }
+            // --- FIN DE LA LÓGICA DE REFERIDO ---
+
             updateGlobalState(initialData);
             return;
         }
@@ -591,8 +606,8 @@ function loadUserData() {
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
-        console.error("Firebase Read Error (User Data):", error);
-        WebApp.showAlert("Failed to load user data.");
+        console.error("Error de lectura de Firebase (Datos de Usuario):", error);
+        WebApp.showAlert("No se pudieron cargar los datos del usuario.");
     });
 }
 
@@ -612,7 +627,7 @@ function loadAdminSettings() {
             updateMiningButtonState();
             updateAdStatus();
         }
-    }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
+    }, (error) => console.error("Error de lectura de Firebase (Configuración de Admin):", error));
 }
 
 // --- TASK SYSTEM FIXED ---
@@ -749,17 +764,17 @@ window.canMineToday = () => {
 
 
 // --- AD-BASED MINING LOGIC ---
-// <<<<<<<<<<<<< सिर्फ यह फंक्शन बदला गया है
+// <<<<<<<<<<<<< sólo se cambió esta función
 window.watchAd = () => {
     const miningStillActive = window.miningEndTime > Date.now(); 
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
 
     if (window.adsWatched >= window.ADS_REQUIRED) {
-        WebApp.showAlert(window.canMineToday() ? "A new session is ready. Click 'Start Mining'." : "Ads are complete. Wait for the 24h reset.");
+        WebApp.showAlert(window.canMineToday() ? "Una nueva sesión está lista. Haz clic en 'Comenzar a Minar'." : "Anuncios completados. Espera el reinicio de 24h.");
         return;
     }
     if (miningStillActive || isInCooldown) {
-        WebApp.showAlert("Cannot watch ads while mining or in cooldown.");
+        WebApp.showAlert("No se pueden ver anuncios mientras se está minando o en período de enfriamiento.");
         return;
     }
 
@@ -771,21 +786,21 @@ window.watchAd = () => {
 
     watchAdBtn.disabled = true;
     
-    // बटन पर 15 सेकंड का काउंटडाउन दिखाएं
+    // mostrar una cuenta regresiva de 15 segundos en el botón
     let countdown = 15;
-    watchAdBtn.innerText = `🎥 Ad Playing... (${countdown}s)`;
+    watchAdBtn.innerText = `🎥 Reproduciendo Anuncio... (${countdown}s)`;
     const interval = setInterval(() => {
         countdown--;
         if (countdown > 0) {
-            watchAdBtn.innerText = `🎥 Ad Playing... (${countdown}s)`;
+            watchAdBtn.innerText = `🎥 Reproduciendo Anuncio... (${countdown}s)`;
         } else {
             clearInterval(interval);
         }
     }, 1000);
 
-    // इनाम 15 सेकंड के बाद दें
+    // dar la recompensa después de 15 segundos
     setTimeout(() => {
-        clearInterval(interval); // सुनिश्चित करें कि इंटरवल बंद हो गया है
+        clearInterval(interval); // asegurarse de que el intervalo se detenga
         window.adsWatched++;
         window.coins += window.AD_REWARD_COINS; 
         
@@ -793,32 +808,32 @@ window.watchAd = () => {
         
         if (window.adsWatched < window.ADS_REQUIRED) {
             watchAdBtn.disabled = false;
-            watchAdBtn.innerText = '🎬 Watch Ad';
-            WebApp.showPopup({message: `+${window.AD_REWARD_COINS} Coins! ${window.ADS_REQUIRED - window.adsWatched} more ads needed.`});
+            watchAdBtn.innerText = '🎬 Ver Anuncio';
+            WebApp.showPopup({message: `+${window.AD_REWARD_COINS} Monedas! Se necesitan ${window.ADS_REQUIRED - window.adsWatched} anuncios más.`});
         } else {
-            watchAdBtn.innerText = '✅ Ads Complete';
-            WebApp.showPopup({message: `Congratulations! You can now start mining!`});
+            watchAdBtn.innerText = '✅ Anuncios Completos';
+            WebApp.showPopup({message: `¡Felicidades! ¡Ya puedes empezar a minar!`});
         }
-    }, 15000); // <<<<<<<<<<<<< समय 15000ms (15 सेकंड) पर सेट
+    }, 15000); // <<<<<<<<<<<<< tiempo establecido en 15000ms (15 segundos)
 }
-// >>>>>>>>>>>>> बदलाव यहाँ खत्म होता है
+// >>>>>>>>>>>>> los cambios terminan aquí
 
 
 function updateAdStatus() {
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
     
     if (window.adsWatched >= window.ADS_REQUIRED) {
-        adStatusDisplay.innerText = `Ads Complete! Mining unlocked.`;
+        adStatusDisplay.innerText = `¡Anuncios Completos! Minería desbloqueada.`;
         watchAdBtn.disabled = true;
-        watchAdBtn.innerText = '✅ Ads Complete';
+        watchAdBtn.innerText = '✅ Anuncios Completos';
         if (isInCooldown) {
             const remainingCooldown = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
-            adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime(remainingCooldown)}`;
+            adStatusDisplay.innerHTML = `Reinicio de Anuncios/Minería en: ${formatTime(remainingCooldown)}`;
         }
     } else {
-        adStatusDisplay.innerText = `Ads Watched: ${window.adsWatched}/${window.ADS_REQUIRED}`;
+        adStatusDisplay.innerText = `Anuncios Vistos: ${window.adsWatched}/${window.ADS_REQUIRED}`;
         watchAdBtn.disabled = isInCooldown; 
-        watchAdBtn.innerText = '🎬 Watch Ad';
+        watchAdBtn.innerText = '🎬 Ver Anuncio';
     }
 }
 
@@ -853,14 +868,14 @@ function updateCountdown() {
     }
     mineCircle.classList.add('mining-active-glow');
     mineButton.disabled = true;
-    mineButton.innerText = '⛏️ Mining Active';
+    mineButton.innerText = '⛏️ Minando';
     mineButton.style.background = '#808080';
-    countdownDisplay.innerText = 'Time Left: ' + formatTime(remainingSessionTime);
+    countdownDisplay.innerText = 'Tiempo Restante: ' + formatTime(remainingSessionTime);
 }
 
 window.startDailyMining = () => {
   if (window.adsWatched < window.ADS_REQUIRED) {
-      WebApp.showAlert(`Please watch ${window.ADS_REQUIRED} ads to start mining.`);
+      WebApp.showAlert(`Por favor, mira ${window.ADS_REQUIRED} anuncios para empezar a minar.`);
       return;
   }
   if (window.miningInterval) return; 
@@ -903,9 +918,9 @@ function startCooldownCountdown() {
             return;
         }
         mineButton.disabled = true;
-        mineButton.innerText = '⏳ Cooldown Active';
+        mineButton.innerText = '⏳ Enfriamiento';
         mineButton.style.background = '#808080';
-        countdownDisplay.innerText = 'Next Mine in: ' + formatTime(remainingCooldown);
+        countdownDisplay.innerText = 'Próxima Minería en: ' + formatTime(remainingCooldown);
         updateAdStatus(); 
     }, 1000);
 }
@@ -925,17 +940,17 @@ function updateMiningButtonState() {
         if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
-        mineButton.innerText = '🪙 Start Mining';
+        mineButton.innerText = '🪙 Empezar a Minar';
         mineButton.style.background = '#32cd32';
-        countdownDisplay.innerText = 'Click to start 1 hour session';
+        countdownDisplay.innerText = 'Haz clic para iniciar una sesión de 1 hora';
     } else {
         if (window.miningInterval) clearInterval(window.miningInterval);
         if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = true;
-        mineButton.innerText = `🔒 Watch Ads to Unlock`;
+        mineButton.innerText = `🔒 Mira Anuncios para Desbloquear`;
         mineButton.style.background = '#808080';
-        countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
+        countdownDisplay.innerText = `Mira ${window.ADS_REQUIRED - window.adsWatched} anuncios más para empezar.`;
     }
 }
 
@@ -959,17 +974,17 @@ window.checkWithdrawalEligibility = () => {
     const inrValueText = document.getElementById('inrValueText');
     
     inrValueText.style.color = '#90ee90';
-    inrValueText.innerText = amount > 0 ? `Equivalent to ₹${(amount / 1000).toFixed(2)}` : '';
+    inrValueText.innerText = amount > 0 ? `Equivalente a ₹${(amount / 1000).toFixed(2)}` : '';
 
     if (amount >= MIN_WITHDRAWAL_COINS && amount <= window.coins) {
         submitWithdrawalBtn.disabled = false;
     } else {
         submitWithdrawalBtn.disabled = true;
         if (amount > 0 && amount < MIN_WITHDRAWAL_COINS) {
-            inrValueText.innerText = `Error: Minimum is ${MIN_WITHDRAWAL_COINS} Coins.`;
+            inrValueText.innerText = `Error: El mínimo es de ${MIN_WITHDRAWAL_COINS} Monedas.`;
             inrValueText.style.color = '#f44336';
         } else if (amount > window.coins) {
-             inrValueText.innerText = `Error: Insufficient balance.`;
+             inrValueText.innerText = `Error: Saldo insuficiente.`;
              inrValueText.style.color = '#f44336';
         }
     }
@@ -980,10 +995,10 @@ window.submitWithdrawal = () => {
     const upiId = document.getElementById('upiId').value.trim();
 
     if (amount < MIN_WITHDRAWAL_COINS || amount > window.coins) {
-        WebApp.showAlert(`Withdrawal failed: Amount must be valid.`); return;
+        WebApp.showAlert(`Retiro fallido: La cantidad debe ser válida.`); return;
     }
     if (upiId.length < 5 || !upiId.includes('@')) {
-        WebApp.showAlert("Withdrawal failed: Please enter a valid UPI ID."); return;
+        WebApp.showAlert("Retiro fallido: Por favor, introduce un ID de UPI válido."); return;
     }
 
     const newCoinBalance = window.coins - amount;
@@ -996,10 +1011,10 @@ window.submitWithdrawal = () => {
 
     push(WITHDRAWALS_REF, withdrawalRequest).then(() => {
         closeWithdrawalModal();
-        WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
+        WebApp.showAlert(`El retiro de ${amount} Monedas se ha enviado con éxito. Procesamiento en 24 horas.`);
     }).catch(error => {
-         WebApp.showAlert("Withdrawal failed to submit. Please try again.");
-         window.updateDatabase({ coins: window.coins }); // Revert deduction
+         WebApp.showAlert("El retiro no se pudo enviar. Por favor, inténtalo de nuevo.");
+         window.updateDatabase({ coins: window.coins }); // Revertir la deducción
     });
 }
 
@@ -1010,15 +1025,15 @@ window.onclick = function(event) {
 // --- REFERRAL FUNCTIONS ---
 window.shareReferralLink = () => {
     const link = document.getElementById('refLink').innerText;
-    const shareText = `💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 700 bonus Coins, and I get a 5% lifetime commission on your mining!`;
+    const shareText = `💰 ¡Únete a CoinMine y empieza a ganar! Usa mi enlace de referido: ${link}. ¡Tú obtienes 500 Monedas de bono, y yo obtengo una comisión del 5% de por vida en tu minería!`;
     WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`);
 }
 
 // --- NEW FUNCTION TO COPY USER ID ---
 window.copyUserId = () => {
     navigator.clipboard.writeText(TELEGRAM_USER_ID).then(() => {
-        WebApp.showPopup({message: 'User ID Copied!'});
-    }).catch(err => WebApp.showAlert('Failed to copy User ID.'));
+        WebApp.showPopup({message: '¡ID de Usuario Copiado!'});
+    }).catch(err => WebApp.showAlert('No se pudo copiar el ID de Usuario.'));
 }
 
 
@@ -1051,17 +1066,17 @@ async function checkClaimStatus() {
 
 window.redeemCode = async () => {
     let code = document.getElementById("giftCode").value.trim().toUpperCase();
-    if (code === "") { WebApp.showAlert("Please enter a gift code!"); return; }
+    if (code === "") { WebApp.showAlert("¡Por favor, introduce un código de regalo!"); return; }
 
     try {
         let codeData = null;
         if (claimSettings.claim1?.code === code) codeData = claimSettings.claim1;
         if (!codeData && claimSettings.common?.code === code) codeData = claimSettings.common;
-        if (!codeData) { WebApp.showAlert("Invalid Gift Code!"); return; }
+        if (!codeData) { WebApp.showAlert("¡Código de Regalo Inválido!"); return; }
 
         const redemptionSnapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
         const alreadyRedeemed = Object.values(redemptionSnapshot.val() || {}).some(r => r.code === code);
-        if (alreadyRedeemed) { WebApp.showAlert("You have already redeemed this code."); return; }
+        if (alreadyRedeemed) { WebApp.showAlert("Ya has canjeado este código."); return; }
 
         const coinsAwarded = codeData.coins;
         const redemptionData = { code, coins: coinsAwarded, redeemedAt: Date.now(), userId: TELEGRAM_USER_ID, userName: USER_NAME };
@@ -1072,18 +1087,18 @@ window.redeemCode = async () => {
         push(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`), { code, coins: coinsAwarded });
         push(REDEEMED_CODES_REF, redemptionData); 
 
-        WebApp.showPopup({message: `Code redeemed! 🎉 You won ${coinsAwarded} coins!`});
+        WebApp.showPopup({message: `¡Código canjeado! 🎉 ¡Has ganado ${coinsAwarded} monedas!`});
         document.getElementById("giftCode").value = "";
         if (code === claimSettings.claim1?.code) checkClaimStatus();
 
     } catch (error) {
-        console.error("Redemption Error:", error);
-        WebApp.showAlert("Redemption failed! Please try again later.");
+        console.error("Error de Canje:", error);
+        WebApp.showAlert("¡El canje falló! Por favor, inténtalo de nuevo más tarde.");
     }
 }
 
 window.claimCode = (button, url) => {
-    if (!url || url === 'placeholder') { WebApp.showAlert("The link for this code is not available yet."); return; }
+    if (!url || url === 'placeholder') { WebApp.showAlert("El enlace para este código aún no está disponible."); return; }
     WebApp.openLink(url);
 }
 
@@ -1104,9 +1119,9 @@ window.showSection = (sectionId, button) => {
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
   button.classList.add('active');
 }
-window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); } 
-window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
+window.showProfile = () => { WebApp.showAlert(`Perfil de Usuario:\nNombre: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); } 
+window.showMsg = () => { WebApp.showPopup({message: '¡Bienvenido a CoinMine!'}); }
 
 </script>
 </body>
-</html>```
+</html>
