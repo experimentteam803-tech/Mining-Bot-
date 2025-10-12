@@ -516,7 +516,7 @@ const USER_NAME = telegramUser.first_name + (telegramUser.last_name ? ' ' + tele
 
 // Set UI elements with Telegram Data
 document.getElementById('username').innerText = USER_NAME;
-document.getElementById('refLink').innerText = `https://t.me/MiningFather1Bot?start=${TELEGRAM_USER_ID}`;
+document.getElementById('refLink').innerText = `https://t.me/YourBot?start=${TELEGRAM_USER_ID}`;
 // End of Telegram Init
 
 // --- FIREBASE CONFIGURATION ---
@@ -557,6 +557,7 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
 window.ADS_REQUIRED = 10;
 window.AD_REWARD_COINS = 5;
+window.miningAdLinks = []; // <<<<<<<<<<<<< नई वेरिएबल लिंक्स को स्टोर करने के लिए
 let claimSettings = {};
 
 // UI Elements 
@@ -595,17 +596,27 @@ function loadUserData() {
     });
 }
 
+// <<<<<<<<<<<<< सिर्फ यह फंक्शन बदला गया है
 function loadAdminSettings() {
     onValue(ADMIN_SETTINGS_REF, (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
             window.ADS_REQUIRED = settings.miningAds?.required || 10;
+            
+            // एडमिन पैनल से विज्ञापन लिंक्स को पढ़ें
+            if (settings.miningAds?.links && Array.isArray(settings.miningAds.links)) {
+                window.miningAdLinks = settings.miningAds.links;
+            } else {
+                window.miningAdLinks = []; // अगर लिंक नहीं हैं तो खाली रखें
+            }
+
             window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
             updateMiningButtonState();
             updateAdStatus();
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
+// >>>>>>>>>>>>> बदलाव यहाँ खत्म होता है
 
 // --- TASK SYSTEM FIXED ---
 function loadLiveTasks() {
@@ -741,6 +752,7 @@ window.canMineToday = () => {
 
 
 // --- AD-BASED MINING LOGIC ---
+// <<<<<<<<<<<<< सिर्फ यह फंक्शन बदला गया है
 window.watchAd = () => {
     const miningStillActive = window.miningEndTime > Date.now(); 
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
@@ -753,6 +765,19 @@ window.watchAd = () => {
         WebApp.showAlert("Cannot watch ads while mining or in cooldown.");
         return;
     }
+
+    // --- विज्ञापन लिंक खोलने का लॉजिक ---
+    if (window.miningAdLinks && window.miningAdLinks.length > 0) {
+        // सूची से एक रैंडम लिंक चुनें
+        const randomIndex = Math.floor(Math.random() * window.miningAdLinks.length);
+        const adLink = window.miningAdLinks[randomIndex];
+        // टेलीग्राम के तरीके से लिंक खोलें
+        WebApp.openLink(adLink);
+    } else {
+        // यदि कोई लिंक सेट नहीं है, तो एक चेतावनी दिखाएँ (वैकल्पिक)
+        // WebApp.showAlert("No ad link available right now.");
+    }
+    // --- नए लॉजिक का अंत ---
 
     watchAdBtn.disabled = true;
     watchAdBtn.innerText = '🎥 Ad Playing... (3s)';
@@ -773,6 +798,7 @@ window.watchAd = () => {
         }
     }, 3000); 
 }
+// >>>>>>>>>>>>> बदलाव यहाँ खत्म होता है
 
 function updateAdStatus() {
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
