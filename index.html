@@ -549,10 +549,8 @@ window.dailyMinedTimestamp = 0;
 window.miningEndTime = 0; 
 window.adsWatched = 0;
 window.adsWatchedTimestamp = 0;
-window.lastCoinUpdateTime = 0;
 window.dbRef = ref(database, DB_NODE_PATH); 
-window.isSessionResumed = false;
-let initialDataLoaded = false; 
+window.isSessionResumed = false; // <<< NEW: Flag to prevent multiple session resumes
 
 const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -578,16 +576,15 @@ const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
-        let data = snapshot.val();
+        const data = snapshot.val();
         
         if (!data) {
             const initialData = {
                 coins: 0, dailyMinedTimestamp: 0, miningEndTime: 0, adsWatched: 0,
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
-                userName: USER_NAME, lastActive: Date.now(),
-                lastCoinUpdateTime: 0
+                userName: USER_NAME, lastActive: Date.now()
             };
-            set(window.dbRef, initialData).then(() => { initialDataLoaded = true; });
+            set(window.dbRef, initialData);
 
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -600,48 +597,12 @@ function loadUserData() {
                     }
                 }).catch(error => console.error("Error awarding referral bonus:", error));
             }
-            
+
             updateGlobalState(initialData);
             return;
         }
 
-        // <<< CORRECTED & SAFE OFFLINE MINING CALCULATION --- START >>>
-        if (!initialDataLoaded) { 
-            if (data.miningEndTime && data.miningEndTime > 0 && data.lastCoinUpdateTime > 0) {
-                const now = Date.now();
-                const calculationEndpoint = Math.min(now, data.miningEndTime);
-                const offlineDuration = calculationEndpoint - data.lastCoinUpdateTime;
-
-                if (offlineDuration > MINING_RATE_MS) {
-                    const coinsEarnedOffline = Math.floor(offlineDuration / MINING_RATE_MS);
-                    const newTotalCoins = (data.coins || 0) + coinsEarnedOffline; // THIS IS THE FIX
-
-                    console.log(`User was offline. Earned ${coinsEarnedOffline} coins. New total: ${newTotalCoins}`);
-
-                    const updates = {
-                        coins: newTotalCoins,
-                        lastCoinUpdateTime: now,
-                        lastActive: now,
-                        userName: USER_NAME
-                    };
-
-                    if (data.miningEndTime <= now) {
-                        updates.miningEndTime = 0;
-                        console.log("Mining session finished and claimed.");
-                    }
-                    
-                    update(window.dbRef, updates);
-                    data = {...data, ...updates};
-                } else {
-                     update(window.dbRef, { lastActive: now, userName: USER_NAME, lastCoinUpdateTime: now });
-                }
-            } else {
-                update(window.dbRef, { lastActive: now, userName: USER_NAME });
-            }
-            initialDataLoaded = true; 
-        }
-        // <<< CORRECTED & SAFE OFFLINE MINING CALCULATION --- END >>>
-
+        update(window.dbRef, { lastActive: Date.now(), userName: USER_NAME });
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
@@ -752,13 +713,14 @@ function updateGlobalState(data) {
     window.adsWatched = data.adsWatched || 0;
     window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
     window.upiId = data.upiId || '';
-    window.lastCoinUpdateTime = data.lastCoinUpdateTime || 0;
 }
 
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) {
+        // If a session should be active, try to resume it.
         resumeMiningSession();
     } else if (window.miningEndTime !== 0) {
+        // If a session has ended, make sure it's stopped.
         stopMining(false);
     }
 
@@ -890,17 +852,12 @@ window.stopMining = (doUpdateState = true) => {
     if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
     window.miningInterval = null; 
     window.remainingTimeInterval = null;
-    window.isSessionResumed = false;
+    window.isSessionResumed = false; // <<< NEW: Reset flag on stop
     mineCircle.classList.remove('mining-active-glow');
     
     if (window.miningEndTime !== 0) {
-        const lastMinedDuration = Date.now() - window.lastCoinUpdateTime;
-        if (lastMinedDuration > 0) {
-            const finalCoins = Math.floor(lastMinedDuration / MINING_RATE_MS);
-            window.coins += finalCoins;
-        }
         window.miningEndTime = 0;
-        window.updateDatabase({ miningEndTime: 0, coins: window.coins }); 
+        window.updateDatabase({ miningEndTime: 0 }); 
     }
     
     if (doUpdateState) updateMiningButtonState(); 
@@ -909,7 +866,7 @@ window.stopMining = (doUpdateState = true) => {
 function updateCountdown() {
     const remainingSessionTime = window.miningEndTime - Date.now();
     if (remainingSessionTime <= 0) {
-        stopMining(); 
+        stopMining(); // Use the global stopMining function
         return;
     }
     mineCircle.classList.add('mining-active-glow');
@@ -919,36 +876,42 @@ function updateCountdown() {
     countdownDisplay.innerText = 'Time Left: ' + formatTime(remainingSessionTime);
 }
 
-
+// <<< NEW FUNCTION TO FIX FREEZE ISSUE >>>
 function resumeMiningSession() {
+    // If session is already resumed and timers are running, do nothing.
     if (window.isSessionResumed) return;
 
     const remainingTime = window.miningEndTime - Date.now();
     if (remainingTime <= 0) {
-        return; 
+        return; // Session is over
     }
 
     console.log("Resuming active mining session...");
     window.isSessionResumed = true;
 
+    // Clear any old timers just in case
     if (window.miningInterval) clearInterval(window.miningInterval);
     if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
 
+    // 1. Restart the coin incrementing timer
     window.miningInterval = setInterval(() => {
         window.coins += 1;
         if (window.coins % 10 === 0) { 
-            window.updateDatabase({ coins: window.coins, lastCoinUpdateTime: Date.now() }); 
+            window.updateDatabase({ coins: window.coins }); 
         }
         startMiningAnimation();
         updateCoinDisplays();
     }, MINING_RATE_MS);
 
+    // 2. Restart the countdown display timer
     window.remainingTimeInterval = setInterval(updateCountdown, 1000);
 
+    // 3. Schedule the session to stop automatically when the time is up
     setTimeout(() => {
-        stopMining();
+        stopMining(); // Use the global stopMining function
     }, remainingTime);
 
+    // 4. Update the UI immediately
     updateCountdown();
 }
 
@@ -968,14 +931,11 @@ window.startDailyMining = () => {
   
   window.dailyMinedTimestamp = currentTime; 
   window.miningEndTime = endTime; 
-  window.lastCoinUpdateTime = currentTime;
-  
-  window.updateDatabase({ 
-      dailyMinedTimestamp: currentTime, 
-      miningEndTime: endTime,
-      lastCoinUpdateTime: currentTime 
-  });
+  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime });
 
+  // This logic is now part of resumeMiningSession and will be called
+  // immediately after the database update triggers a state change.
+  // We call it here to ensure the UI updates instantly without waiting for the DB echo.
   resumeMiningSession(); 
 }
 
@@ -1008,18 +968,22 @@ function updateMiningButtonState() {
     updateAdStatus(); 
     
     if (miningStillActive) {
+        // The resume logic is handled in processDataForStateUpdate,
+        // we just need to make sure the display is correct.
         updateCountdown(); 
     } else if (!window.canMineToday() && window.dailyMinedTimestamp !== 0) {
         startCooldownCountdown();
     } else if (isAdsComplete) {
-        if (window.miningInterval) stopMining(false);
+        // Ready to mine
+        if (window.miningInterval) stopMining(false); // Clean up just in case
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
         mineButton.innerText = '🪙 Start Mining';
         mineButton.style.background = '#32cd32';
         countdownDisplay.innerText = 'Click to start 1 hour session';
     } else {
-        if (window.miningInterval) stopMining(false);
+        // Ads not complete
+        if (window.miningInterval) stopMining(false); // Clean up
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = true;
         mineButton.innerText = `🔒 Watch Ads to Unlock`;
