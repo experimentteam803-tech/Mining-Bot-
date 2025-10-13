@@ -323,7 +323,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .status-rejected { color: #f44336; font-weight: 600; }
 
 </style>
-<!-- The Telegram script is already in your original code, so it's kept here -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 </head>
@@ -551,7 +550,7 @@ window.miningEndTime = 0;
 window.adsWatched = 0;
 window.adsWatchedTimestamp = 0;
 window.dbRef = ref(database, DB_NODE_PATH); 
-window.isSessionResumed = false; // Flag to prevent multiple session resumes
+window.isSessionResumed = false; // <<< NEW: Flag to prevent multiple session resumes
 
 const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -560,6 +559,7 @@ const MIN_WITHDRAWAL_COINS = 10000;
 const REFERRAL_BONUS = 500;
 window.ADS_REQUIRED = 10;
 window.AD_REWARD_COINS = 5;
+window.miningAdLinks = []; 
 let claimSettings = {};
 
 // UI Elements 
@@ -616,7 +616,13 @@ function loadAdminSettings() {
         const settings = snapshot.val();
         if (settings) {
             window.ADS_REQUIRED = settings.miningAds?.required || 10;
-            // The miningAdLinks array is no longer needed for the new ad script
+            
+            if (settings.miningAds?.links && Array.isArray(settings.miningAds.links)) {
+                window.miningAdLinks = settings.miningAds.links;
+            } else {
+                window.miningAdLinks = [];
+            }
+
             window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
             updateMiningButtonState();
             updateAdStatus();
@@ -711,8 +717,10 @@ function updateGlobalState(data) {
 
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) {
+        // If a session should be active, try to resume it.
         resumeMiningSession();
     } else if (window.miningEndTime !== 0) {
+        // If a session has ended, make sure it's stopped.
         stopMining(false);
     }
 
@@ -769,31 +777,12 @@ window.watchAd = () => {
         WebApp.showAlert("Cannot watch ads while mining or in cooldown.");
         return;
     }
-    
-    // =================================================================
-    // START: MODIFIED CODE - This part is changed for the new ad script
-    // =================================================================
-    
-    // Remove any old ad script to ensure the new one loads correctly
-    const oldAdScript = document.getElementById('telegram-ad-script');
-    if (oldAdScript) {
-        oldAdScript.remove();
-    }
-    
-    // Create the new script element dynamically
-    const adScript = document.createElement('script');
-    adScript.id = 'telegram-ad-script'; // Give it an ID for easy removal
-    adScript.src = '//libtl.com/sdk.js';
-    adScript.setAttribute('data-zone', '9966767');
-    adScript.setAttribute('data-sdk', 'show_9966767');
-    adScript.async = true;
 
-    // Append the script to the page to execute it and show the ad
-    document.body.appendChild(adScript);
-
-    // ===============================================================
-    // END: MODIFIED CODE
-    // ===============================================================
+    if (window.miningAdLinks && window.miningAdLinks.length > 0) {
+        const randomIndex = Math.floor(Math.random() * window.miningAdLinks.length);
+        const adLink = window.miningAdLinks[randomIndex];
+        WebApp.openLink(adLink);
+    } 
 
     watchAdBtn.disabled = true;
     
@@ -863,7 +852,7 @@ window.stopMining = (doUpdateState = true) => {
     if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
     window.miningInterval = null; 
     window.remainingTimeInterval = null;
-    window.isSessionResumed = false; // Reset flag on stop
+    window.isSessionResumed = false; // <<< NEW: Reset flag on stop
     mineCircle.classList.remove('mining-active-glow');
     
     if (window.miningEndTime !== 0) {
@@ -877,7 +866,7 @@ window.stopMining = (doUpdateState = true) => {
 function updateCountdown() {
     const remainingSessionTime = window.miningEndTime - Date.now();
     if (remainingSessionTime <= 0) {
-        stopMining();
+        stopMining(); // Use the global stopMining function
         return;
     }
     mineCircle.classList.add('mining-active-glow');
@@ -887,20 +876,24 @@ function updateCountdown() {
     countdownDisplay.innerText = 'Time Left: ' + formatTime(remainingSessionTime);
 }
 
+// <<< NEW FUNCTION TO FIX FREEZE ISSUE >>>
 function resumeMiningSession() {
+    // If session is already resumed and timers are running, do nothing.
     if (window.isSessionResumed) return;
 
     const remainingTime = window.miningEndTime - Date.now();
     if (remainingTime <= 0) {
-        return; 
+        return; // Session is over
     }
 
     console.log("Resuming active mining session...");
     window.isSessionResumed = true;
 
+    // Clear any old timers just in case
     if (window.miningInterval) clearInterval(window.miningInterval);
     if (window.remainingTimeInterval) clearInterval(window.remainingTimeInterval);
 
+    // 1. Restart the coin incrementing timer
     window.miningInterval = setInterval(() => {
         window.coins += 1;
         if (window.coins % 10 === 0) { 
@@ -910,12 +903,15 @@ function resumeMiningSession() {
         updateCoinDisplays();
     }, MINING_RATE_MS);
 
+    // 2. Restart the countdown display timer
     window.remainingTimeInterval = setInterval(updateCountdown, 1000);
 
+    // 3. Schedule the session to stop automatically when the time is up
     setTimeout(() => {
-        stopMining();
+        stopMining(); // Use the global stopMining function
     }, remainingTime);
 
+    // 4. Update the UI immediately
     updateCountdown();
 }
 
@@ -937,6 +933,9 @@ window.startDailyMining = () => {
   window.miningEndTime = endTime; 
   window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime });
 
+  // This logic is now part of resumeMiningSession and will be called
+  // immediately after the database update triggers a state change.
+  // We call it here to ensure the UI updates instantly without waiting for the DB echo.
   resumeMiningSession(); 
 }
 
@@ -969,18 +968,22 @@ function updateMiningButtonState() {
     updateAdStatus(); 
     
     if (miningStillActive) {
+        // The resume logic is handled in processDataForStateUpdate,
+        // we just need to make sure the display is correct.
         updateCountdown(); 
     } else if (!window.canMineToday() && window.dailyMinedTimestamp !== 0) {
         startCooldownCountdown();
     } else if (isAdsComplete) {
-        if (window.miningInterval) stopMining(false);
+        // Ready to mine
+        if (window.miningInterval) stopMining(false); // Clean up just in case
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
         mineButton.innerText = '🪙 Start Mining';
         mineButton.style.background = '#32cd32';
         countdownDisplay.innerText = 'Click to start 1 hour session';
     } else {
-        if (window.miningInterval) stopMining(false);
+        // Ads not complete
+        if (window.miningInterval) stopMining(false); // Clean up
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = true;
         mineButton.innerText = `🔒 Watch Ads to Unlock`;
