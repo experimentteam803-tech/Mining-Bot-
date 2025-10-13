@@ -576,7 +576,7 @@ const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
-        const data = snapshot.val();
+        let data = snapshot.val();
         
         if (!data) {
             const initialData = {
@@ -602,7 +602,41 @@ function loadUserData() {
             return;
         }
 
-        update(window.dbRef, { lastActive: Date.now(), userName: USER_NAME });
+        // --- START: Offline mining calculation logic ---
+        const lastSeen = data.lastActive || 0;
+        const sessionEndTime = data.miningEndTime || 0;
+        const now = Date.now();
+        let offlineCoinsEarned = 0;
+
+        // Check if a session was active since the user was last seen
+        if (sessionEndTime > lastSeen) {
+            // Calculate the duration the user was offline during an active session
+            // The end time for the calculation is either now or the session end time, whichever comes first
+            const calculationEndTime = Math.min(now, sessionEndTime);
+            const offlineDurationMs = calculationEndTime - lastSeen;
+
+            if (offlineDurationMs > 0) {
+                const coinsPerMs = 1 / MINING_RATE_MS; // 1 coin per 1500ms
+                offlineCoinsEarned = Math.floor(offlineDurationMs * coinsPerMs);
+                
+                if (offlineCoinsEarned > 0) {
+                    console.log(`Awarded ${offlineCoinsEarned} coins for offline mining.`);
+                    data.coins += offlineCoinsEarned; // Add coins to the 'data' object we will use to update state
+                }
+            }
+        }
+        // --- END: Offline mining calculation logic ---
+
+        const updates = { 
+            lastActive: now, 
+            userName: USER_NAME 
+        };
+        
+        if (offlineCoinsEarned > 0) {
+            updates.coins = data.coins;
+        }
+        update(window.dbRef, updates);
+
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
