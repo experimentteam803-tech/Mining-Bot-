@@ -549,9 +549,10 @@ window.dailyMinedTimestamp = 0;
 window.miningEndTime = 0; 
 window.adsWatched = 0;
 window.adsWatchedTimestamp = 0;
-window.lastCoinUpdateTime = 0; // <<< NEW: For offline calculation
+window.lastCoinUpdateTime = 0;
 window.dbRef = ref(database, DB_NODE_PATH); 
 window.isSessionResumed = false;
+let initialDataLoaded = false; // <<< NEW: Flag to prevent multiple offline calculations
 
 const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -584,9 +585,9 @@ function loadUserData() {
                 coins: 0, dailyMinedTimestamp: 0, miningEndTime: 0, adsWatched: 0,
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME, lastActive: Date.now(),
-                lastCoinUpdateTime: 0 // <<< NEW: Initialize
+                lastCoinUpdateTime: 0
             };
-            set(window.dbRef, initialData);
+            set(window.dbRef, initialData).then(() => { initialDataLoaded = true; });
 
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -604,44 +605,48 @@ function loadUserData() {
             return;
         }
 
-        // <<< NEW: OFFLINE MINING CALCULATION LOGIC --- START >>>
-        if (data.miningEndTime && data.miningEndTime > 0 && data.lastCoinUpdateTime > 0) {
-            const now = Date.now();
-            const calculationEndpoint = Math.min(now, data.miningEndTime);
-            const offlineDuration = calculationEndpoint - data.lastCoinUpdateTime;
+        // <<< CORRECTED OFFLINE MINING CALCULATION --- START >>>
+        if (!initialDataLoaded) { // Run this calculation only on the very first load
+            if (data.miningEndTime && data.miningEndTime > 0 && data.lastCoinUpdateTime > 0) {
+                const now = Date.now();
+                const calculationEndpoint = Math.min(now, data.miningEndTime);
+                const offlineDuration = calculationEndpoint - data.lastCoinUpdateTime;
 
-            if (offlineDuration > MINING_RATE_MS) {
-                const coinsEarnedOffline = Math.floor(offlineDuration / MINING_RATE_MS);
-                const newTotalCoins = (data.coins || 0) + coinsEarnedOffline;
+                if (offlineDuration > MINING_RATE_MS) {
+                    const coinsEarnedOffline = Math.floor(offlineDuration / MINING_RATE_MS);
+                    // THIS IS THE FIX: Add offline coins to the existing balance
+                    const newTotalCoins = (data.coins || 0) + coinsEarnedOffline;
 
-                console.log(`User was offline. Earned ${coinsEarnedOffline} coins.`);
+                    console.log(`User was offline. Earned ${coinsEarnedOffline} coins. New total: ${newTotalCoins}`);
 
-                const updates = {
-                    coins: newTotalCoins,
-                    lastCoinUpdateTime: now,
-                    lastActive: now,
-                    userName: USER_NAME
-                };
+                    const updates = {
+                        coins: newTotalCoins,
+                        lastCoinUpdateTime: now,
+                        lastActive: now,
+                        userName: USER_NAME
+                    };
 
-                // If the session has finished, claim it by resetting miningEndTime
-                if (data.miningEndTime <= now) {
-                    updates.miningEndTime = 0;
-                    console.log("Mining session finished and claimed.");
+                    if (data.miningEndTime <= now) {
+                        updates.miningEndTime = 0;
+                        console.log("Mining session finished and claimed.");
+                    }
+                    
+                    update(window.dbRef, updates);
+                    data = {...data, ...updates};
+                } else {
+                     update(window.dbRef, { lastActive: now, userName: USER_NAME, lastCoinUpdateTime: now });
                 }
-                
-                // Update the database immediately and then update the local state
-                update(window.dbRef, updates);
-                data = {...data, ...updates}; // Merge updates into local data object
             } else {
-                 update(window.dbRef, { lastActive: now, userName: USER_NAME });
+                update(window.dbRef, { lastActive: now, userName: USER_NAME });
             }
-        } else {
-            update(window.dbRef, { lastActive: now, userName: USER_NAME });
+            initialDataLoaded = true; // Mark as loaded so it doesn't run again on subsequent updates
         }
-        // <<< NEW: OFFLINE MINING CALCULATION LOGIC --- END >>>
+        // <<< CORRECTED OFFLINE MINING CALCULATION --- END >>>
 
         updateGlobalState(data);
         processDataForStateUpdate();
+    }, {
+        onlyOnce: false // Ensure listener stays active, but our flag will prevent re-calculation
     }, (error) => {
         console.error("Firebase Read Error (User Data):", error);
         WebApp.showAlert("Failed to load user data.");
@@ -750,7 +755,7 @@ function updateGlobalState(data) {
     window.adsWatched = data.adsWatched || 0;
     window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
     window.upiId = data.upiId || '';
-    window.lastCoinUpdateTime = data.lastCoinUpdateTime || 0; // <<< NEW
+    window.lastCoinUpdateTime = data.lastCoinUpdateTime || 0;
 }
 
 function processDataForStateUpdate() {
@@ -892,7 +897,6 @@ window.stopMining = (doUpdateState = true) => {
     mineCircle.classList.remove('mining-active-glow');
     
     if (window.miningEndTime !== 0) {
-        // Final sync of coins earned up to the moment of stopping
         const lastMinedDuration = Date.now() - window.lastCoinUpdateTime;
         if (lastMinedDuration > 0) {
             const finalCoins = Math.floor(lastMinedDuration / MINING_RATE_MS);
@@ -935,7 +939,6 @@ function resumeMiningSession() {
 
     window.miningInterval = setInterval(() => {
         window.coins += 1;
-        // <<< MODIFIED: Also update lastCoinUpdateTime during session >>>
         if (window.coins % 10 === 0) { 
             window.updateDatabase({ coins: window.coins, lastCoinUpdateTime: Date.now() }); 
         }
@@ -968,9 +971,8 @@ window.startDailyMining = () => {
   
   window.dailyMinedTimestamp = currentTime; 
   window.miningEndTime = endTime; 
-  window.lastCoinUpdateTime = currentTime; // <<< NEW: Set start time for sync
+  window.lastCoinUpdateTime = currentTime;
   
-  // <<< MODIFIED: Include lastCoinUpdateTime when starting a session >>>
   window.updateDatabase({ 
       dailyMinedTimestamp: currentTime, 
       miningEndTime: endTime,
