@@ -552,7 +552,7 @@ window.adsWatchedTimestamp = 0;
 window.lastCoinUpdateTime = 0;
 window.dbRef = ref(database, DB_NODE_PATH); 
 window.isSessionResumed = false;
-let initialDataLoaded = false; // <<< NEW: Flag to prevent multiple offline calculations
+let initialDataLoaded = false; 
 
 const MINING_RATE_MS = 1500;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -605,8 +605,8 @@ function loadUserData() {
             return;
         }
 
-        // <<< CORRECTED OFFLINE MINING CALCULATION --- START >>>
-        if (!initialDataLoaded) { // Run this calculation only on the very first load
+        // <<< CORRECTED & SAFE OFFLINE MINING CALCULATION --- START >>>
+        if (!initialDataLoaded) { 
             if (data.miningEndTime && data.miningEndTime > 0 && data.lastCoinUpdateTime > 0) {
                 const now = Date.now();
                 const calculationEndpoint = Math.min(now, data.miningEndTime);
@@ -614,8 +614,7 @@ function loadUserData() {
 
                 if (offlineDuration > MINING_RATE_MS) {
                     const coinsEarnedOffline = Math.floor(offlineDuration / MINING_RATE_MS);
-                    // THIS IS THE FIX: Add offline coins to the existing balance
-                    const newTotalCoins = (data.coins || 0) + coinsEarnedOffline;
+                    const newTotalCoins = (data.coins || 0) + coinsEarnedOffline; // THIS IS THE FIX
 
                     console.log(`User was offline. Earned ${coinsEarnedOffline} coins. New total: ${newTotalCoins}`);
 
@@ -639,14 +638,12 @@ function loadUserData() {
             } else {
                 update(window.dbRef, { lastActive: now, userName: USER_NAME });
             }
-            initialDataLoaded = true; // Mark as loaded so it doesn't run again on subsequent updates
+            initialDataLoaded = true; 
         }
-        // <<< CORRECTED OFFLINE MINING CALCULATION --- END >>>
+        // <<< CORRECTED & SAFE OFFLINE MINING CALCULATION --- END >>>
 
         updateGlobalState(data);
         processDataForStateUpdate();
-    }, {
-        onlyOnce: false // Ensure listener stays active, but our flag will prevent re-calculation
     }, (error) => {
         console.error("Firebase Read Error (User Data):", error);
         WebApp.showAlert("Failed to load user data.");
