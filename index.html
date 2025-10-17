@@ -4,45 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CoinMine App - Telegram Mini App</title>
-
-<!-- =================================================================== -->
-<!-- MONETAG SDK SCRIPT -->
 <script src='//libtl.com/sdk.js' data-zone='9969043' data-sdk='show_9969043'></script>
-<!-- =================================================================== -->
-
 <style>
-/* आपका सारा CSS यहाँ है... (कोई बदलाव नहीं) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif}
-body{
-  background:linear-gradient(180deg,#000000,#141e30);
-  color:white;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  width:100%;
-  padding:15px 20px;
-  background:rgba(0,0,0,0.8);
-  box-shadow:0 2px 8px rgba(0,0,0,0.6);
-  position:fixed;
-  top:0;
-  z-index:100;
-}
+body{background:linear-gradient(180deg,#000000,#141e30);color:white;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:15px 20px;background:rgba(0,0,0,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.6);position:fixed;top:0;z-index:100;}
 header .profile{cursor:pointer;display:flex;align-items:center;gap:10px}
 header .profile img{width:45px;height:45px;border-radius:50%;border:2px solid #32cd32}
 header .profile span{font-weight:600;color:#90ee90}
 header .msg-icon{cursor:pointer;font-size:26px;color:#32cd32}
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-  width:100%;
-  padding-top:70px;
-  padding-bottom: 90px;
-}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:100%;padding-top:70px;padding-bottom: 90px;}
 .section{display:none;width:100%;padding:20px;animation:fadeIn 0.3s ease;}
 #home{display:block;}
 #home h2{font-size:24px;margin-bottom:5px;color:#90ee90;text-align: center;}
@@ -60,93 +31,24 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 button.action-btn{padding:14px 28px;border-radius:30px;font-weight:700;font-size:18px;cursor:pointer;margin-top:20px;transition:0.3s;display: block; margin-left: auto; margin-right: auto; border: none;}
 button.action-btn:hover:enabled{filter: brightness(1.1);}
 button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
-.mine-btn {
-    background: #32cd32;
-    color: #000;
-    box-shadow: 0 4px 15px rgba(50, 205, 50, 0.5);
-    margin-top: 40px; 
-}
-.ad-btn {
-    background: #ffd700;
-    color: #000;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
-}
+.mine-btn {background: #32cd32;color: #000;box-shadow: 0 4px 15px rgba(50, 205, 50, 0.5);margin-top: 40px;}
+.ad-btn {background: #ffd700;color: #000;box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);}
 #miningCountdown {color: #90ee90; font-size: 18px; margin-top: 10px; font-weight: 600; text-align: center;}
 #adStatus {color: #ffd700; font-size: 16px; margin-top: 10px; font-weight: 600; text-align: center;}
-.wallet-summary {
-    background: #282828;
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    text-align: center;
-}
+.wallet-summary {background: #282828;padding: 20px;border-radius: 10px;margin: 20px 0;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);text-align: center;}
 .balance-info { margin-bottom: 20px; }
 .balance-label { font-size: 14px; color: #aaa; }
 .balance-value { font-size: 36px; font-weight: 700; color: #ffd700; }
 .value-inr { font-size: 16px; color: #90ee90; margin-top: 5px; }
-.wallet-summary button {
-    background: #32cd32;
-    color: #000;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
+.wallet-summary button {background: #32cd32;color: #000;padding: 10px 20px;border: none;border-radius: 20px;font-weight: 600;cursor: pointer;transition: 0.3s;}
 .withdrawal-note { font-size: 12px; color: #aaa; margin-top: 15px; }
-.referral-box {
-    background: #282828;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px dashed #32cd32;
-    text-align: center;
-}
-#refLink {
-    font-size: 14px;
-    color: #ffd700;
-    word-break: break-all;
-    margin-top: 5px;
-}
-.referral-details {
-    padding: 15px;
-    background: #1c1c1c;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-.referral-instruction-list {
-    list-style: none;
-    padding-left: 0;
-    text-align: left;
-}
-.referral-instruction-list li {
-    margin-bottom: 10px;
-    font-size: 15px;
-    color: #ccc;
-    padding-left: 20px;
-    position: relative;
-}
-.referral-instruction-list li::before {
-    content: '★';
-    color: #ffd700;
-    font-weight: bold;
-    display: inline-block;
-    width: 1em;
-    margin-left: -1em;
-}
-.share-btn {
-    background: #ffd700;
-    color: #000;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 25px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
-    width: 80%;
-}
+.referral-box {background: #282828;padding: 15px;border-radius: 8px;margin-bottom: 20px;border: 1px dashed #32cd32;text-align: center;}
+#refLink {font-size: 14px;color: #ffd700;word-break: break-all;margin-top: 5px;}
+.referral-details {padding: 15px;background: #1c1c1c;border-radius: 8px;margin-bottom: 20px;}
+.referral-instruction-list {list-style: none;padding-left: 0;text-align: left;}
+.referral-instruction-list li {margin-bottom: 10px;font-size: 15px;color: #ccc;padding-left: 20px;position: relative;}
+.referral-instruction-list li::before {content: '★';color: #ffd700;font-weight: bold;display: inline-block;width: 1em;margin-left: -1em;}
+.share-btn {background: #ffd700;color: #000;padding: 12px 25px;border: none;border-radius: 25px;font-weight: 700;cursor: pointer;transition: 0.3s;width: 80%;}
 .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); padding-top: 60px; animation: fadeIn 0.3s; }
 .modal-content { background: #282828; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; color: white; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);}
 .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
@@ -158,214 +60,39 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .nav-btn{background:none;border:none;color:white;font-size:18px;padding:8px 12px;border-radius:10px;cursor:pointer;transition:0.2s;font-weight:600;}
 .nav-btn.active,.nav-btn:hover{color:#32cd32;background:rgba(50, 205, 50, 0.2);}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-#gift .gift-container {
-    background: #1c1c1c;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    width: 100%;
-    max-width: 420px;
-    border: 1px solid #333;
-    margin: 0 auto;
-}
-#gift h2 {
-    margin-top: 0;
-    margin-bottom: 5px;
-    color: #90ee90; 
-    font-weight: 700;
-    font-size: 1.8em;
-}
-#gift .sub-text {
-    font-size: 0.9em;
-    color: #aaa;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-#gift .highlight {
-    font-size: 1em;
-    color: #fff;
-    margin-bottom: 20px;
-    font-weight: 600;
-    padding: 10px 5px;
-    border-bottom: 1px solid #333;
-    border-top: 1px solid #333;
-    background: rgba(255, 215, 0, 0.1);
-}
-#gift .highlight span {
-    color: #ffd700; 
-}
-#gift input {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid #555;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 1em;
-    background: #282828;
-    color: white;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
-    text-align: center;
-    text-transform: uppercase;
-}
-#gift input:focus {
-    border-color: #ffd700;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.25);
-}
-#gift button {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-#gift .redeem-btn {
-    background: #32cd32; 
-    color: #000;
-    box-shadow: 0 5px 15px rgba(50, 205, 50, 0.3);
-}
-#gift .redeem-btn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-}
-#gift .claim-btn {
-    background: #ffd700; 
-    color: #000;
-    margin-bottom: 0 !important;
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-}
-#gift .claim-btn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-}
-#gift p.separator {
-    color: #888;
-    font-weight: 500;
-    font-size: 0.9em;
-    margin: 15px 0;
-}
-#gift .note {
-    margin-top: 20px;
-    font-size: 0.9em;
-    color: #90ee90;
-    padding-top: 15px;
-    border-top: 1px dashed #444;
-    font-weight: 500;
-}
-#gift #claimButtonContainer {
-    display: block;
-}
-#gift .redeemed-message {
-    display: none;
-    padding: 15px;
-    border-radius: 8px;
-    background: #32cd32;
-    color: #000;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.1em;
-    box-shadow: 0 4px 10px rgba(50, 205, 50, 0.3);
-    letter-spacing: 0.3px;
-}
-.history-container {
-    margin-top: 30px;
-    background: #1c1c1c;
-    padding: 20px;
-    border-radius: 10px;
-}
-.history-container h3 {
-    text-align: center;
-    color: #ffd700;
-    margin-bottom: 15px;
-}
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.history-table th, .history-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-}
-.history-table th {
-    font-size: 14px;
-    color: #aaa;
-}
-.history-table td {
-    font-size: 15px;
-}
+#gift .gift-container {background: #1c1c1c;padding: 30px;border-radius: 12px;box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);text-align: center;width: 100%;max-width: 420px;border: 1px solid #333;margin: 0 auto;}
+#gift h2 {margin-top: 0;margin-bottom: 5px;color: #90ee90; font-weight: 700;font-size: 1.8em;}
+#gift .sub-text {font-size: 0.9em;color: #aaa;margin-bottom: 5px;font-weight: 500;}
+#gift .highlight {font-size: 1em;color: #fff;margin-bottom: 20px;font-weight: 600;padding: 10px 5px;border-bottom: 1px solid #333;border-top: 1px solid #333;background: rgba(255, 215, 0, 0.1);}
+#gift .highlight span {color: #ffd700;}
+#gift input {width: 100%;padding: 15px;border: 2px solid #555;border-radius: 8px;margin-bottom: 20px;font-size: 1em;background: #282828;color: white;box-sizing: border-box;transition: border-color 0.3s;text-align: center;text-transform: uppercase;}
+#gift input:focus {border-color: #ffd700;outline: none;box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.25);}
+#gift button {width: 100%;padding: 15px;border: none;border-radius: 8px;font-size: 1em;font-weight: 700;cursor: pointer;transition: all 0.3s ease;text-transform: uppercase;letter-spacing: 0.5px;margin-bottom: 15px;box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);}
+#gift .redeem-btn {background: #32cd32; color: #000;box-shadow: 0 5px 15px rgba(50, 205, 50, 0.3);}
+#gift .redeem-btn:hover {filter: brightness(1.1);transform: translateY(-2px);}
+#gift .claim-btn {background: #ffd700; color: #000;margin-bottom: 0 !important;box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);}
+#gift .claim-btn:hover {filter: brightness(1.1);transform: translateY(-2px);}
+#gift p.separator {color: #888;font-weight: 500;font-size: 0.9em;margin: 15px 0;}
+#gift .note {margin-top: 20px;font-size: 0.9em;color: #90ee90;padding-top: 15px;border-top: 1px dashed #444;font-weight: 500;}
+#gift #claimButtonContainer {display: block;}
+#gift .redeemed-message {display: none;padding: 15px;border-radius: 8px;background: #32cd32;color: #000;font-weight: 700;text-align: center;margin-bottom: 20px;font-size: 1.1em;box-shadow: 0 4px 10px rgba(50, 205, 50, 0.3);letter-spacing: 0.3px;}
+.history-container {margin-top: 30px;background: #1c1c1c;padding: 20px;border-radius: 10px;}
+.history-container h3 {text-align: center;color: #ffd700;margin-bottom: 15px;}
+.history-table {width: 100%;border-collapse: collapse;}
+.history-table th, .history-table td {padding: 10px;text-align: left;border-bottom: 1px solid #333;}
+.history-table th {font-size: 14px;color: #aaa;}
+.history-table td {font-size: 15px;}
 .status-pending { color: #ffd700; font-weight: 600; }
 .status-approved { color: #32cd32; font-weight: 600; }
 .status-rejected { color: #f44336; font-weight: 600; }
-/* --- TASK SECTION STYLES --- */
-.task-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #1c1c1c;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: background-color 0.2s, border-left-color 0.2s;
-    border-left: 4px solid #333;
-}
-.task-item:hover {
-    background: #2a2a2a;
-    border-left-color: #ffd700;
-}
-.task-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    overflow: hidden;
-}
-.task-info img {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    flex-shrink: 0;
-}
-.task-info .task-name {
-    font-weight: 600;
-    color: #eee;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.task-reward {
-    font-weight: 700;
-    font-size: 16px;
-    color: #ffd700;
-    flex-shrink: 0;
-    padding-left: 10px;
-}
-.verify-btn {
-    width: 100%;
-    padding: 10px;
-    margin-top: -10px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 0 0 8px 8px;
-    background: #ffd700;
-    color: #000;
-    font-weight: 700;
-    cursor: pointer;
-    transition: filter 0.2s;
-}
-.verify-btn:hover {
-    filter: brightness(1.1);
-}
+.task-item {display: flex;align-items: center;justify-content: space-between;background: #1c1c1c;padding: 12px 15px;border-radius: 8px;margin-bottom: 10px;cursor: pointer;transition: background-color 0.2s, border-left-color 0.2s;border-left: 4px solid #333;}
+.task-item:hover {background: #2a2a2a;border-left-color: #ffd700;}
+.task-info {display: flex;align-items: center;gap: 15px;overflow: hidden;}
+.task-info img {width: 40px;height: 40px;border-radius: 8px;flex-shrink: 0;}
+.task-info .task-name {font-weight: 600;color: #eee;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+.task-reward {font-weight: 700;font-size: 16px;color: #ffd700;flex-shrink: 0;padding-left: 10px;}
+.verify-btn {width: 100%;padding: 10px;margin-top: -10px;margin-bottom: 10px;border: none;border-radius: 0 0 8px 8px;background: #ffd700;color: #000;font-weight: 700;cursor: pointer;transition: filter 0.2s;}
+.verify-btn:hover {filter: brightness(1.1);}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -373,114 +100,87 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 
 <div id="app-content" style="width: 100%;">
     <header>
-    <div class="profile" onclick="showProfile()">
-    <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
-    <span id="username">Loading...</span> </div>
-    <div class="msg-icon" onclick="showMsg()">💬</div>
+        <div class="profile" onclick="showProfile()"><img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile"><span id="username">Loading...</span></div>
+        <div class="msg-icon" onclick="showMsg()">💬</div>
     </header>
     <main>
-    <section id="home" class="section">
-    <div id="totalCoins"><span id="coinCount">0</span></div>
-    <h2>Your Coins</h2>
-    <div class="circle-container">
-    <div class="circle" id="mineCircle">
-    <span id="coinInsideCircle">0</span>
-    </div>
-    </div>
-    <button class="action-btn ad-btn" id="watchAdBtn" onclick="watchAd()">🎬 Watch Ad</button>
-    <div id="adStatus">Ads Watched: 0/10</div>
-    <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">🪙 Start Mining</button>
-    <div id="miningCountdown">Click to start 1 hour session</div>
-    </section>
-
-    <section id="task" class="section">
-        <div id="taskList">
-            <h2 style="text-align: center; margin-bottom: 10px;">🧩 Daily Tasks</h2>
-            <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
-            <div id="task-items-container">
-                <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
+        <section id="home" class="section">
+            <div id="totalCoins"><span id="coinCount">0</span></div>
+            <h2>Your Coins</h2>
+            <div class="circle-container"><div class="circle" id="mineCircle"><span id="coinInsideCircle">0</span></div></div>
+            <button class="action-btn ad-btn" id="watchAdBtn" onclick="watchAd()">🎬 Watch Ad</button>
+            <div id="adStatus">Ads Watched: 0/10</div>
+            <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">🪙 Start Mining</button>
+            <div id="miningCountdown">Click to start 1 hour session</div>
+        </section>
+        <section id="task" class="section">
+            <div id="taskList">
+                <h2 style="text-align: center; margin-bottom: 10px;">🧩 Daily Tasks</h2>
+                <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
+                <div id="task-items-container"><p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p></div>
             </div>
-        </div>
-    </section>
-
-    <section id="wallet" class="section">
-        <h2 style="text-align: center;">💼 Wallet</h2>
-        <div class="wallet-summary">
-            <div class="balance-info">
-                <div class="balance-label">Current Balance (Coins)</div>
-                <div class="balance-value"><span id="walletCoins">0</span></div>
-                <div class="value-inr">₹ <span id="walletValue">0.00</span> (1000 Coins ≈ ₹1)</div>
+        </section>
+        <section id="wallet" class="section">
+            <h2 style="text-align: center;">💼 Wallet</h2>
+            <div class="wallet-summary">
+                <div class="balance-info">
+                    <div class="balance-label">Current Balance (Coins)</div>
+                    <div class="balance-value"><span id="walletCoins">0</span></div>
+                    <div class="value-inr">₹ <span id="walletValue">0.00</span> (1000 Coins ≈ ₹1)</div>
+                </div>
+                <button onclick="showWithdrawalModal()">UPI Withdrawal</button>
+                <div class="withdrawal-note">Minimum withdrawal amount is **10,000 Coins** (₹10.00).</div>
             </div>
-            <button onclick="showWithdrawalModal()">UPI Withdrawal</button>
-            <div class="withdrawal-note">
-                Minimum withdrawal amount is **10,000 Coins** (₹10.00).
+            <div class="history-container">
+                <h3>Withdrawal History</h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table class="history-table">
+                        <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                        <tbody id="withdrawal-history-table"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        <div class="history-container">
-            <h3>Withdrawal History</h3>
-            <div style="max-height: 300px; overflow-y: auto;">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdrawal-history-table">
-                    </tbody>
-                </table>
+        </section>
+        <section id="referral" class="section">
+            <h2 style="text-align: center;">🔗 Referral Program</h2>
+            <div id="referral-content">
+                <p style="text-align: center; color: #ccc; margin-bottom: 25px;">Invite your friends to CoinMine and earn substantial rewards!</p>
+                <div class="referral-box">
+                    <div style="font-size: 16px; color: #90ee90; font-weight: 600;">Your Unique Referral Link:</div>
+                    <p id="refLink">Loading...</p> 
+                </div>
+                <div class="referral-details">
+                    <h3 style="color: #fff; margin-bottom: 15px;">How It Works:</h3>
+                    <ul class="referral-instruction-list">
+                        <li><strong>Share:</strong> Share your unique link with friends and family.</li>
+                        <li><strong>Signup Bonus:</strong> You earn **500 Coins** immediately when your friend successfully signs up using your link.</li>
+                        <li><strong>Lifetime Commission:</strong> You earn a **5% commission** on all coins your referred users mine, forever!</li>
+                    </ul>
+                    <p style="text-align: center; color: #ffd700; font-weight: 600; margin-bottom: 20px;">The more you share, the more you earn!</p>
+                </div>
+                <button class="share-btn" onclick="shareReferralLink()">📢 Share My Link Now</button>
             </div>
-        </div>
-    </section>
-    <section id="referral" class="section">
-        <h2 style="text-align: center;">🔗 Referral Program</h2>
-        <div id="referral-content">
-            <p style="text-align: center; color: #ccc; margin-bottom: 25px;">Invite your friends to CoinMine and earn substantial rewards!</p>
-            <div class="referral-box">
-                <div style="font-size: 16px; color: #90ee90; font-weight: 600;">Your Unique Referral Link:</div>
-                <p id="refLink">Loading...</p> 
+        </section>
+        <section id="gift" class="section">
+            <div class="gift-container">
+                <h2><span style="color: #FFD700;">★</span> Redeem Gift Code</h2>
+                <p class="sub-text">A new gift code may be available periodically.</p>
+                <p class="highlight">You can win up to <span>10,000</span> coins from gift codes!</p>
+                <input type="text" id="giftCode" placeholder="Enter your gift code here">
+                <button class="redeem-btn" onclick="redeemCode()">Redeem Code</button>
+                <p class="separator">— OR GET A FREE CODE —</p>
+                <div id="claimButtonContainer"><button class="claim-btn" id="claimBtn1" onclick="claimCode(this, 'placeholder')">Claim Free Gift Code 🚀</button></div>
+                <div id="redeemedMessage" class="redeemed-message">This special code has already been redeemed! ✅</div>
+                <p class="note">Claim a code and redeem it to earn bonus coins 💰</p>
             </div>
-            <div class="referral-details">
-                <h3 style="color: #fff; margin-bottom: 15px;">How It Works:</h3>
-                <ul class="referral-instruction-list">
-                    <li><strong>Share:</strong> Share your unique link with friends and family.</li>
-                    <li><strong>Signup Bonus:</strong> You earn **500 Coins** immediately when your friend successfully signs up using your link.</li>
-                    <li><strong>Lifetime Commission:</strong> You earn a **5% commission** on all coins your referred users mine, forever!</li>
-                </ul>
-                <p style="text-align: center; color: #ffd700; font-weight: 600; margin-bottom: 20px;">The more you share, the more you earn!</p>
-            </div>
-            <button class="share-btn" onclick="shareReferralLink()">
-                📢 Share My Link Now
-            </button>
-        </div>
-    </section>
-    <section id="gift" class="section">
-        <div class="gift-container">
-            <h2><span style="color: #FFD700;">★</span> Redeem Gift Code</h2>
-            <p class="sub-text">A new gift code may be available periodically.</p>
-            <p class="highlight">You can win up to <span>10,000</span> coins from gift codes!</p>
-            <input type="text" id="giftCode" placeholder="Enter your gift code here">
-            <button class="redeem-btn" onclick="redeemCode()">Redeem Code</button>
-            <p class="separator">— OR GET A FREE CODE —</p>
-            <div id="claimButtonContainer">
-              <button class="claim-btn" id="claimBtn1" onclick="claimCode(this, 'placeholder')">
-                Claim Free Gift Code 🚀
-              </button>
-            </div>
-            <div id="redeemedMessage" class="redeemed-message">
-              This special code has already been redeemed! ✅
-            </div>
-            <p class="note">Claim a code and redeem it to earn bonus coins 💰</p>
-        </div>
-    </section>
+        </section>
     </main>
     <nav class="navbar">
-    <button class="nav-btn active" onclick="showSection('home', this)">🏠 Home</button>
-    <button class="nav-btn" onclick="showSection('task', this)">🧩 Task</button>
-    <button class="nav-btn" onclick="showSection('gift', this)">🎁 Gift</button>
-    <button class="nav-btn" onclick="showSection('wallet', this)">💼 Wallet</button>
-    <button class="nav-btn" onclick="showSection('referral', this)">🔗 Referral</button>
+        <button class="nav-btn active" onclick="showSection('home', this)">🏠 Home</button>
+        <button class="nav-btn" onclick="showSection('task', this)">🧩 Task</button>
+        <button class="nav-btn" onclick="showSection('gift', this)">🎁 Gift</button>
+        <button class="nav-btn" onclick="showSection('wallet', this)">💼 Wallet</button>
+        <button class="nav-btn" onclick="showSection('referral', this)">🔗 Referral</button>
     </nav>
 </div>
 <div id="withdrawalModal" class="modal">
@@ -488,600 +188,427 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
         <span class="close-btn" onclick="closeWithdrawalModal()">&times;</span>
         <h3>UPI Withdrawal</h3>
         <p style="color:#aaa; text-align: center; margin-bottom: 15px;">Minimum: 10,000 Coins (₹10.00)</p>
-        <div class="form-group">
-            <label for="upiAmount">Coins to Withdraw:</label>
-            <input type="number" id="upiAmount" placeholder="Min 10000" oninput="checkWithdrawalEligibility()">
-            <small id="inrValueText" style="color: #90ee90;"></small>
-        </div>
-        <div class="form-group">
-            <label for="upiId">Your UPI ID:</label>
-            <input type="text" id="upiId" placeholder="example@bankupi">
-        </div>
+        <div class="form-group"><label for="upiAmount">Coins to Withdraw:</label><input type="number" id="upiAmount" placeholder="Min 10000" oninput="checkWithdrawalEligibility()"><small id="inrValueText" style="color: #90ee90;"></small></div>
+        <div class="form-group"><label for="upiId">Your UPI ID:</label><input type="text" id="upiId" placeholder="example@bankupi"></div>
         <button class="withdraw-button" id="submitWithdrawalBtn" disabled onclick="submitWithdrawal()">Submit Withdrawal Request</button>
         <small style="display: block; text-align: center; color: #f44336; margin-top: 10px;">Withdrawals processed within 24 hours.</small>
     </div>
 </div>
-
 <div id="taskDetailModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" id="closeTaskModal">&times;</span>
         <h3 id="taskDetailTitle" style="color: #90ee90; margin-bottom: 5px;">Task Details</h3>
         <p style="font-weight: 600; margin-bottom: 15px;">Reward: <span id="taskDetailReward" style="color: #ffd700;"></span></p>
         <p style="font-size: 14px; color: #ccc; margin-top: 10px;">Instructions:</p>
-        <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;">
-        </ul>
+        <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;"></ul>
         <button id="taskDetailCompleteBtn" class="action-btn" style="width: 100%; margin: 0; background: #32cd32; color: #000;">Complete Task</button>
     </div>
 </div>
 
-
 <script type="module">
-// --- FIREBASE IMPORTS ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-import { getDatabase, ref, set, onValue, update, push, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, push, get, query, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// --- TELEGRAM & FIREBASE SETUP ---
-const WebApp = window.Telegram.WebApp;
-WebApp.ready();
-const telegramUser = WebApp.initDataUnsafe.user;
-if (!telegramUser || !telegramUser.id) {
-    alert("Error: Could not get Telegram user data. Please open the app via Telegram.");
-    throw new Error("Missing Telegram User ID");
-}
-const TELEGRAM_USER_ID = telegramUser.id.toString();
-const USER_NAME = telegramUser.first_name + (telegramUser.last_name ? ' ' + telegramUser.last_name : '');
-document.getElementById('username').innerText = USER_NAME;
-document.getElementById('refLink').innerText = `https://t.me/MiningFather1Bot?start=${TELEGRAM_USER_ID}`;
-const firebaseConfig = {
-    apiKey: "AIzaSyCcgl31JqffVd8bW8G23UurFhxH8IFlEfM",
-    authDomain: "mining-bot-276d0.firebaseapp.com",
-    projectId: "mining-bot-276d0",
-    storageBucket: "mining-bot-276d0.firebasestorage.app",
-    messagingSenderId: "263688973305",
-    appId: "1:263688973305:web:bf3eab880a03dde0ec2b28",
-    measurementId: "G-2FWW2SVSLR"
-};
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase(app);
-const DB_NODE_PATH = 'users/' + TELEGRAM_USER_ID; 
-const ADMIN_SETTINGS_REF = ref(database, 'admin_settings');
-const TASKS_REF = ref(database, 'tasks');
-const WITHDRAWALS_REF = ref(database, 'withdrawals');
-const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
-window.coins = 0; 
-window.dailyMinedTimestamp = 0; 
-window.miningEndTime = 0; 
-window.adsWatched = 0;
-window.adsWatchedTimestamp = 0;
-window.dbRef = ref(database, DB_NODE_PATH); 
-let miningInterval = null;
-let remainingTimeInterval = null;
-const MINING_RATE_MS = 1500;
-const ONE_HOUR_MS = 60 * 60 * 1000;
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const MIN_WITHDRAWAL_COINS = 10000;
-const REFERRAL_BONUS = 500;
-window.ADS_REQUIRED = 10;
-window.AD_REWARD_COINS = 5;
-let claimSettings = {};
-let isInitialLoadComplete = false;
-const mineButton = document.getElementById('mineBtn');
-const watchAdBtn = document.getElementById('watchAdBtn');
-const adStatusDisplay = document.getElementById('adStatus');
-const mineCircle = document.getElementById('mineCircle');
-const countdownDisplay = document.getElementById('miningCountdown');
-const withdrawalModal = document.getElementById('withdrawalModal');
-const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
-const taskDetailModal = document.getElementById('taskDetailModal');
-const closeTaskModalBtn = document.getElementById('closeTaskModal');
-let allTasks = {}; 
+    const WebApp = window.Telegram.WebApp;
+    WebApp.ready();
+    const telegramUser = WebApp.initDataUnsafe.user;
+    if (!telegramUser || !telegramUser.id) {
+        alert("Error: Could not get Telegram user data. Please open the app via Telegram.");
+        throw new Error("Missing Telegram User ID");
+    }
+    const TELEGRAM_USER_ID = telegramUser.id.toString();
+    const USER_NAME = telegramUser.first_name + (telegramUser.last_name ? ' ' + telegramUser.last_name : '');
+    document.getElementById('username').innerText = USER_NAME;
+    document.getElementById('refLink').innerText = `https://t.me/MiningFather1Bot?start=${TELEGRAM_USER_ID}`;
+    const firebaseConfig = {
+        apiKey: "AIzaSyCcgl31JqffVd8bW8G23UurFhxH8IFlEfM",
+        authDomain: "mining-bot-276d0.firebaseapp.com",
+        projectId: "mining-bot-276d0",
+        storageBucket: "mining-bot-276d0.firebasestorage.app",
+        messagingSenderId: "263688973305",
+        appId: "1:263688973305:web:bf3eab880a03dde0ec2b28",
+        measurementId: "G-2FWW2SVSLR"
+    };
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const DB_NODE_PATH = 'users/' + TELEGRAM_USER_ID; 
+    const ADMIN_SETTINGS_REF = ref(database, 'admin_settings');
+    const TASKS_REF = ref(database, 'tasks');
+    const WITHDRAWALS_REF = ref(database, 'withdrawals');
+    const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
+    window.coins = 0; 
+    window.dailyMinedTimestamp = 0; 
+    window.miningEndTime = 0; 
+    window.adsWatched = 0;
+    window.adsWatchedTimestamp = 0;
+    window.dbRef = ref(database, DB_NODE_PATH); 
+    let miningInterval = null;
+    let remainingTimeInterval = null;
+    const MINING_RATE_MS = 1500;
+    const ONE_HOUR_MS = 3600000;
+    const ONE_DAY_MS = 86400000;
+    const MIN_WITHDRAWAL_COINS = 10000;
+    const REFERRAL_BONUS = 500;
+    window.ADS_REQUIRED = 10;
+    window.AD_REWARD_COINS = 5;
+    let claimSettings = {};
+    let isInitialLoadComplete = false;
+    const taskDetailModal = document.getElementById('taskDetailModal');
+    const closeTaskModalBtn = document.getElementById('closeTaskModal');
+    let allTasks = {}; 
 
-function loadUserData() {
-    onValue(window.dbRef, (snapshot) => {
-        let data = snapshot.val();
-        if (!data) {
-            const initialData = { 
-                coins: 0, 
-                dailyMinedTimestamp: 0, 
-                miningEndTime: 0, 
-                adsWatched: 0, 
-                adsWatchedTimestamp: 0, 
-                upiId: '', 
-                telegramId: TELEGRAM_USER_ID, 
-                userName: USER_NAME, 
-                lastActive: Date.now(),
-                joinDate: Date.now() // <-- Add joinDate for new users
-            };
-            set(window.dbRef, initialData).then(() => { isInitialLoadComplete = true; });
-            const referrerId = WebApp.initDataUnsafe.start_param;
-            if (referrerId && referrerId !== TELEGRAM_USER_ID) {
-                const referrerRef = ref(database, 'users/' + referrerId);
-                get(referrerRef).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const referrerData = snapshot.val();
-                        const newBalance = (referrerData.coins || 0) + REFERRAL_BONUS;
-                        update(referrerRef, { coins: newBalance });
-                    }
-                }).catch(error => console.error("Error awarding referral bonus:", error));
-            }
-            updateGlobalState(initialData);
-            return;
-        }
-        if (!isInitialLoadComplete) {
-            const lastSeen = data.lastActive || 0;
-            const sessionEndTime = data.miningEndTime || 0;
-            const now = Date.now();
-            let offlineCoinsEarned = 0;
-            if (sessionEndTime > lastSeen) {
-                const calculationEndTime = Math.min(now, sessionEndTime);
-                const offlineDurationMs = calculationEndTime - lastSeen;
-                if (offlineDurationMs > 0) {
-                    const coinsPerMs = 1 / MINING_RATE_MS;
-                    offlineCoinsEarned = Math.floor(offlineDurationMs * coinsPerMs);
-                    if (offlineCoinsEarned > 0) { data.coins += offlineCoinsEarned; }
+    function loadUserData() {
+        onValue(window.dbRef, (snapshot) => {
+            let data = snapshot.val();
+            if (!data) {
+                const initialData = { coins: 0, dailyMinedTimestamp: 0, miningEndTime: 0, adsWatched: 0, adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID, userName: USER_NAME, lastActive: Date.now(), joinDate: Date.now() };
+                set(window.dbRef, initialData).then(() => { isInitialLoadComplete = true; });
+                const referrerId = WebApp.initDataUnsafe.start_param;
+                if (referrerId && referrerId !== TELEGRAM_USER_ID) {
+                    const referrerRef = ref(database, 'users/' + referrerId);
+                    get(referrerRef).then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const referrerData = snapshot.val();
+                            update(referrerRef, { coins: (referrerData.coins || 0) + REFERRAL_BONUS });
+                        }
+                    }).catch(error => console.error("Error awarding referral bonus:", error));
                 }
+                updateGlobalState(initialData);
+                return;
             }
-            const updates = { lastActive: now, userName: USER_NAME };
-            if(offlineCoinsEarned > 0) { updates.coins = data.coins; }
-            update(window.dbRef, updates);
-            isInitialLoadComplete = true;
-        }
-        updateGlobalState(data);
-        processDataForStateUpdate();
-    }, (error) => {
-        console.error("Firebase Read Error (User Data):", error);
-        WebApp.showAlert("Failed to load user data.");
-    });
-}
-function loadAdminSettings() {
-    onValue(ADMIN_SETTINGS_REF, (snapshot) => {
-        const settings = snapshot.val();
-        if (settings) {
-            window.ADS_REQUIRED = settings.miningAds?.required || 10;
-            window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
-            updateMiningButtonState();
-            updateAdStatus();
-        }
-    }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
-}
-
-// --- UPDATED TASK FUNCTIONS ---
-
-async function loadLiveTasks() {
-    const taskContainer = document.getElementById('task-items-container');
-    
-    const userTasksRef = ref(database, `users/${TELEGRAM_USER_ID}`);
-    const userSnapshot = await get(userTasksRef);
-    const userData = userSnapshot.val() || {};
-    const startedTasks = userData.startedTasks || {};
-    const completedTasks = userData.completedTasks || {};
-
-    onValue(TASKS_REF, (snapshot) => {
-        taskContainer.innerHTML = '';
-        const tasks = snapshot.val();
-        allTasks = tasks;
-        let taskHtml = '';
-        let activeTasksFound = false;
-        if (tasks) {
-            for (const taskId in tasks) {
-                const task = tasks[taskId];
-                if (task.active) {
-                    activeTasksFound = true;
-                    
-                    taskHtml += `<div class="task-item-wrapper">`;
-                    
-                    const isCompleted = completedTasks[taskId];
-                    const startStatus = startedTasks[taskId];
-
-                    let actionButton = '';
-                    if (isCompleted) {
-                        actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
-                    } else if (startStatus === 'pending') {
-                        actionButton = `<button class="verify-btn" style="background: #808080;" disabled>⏳ Pending Verification</button>`;
-                    } else if (startStatus) {
-                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
+            if (!isInitialLoadComplete) {
+                const lastSeen = data.lastActive || 0;
+                const sessionEndTime = data.miningEndTime || 0;
+                const now = Date.now();
+                let offlineCoinsEarned = 0;
+                if (sessionEndTime > lastSeen) {
+                    const offlineDurationMs = Math.min(now, sessionEndTime) - lastSeen;
+                    if (offlineDurationMs > 0) {
+                        offlineCoinsEarned = Math.floor(offlineDurationMs * (1 / MINING_RATE_MS));
+                        if (offlineCoinsEarned > 0) data.coins += offlineCoinsEarned;
                     }
-                    
-                    taskHtml += `
-                        <div class="task-item" onclick="showTaskDetails('${taskId}')">
-                            <div class="task-info">
-                                <img src="${task.logoUrl || 'https://via.placeholder.com/40'}" alt="task logo">
-                                <span class="task-name">${task.name}</span>
-                            </div>
-                            <div class="task-reward">${task.reward.toLocaleString()} C</div>
-                        </div>
-                        ${actionButton}
-                    `;
-                    taskHtml += `</div>`;
                 }
+                const updates = { lastActive: now, userName: USER_NAME };
+                if(offlineCoinsEarned > 0) updates.coins = data.coins;
+                update(window.dbRef, updates);
+                isInitialLoadComplete = true;
             }
-        }
-        if (activeTasksFound) {
-            taskContainer.innerHTML = taskHtml;
-        } else {
-            taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
-        }
-    }, { onlyOnce: true });
-}
-
-window.showTaskDetails = (taskId) => {
-    const task = allTasks[taskId];
-    if (!task) return;
-    document.getElementById('taskDetailTitle').innerText = task.name;
-    document.getElementById('taskDetailReward').innerText = `${task.reward.toLocaleString()} Coins`;
-    document.getElementById('taskDetailInstructions').innerHTML = task.instructions.map(inst => `<li>${inst}</li>`).join('');
-    const completeBtn = document.getElementById('taskDetailCompleteBtn');
-    completeBtn.onclick = () => startTask(taskId, task.link);
-    taskDetailModal.style.display = 'block';
-}
-
-function closeTaskModal() {
-    taskDetailModal.style.display = 'none';
-}
-
-window.startTask = (taskId, taskLink) => {
-    const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
-    set(userTaskStatusRef, true).then(() => {
-        closeTaskModal();
-        WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
-        WebApp.openLink(taskLink);
-        loadLiveTasks();
-    }).catch(error => {
-        WebApp.showAlert("Could not start the task. Please try again.");
-        console.error("Error starting task:", error);
-    });
-};
-
-window.verifyTask = (taskId, taskName) => {
-    const verificationsRef = ref(database, 'task_verifications');
-    const newVerificationRef = push(verificationsRef);
-
-    set(newVerificationRef, {
-        userId: TELEGRAM_USER_ID,
-        userName: USER_NAME,
-        taskId: taskId,
-        taskName: taskName,
-        timestamp: Date.now(),
-        status: 'pending'
-    }).then(() => {
-        WebApp.showAlert("Your task has been submitted for verification. Please wait for it to be approved by an admin.");
-        const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
-        set(userTaskStatusRef, 'pending'); 
-        loadLiveTasks();
-    }).catch((error) => {
-        WebApp.showAlert("Could not submit task for verification. Please try again.");
-        console.error("Verification submission error: ", error);
-    });
-};
-
-closeTaskModalBtn.onclick = closeTaskModal;
-
-// --- (The rest of the code is unchanged) ---
-
-function loadWithdrawalHistory() {
-    const historyTableBody = document.getElementById('withdrawal-history-table');
-    const userWithdrawalsQuery = query(WITHDRAWALS_REF, orderByChild('userId'), equalTo(TELEGRAM_USER_ID));
-    onValue(userWithdrawalsQuery, (snapshot) => {
-        historyTableBody.innerHTML = '';
-        if (!snapshot.exists()) {
-            historyTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #888;">No history found.</td></tr>`;
-            return;
-        }
-        const withdrawals = [];
-        snapshot.forEach(childSnapshot => { withdrawals.push(childSnapshot.val()); });
-        withdrawals.sort((a, b) => b.timestamp - a.timestamp);
-        withdrawals.forEach(data => {
-            const date = new Date(data.timestamp).toLocaleDateString();
-            const statusClass = `status-${data.status.toLowerCase()}`;
-            const row = `<tr><td>${date}</td><td>${data.amount.toLocaleString()}</td><td class="${statusClass}">${data.status}</td></tr>`;
-            historyTableBody.innerHTML += row;
+            updateGlobalState(data);
+            processDataForStateUpdate();
+        }, (error) => {
+            console.error("Firebase Read Error (User Data):", error);
+            WebApp.showAlert("Failed to load user data.");
         });
-    });
-}
-function updateGlobalState(data) {
-    window.coins = data.coins || 0;
-    window.dailyMinedTimestamp = data.dailyMinedTimestamp || 0;
-    window.miningEndTime = data.miningEndTime || 0;
-    window.adsWatched = data.adsWatched || 0;
-    window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
-    window.upiId = data.upiId || '';
-}
-function processDataForStateUpdate() {
-    if (window.miningEndTime > Date.now()) { resumeMiningSession(); } 
-    else { stopMining(false); }
-    if (window.dailyMinedTimestamp !== 0 && window.canMineToday()) {
-        updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
-        window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
-    }
-    updateCoinDisplays();
-    updateMiningButtonState();
-}
-window.updateDatabase = (updates) => {
-    update(window.dbRef, updates).catch(error => console.error("Database Write Error:", error));
-};
-function updateCoinDisplays() {
-    const inrValue = (window.coins / 1000).toFixed(2);
-    const coinsStr = Math.floor(window.coins).toLocaleString();
-    document.getElementById('coinCount').innerText = coinsStr;
-    document.getElementById('coinInsideCircle').innerText = coinsStr;
-    document.getElementById('walletCoins').innerText = coinsStr;
-    document.getElementById('walletValue').innerText = inrValue;
-}
-function formatTime(ms) {
-    if (ms < 0) ms = 0;
-    const seconds = Math.floor((ms / 1000) % 60);
-    const minutes = Math.floor((ms / (1000 * 60)) % 60);
-    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-window.canMineToday = () => { return (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS; }
-window.watchAd = () => {
-    const miningStillActive = window.miningEndTime > Date.now(); 
-    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
-
-    if (window.adsWatched >= window.ADS_REQUIRED) {
-        WebApp.showAlert(window.canMineToday() ? "A new session is ready. Click 'Start Mining'." : "Ads are complete. Wait for the 24h reset.");
-        return;
-    }
-    if (miningStillActive || isInCooldown) {
-        WebApp.showAlert("Cannot watch ads while mining or in cooldown.");
-        return;
     }
 
-    watchAdBtn.disabled = true;
-    watchAdBtn.innerText = '🎥 Loading Ad...';
-
-    show_9969043().then(() => {
-        console.log("Ad watched successfully. Awarding user.");
-        window.adsWatched++;
-        window.coins += window.AD_REWARD_COINS; 
-        window.updateDatabase({ coins: window.coins, adsWatched: window.adsWatched, adsWatchedTimestamp: Date.now() });
-        if (window.adsWatched < window.ADS_REQUIRED) {
-            watchAdBtn.disabled = false;
-            watchAdBtn.innerText = '🎬 Watch Ad';
-            WebApp.showPopup({message: `+${window.AD_REWARD_COINS} Coins! ${window.ADS_REQUIRED - window.adsWatched} more ads needed.`});
-        } else {
-            watchAdBtn.innerText = '✅ Ads Complete';
-            WebApp.showPopup({message: `Congratulations! You can now start mining!`});
-        }
-    }).catch((error) => {
-        console.error("Monetag ad error:", error);
-        WebApp.showAlert("Ad could not be shown. Please try again.");
-        watchAdBtn.disabled = false;
-        watchAdBtn.innerText = '🎬 Watch Ad';
-    });
-}
-function updateAdStatus() {
-    const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
-    if (window.adsWatched >= window.ADS_REQUIRED) {
-        adStatusDisplay.innerText = `Ads Complete! Mining unlocked.`;
-        watchAdBtn.disabled = true;
-        watchAdBtn.innerText = '✅ Ads Complete';
-        if (isInCooldown) {
-            const remainingCooldown = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
-            adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime(remainingCooldown)}`;
-        }
-    } else {
-        adStatusDisplay.innerText = `Ads Watched: ${window.adsWatched}/${window.ADS_REQUIRED}`;
-        watchAdBtn.disabled = isInCooldown; 
-        watchAdBtn.innerText = '🎬 Watch Ad';
-    }
-}
-function startMiningAnimation(){
-  const numParticles = Math.floor(Math.random() * 5) + 4; 
-  for(let i=0;i<numParticles;i++){
-    const anim=document.createElement('div');
-    anim.className='mining-animation';
-    anim.style.left=Math.random()*280+'px'; 
-    anim.style.top=Math.random()*280+'px';
-    mineCircle.appendChild(anim);
-    setTimeout(()=>mineCircle.removeChild(anim), MINING_RATE_MS); 
-  }
-}
-window.stopMining = (doUpdateState = true) => {
-    clearInterval(miningInterval);
-    clearInterval(remainingTimeInterval);
-    miningInterval = null; 
-    remainingTimeInterval = null;
-    mineCircle.classList.remove('mining-active-glow');
-    if (window.miningEndTime !== 0) {
-        window.miningEndTime = 0;
-        if(doUpdateState) { window.updateDatabase({ miningEndTime: 0 }); }
-    }
-    if (doUpdateState) updateMiningButtonState(); 
-}
-function updateCountdown() {
-    const remainingSessionTime = window.miningEndTime - Date.now();
-    if (remainingSessionTime <= 0) { stopMining(); return; }
-    mineCircle.classList.add('mining-active-glow');
-    mineButton.disabled = true;
-    mineButton.innerText = '⛏️ Mining Active';
-    mineButton.style.background = '#808080';
-    countdownDisplay.innerText = 'Time Left: ' + formatTime(remainingSessionTime);
-}
-function resumeMiningSession() {
-    if (miningInterval) return;
-    const remainingTime = window.miningEndTime - Date.now();
-    if (remainingTime <= 0) return;
-    clearInterval(miningInterval);
-    clearInterval(remainingTimeInterval);
-    miningInterval = setInterval(() => {
-        window.coins += 1;
-        if (window.coins % 10 === 0) { window.updateDatabase({ coins: window.coins }); }
-        startMiningAnimation();
-        updateCoinDisplays();
-    }, MINING_RATE_MS);
-    remainingTimeInterval = setInterval(updateCountdown, 1000);
-    updateCountdown();
-}
-window.startDailyMining = () => {
-  if (window.adsWatched < window.ADS_REQUIRED) { WebApp.showAlert(`Please watch ${window.ADS_REQUIRED} ads to start mining.`); return; }
-  if (miningInterval) return; 
-  if (!window.canMineToday()){ startCooldownCountdown(); return; }
-  const currentTime = Date.now();
-  const endTime = currentTime + ONE_HOUR_MS;
-  window.dailyMinedTimestamp = currentTime; 
-  window.miningEndTime = endTime; 
-  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime });
-  resumeMiningSession(); 
-}
-function startCooldownCountdown() {
-    clearInterval(remainingTimeInterval);
-    remainingTimeInterval = setInterval(() => {
-        const remainingCooldown = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
-        if (remainingCooldown <= 0) {
-            clearInterval(remainingTimeInterval);
-            remainingTimeInterval = null;
-            if (window.dailyMinedTimestamp !== 0) {
-                 window.updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
+    function listenForNotifications() {
+        const notificationRef = ref(database, `users/${TELEGRAM_USER_ID}/notifications`);
+        onValue(notificationRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const notification = snapshot.val();
+                WebApp.showPopup({ message: notification.message });
+                remove(notificationRef);
             }
-            updateMiningButtonState(); 
-            return;
+        });
+    }
+
+    function loadAdminSettings() {
+        onValue(ADMIN_SETTINGS_REF, (snapshot) => {
+            const settings = snapshot.val();
+            if (settings) {
+                window.ADS_REQUIRED = settings.miningAds?.required || 10;
+                window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
+                updateMiningButtonState();
+                updateAdStatus();
+            }
+        }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
+    }
+
+    async function loadLiveTasks() {
+        const taskContainer = document.getElementById('task-items-container');
+        const userTasksRef = ref(database, `users/${TELEGRAM_USER_ID}`);
+        const userSnapshot = await get(userTasksRef);
+        const userData = userSnapshot.val() || {};
+        const startedTasks = userData.startedTasks || {};
+        const completedTasks = userData.completedTasks || {};
+        onValue(TASKS_REF, (snapshot) => {
+            taskContainer.innerHTML = '';
+            const tasks = snapshot.val();
+            allTasks = tasks;
+            let activeTasksFound = false;
+            if (tasks) {
+                for (const taskId in tasks) {
+                    const task = tasks[taskId];
+                    if (task.active) {
+                        activeTasksFound = true;
+                        let actionButton = '';
+                        if (completedTasks[taskId]) {
+                            actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
+                        } else if (startedTasks[taskId] === 'pending') {
+                            actionButton = `<button class="verify-btn" style="background: #808080;" disabled>⏳ Pending Verification</button>`;
+                        } else if (startedTasks[taskId]) {
+                            actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
+                        }
+                        taskContainer.innerHTML += `<div class="task-item-wrapper"><div class="task-item" onclick="showTaskDetails('${taskId}')"><div class="task-info"><img src="${task.logoUrl || 'https://via.placeholder.com/40'}" alt="task logo"><span class="task-name">${task.name}</span></div><div class="task-reward">${task.reward.toLocaleString()} C</div></div>${actionButton}</div>`;
+                    }
+                }
+            }
+            if (!activeTasksFound) {
+                taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
+            }
+        }, { onlyOnce: true });
+    }
+
+    window.showTaskDetails = (taskId) => {
+        const task = allTasks[taskId];
+        if (!task) return;
+        document.getElementById('taskDetailTitle').innerText = task.name;
+        document.getElementById('taskDetailReward').innerText = `${task.reward.toLocaleString()} Coins`;
+        document.getElementById('taskDetailInstructions').innerHTML = task.instructions.map(inst => `<li>${inst}</li>`).join('');
+        document.getElementById('taskDetailCompleteBtn').onclick = () => startTask(taskId, task.link);
+        taskDetailModal.style.display = 'block';
+    }
+
+    function closeTaskModal() { taskDetailModal.style.display = 'none'; }
+
+    window.startTask = (taskId, taskLink) => {
+        set(ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`), true).then(() => {
+            closeTaskModal();
+            WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
+            WebApp.openLink(taskLink);
+            loadLiveTasks();
+        }).catch(error => WebApp.showAlert("Could not start the task. Please try again."));
+    };
+
+    window.verifyTask = (taskId, taskName) => {
+        const newVerificationRef = push(ref(database, 'task_verifications'));
+        set(newVerificationRef, { userId: TELEGRAM_USER_ID, userName: USER_NAME, taskId, taskName, timestamp: Date.now(), status: 'pending' })
+        .then(() => {
+            WebApp.showAlert("Your task has been submitted for verification. Please wait for it to be approved by an admin.");
+            set(ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`), 'pending'); 
+            loadLiveTasks();
+        }).catch((error) => WebApp.showAlert("Could not submit task for verification. Please try again."));
+    };
+
+    closeTaskModalBtn.onclick = closeTaskModal;
+
+    function loadWithdrawalHistory() {
+        const historyTableBody = document.getElementById('withdrawal-history-table');
+        onValue(query(WITHDRAWALS_REF, orderByChild('userId'), equalTo(TELEGRAM_USER_ID)), (snapshot) => {
+            historyTableBody.innerHTML = !snapshot.exists() ? `<tr><td colspan="3" style="text-align:center; color: #888;">No history found.</td></tr>` : '';
+            if(snapshot.exists()){
+                const withdrawals = [];
+                snapshot.forEach(child => withdrawals.push(child.val()));
+                withdrawals.sort((a, b) => b.timestamp - a.timestamp).forEach(data => {
+                    historyTableBody.innerHTML += `<tr><td>${new Date(data.timestamp).toLocaleDateString()}</td><td>${data.amount.toLocaleString()}</td><td class="status-${data.status.toLowerCase()}">${data.status}</td></tr>`;
+                });
+            }
+        });
+    }
+    function updateGlobalState(data) {
+        window.coins = data.coins || 0; window.dailyMinedTimestamp = data.dailyMinedTimestamp || 0; window.miningEndTime = data.miningEndTime || 0; window.adsWatched = data.adsWatched || 0; window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0; window.upiId = data.upiId || '';
+    }
+    function processDataForStateUpdate() {
+        if (window.miningEndTime > Date.now()) resumeMiningSession(); else stopMining(false);
+        if (window.dailyMinedTimestamp !== 0 && (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS) {
+            updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
+            window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
         }
-        mineButton.disabled = true;
-        mineButton.innerText = '⏳ Cooldown Active';
-        mineButton.style.background = '#808080';
-        countdownDisplay.innerText = 'Next Mine in: ' + formatTime(remainingCooldown);
+        updateCoinDisplays();
+        updateMiningButtonState();
+    }
+    window.updateDatabase = (updates) => update(window.dbRef, updates).catch(error => console.error("Database Write Error:", error));
+    function updateCoinDisplays() {
+        const coinsStr = Math.floor(window.coins).toLocaleString();
+        document.getElementById('coinCount').innerText = coinsStr;
+        document.getElementById('coinInsideCircle').innerText = coinsStr;
+        document.getElementById('walletCoins').innerText = coinsStr;
+        document.getElementById('walletValue').innerText = (window.coins / 1000).toFixed(2);
+    }
+    function formatTime(ms) {
+        if (ms < 0) ms = 0;
+        const h = String(Math.floor(ms / 3600000)).padStart(2, '0');
+        const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+        const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    window.watchAd = () => {
+        if (window.adsWatched >= window.ADS_REQUIRED) { WebApp.showAlert( (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS ? "A new session is ready. Click 'Start Mining'." : "Ads are complete. Wait for the 24h reset."); return; }
+        if (window.miningEndTime > Date.now() || (!( (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS) && window.dailyMinedTimestamp !== 0)) { WebApp.showAlert("Cannot watch ads while mining or in cooldown."); return; }
+        const watchAdBtn = document.getElementById('watchAdBtn');
+        watchAdBtn.disabled = true; watchAdBtn.innerText = '🎥 Loading Ad...';
+        show_9969043().then(() => {
+            window.adsWatched++; window.coins += window.AD_REWARD_COINS; 
+            updateDatabase({ coins: window.coins, adsWatched: window.adsWatched, adsWatchedTimestamp: Date.now() });
+            if (window.adsWatched < window.ADS_REQUIRED) {
+                watchAdBtn.disabled = false; watchAdBtn.innerText = '🎬 Watch Ad';
+                WebApp.showPopup({message: `+${window.AD_REWARD_COINS} Coins! ${window.ADS_REQUIRED - window.adsWatched} more ads needed.`});
+            } else {
+                watchAdBtn.innerText = '✅ Ads Complete';
+                WebApp.showPopup({message: `Congratulations! You can now start mining!`});
+            }
+        }).catch((error) => {
+            WebApp.showAlert("Ad could not be shown. Please try again.");
+            watchAdBtn.disabled = false; watchAdBtn.innerText = '🎬 Watch Ad';
+        });
+    }
+    function updateAdStatus() {
+        const adStatusDisplay = document.getElementById('adStatus');
+        const watchAdBtn = document.getElementById('watchAdBtn');
+        const isInCooldown = !( (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS) && window.dailyMinedTimestamp !== 0; 
+        if (window.adsWatched >= window.ADS_REQUIRED) {
+            adStatusDisplay.innerText = `Ads Complete! Mining unlocked.`;
+            watchAdBtn.disabled = true; watchAdBtn.innerText = '✅ Ads Complete';
+            if (isInCooldown) adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime((window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now())}`;
+        } else {
+            adStatusDisplay.innerText = `Ads Watched: ${window.adsWatched}/${window.ADS_REQUIRED}`;
+            watchAdBtn.disabled = isInCooldown; watchAdBtn.innerText = '🎬 Watch Ad';
+        }
+    }
+    function startMiningAnimation(){ for(let i=0;i<5;i++){ const anim=document.createElement('div'); anim.className='mining-animation'; anim.style.left=Math.random()*280+'px'; anim.style.top=Math.random()*280+'px'; document.getElementById('mineCircle').appendChild(anim); setTimeout(()=>anim.remove(), 1500); } }
+    window.stopMining = (doUpdateState = true) => {
+        clearInterval(miningInterval); clearInterval(remainingTimeInterval); miningInterval = null; remainingTimeInterval = null;
+        document.getElementById('mineCircle').classList.remove('mining-active-glow');
+        if (window.miningEndTime !== 0) { window.miningEndTime = 0; if(doUpdateState) updateDatabase({ miningEndTime: 0 }); }
+        if (doUpdateState) updateMiningButtonState(); 
+    }
+    function updateCountdown() {
+        const remaining = window.miningEndTime - Date.now();
+        if (remaining <= 0) { stopMining(); return; }
+        document.getElementById('mineCircle').classList.add('mining-active-glow');
+        const mineButton = document.getElementById('mineBtn');
+        mineButton.disabled = true; mineButton.innerText = '⛏️ Mining Active'; mineButton.style.background = '#808080';
+        document.getElementById('miningCountdown').innerText = 'Time Left: ' + formatTime(remaining);
+    }
+    function resumeMiningSession() {
+        if (miningInterval || window.miningEndTime - Date.now() <= 0) return;
+        clearInterval(miningInterval); clearInterval(remainingTimeInterval);
+        miningInterval = setInterval(() => { window.coins += 1; if (window.coins % 10 === 0) updateDatabase({ coins: window.coins }); startMiningAnimation(); updateCoinDisplays(); }, MINING_RATE_MS);
+        remainingTimeInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
+    window.startDailyMining = () => {
+      if (window.adsWatched < window.ADS_REQUIRED) { WebApp.showAlert(`Please watch ${window.ADS_REQUIRED} ads to start mining.`); return; }
+      if (miningInterval) return; 
+      if (!( (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS)) { startCooldownCountdown(); return; }
+      const currentTime = Date.now();
+      window.dailyMinedTimestamp = currentTime; window.miningEndTime = currentTime + ONE_HOUR_MS; 
+      updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: window.miningEndTime });
+      resumeMiningSession(); 
+    }
+    function startCooldownCountdown() {
+        clearInterval(remainingTimeInterval);
+        remainingTimeInterval = setInterval(() => {
+            const remaining = (window.dailyMinedTimestamp + ONE_DAY_MS) - Date.now();
+            if (remaining <= 0) {
+                clearInterval(remainingTimeInterval); remainingTimeInterval = null;
+                if (window.dailyMinedTimestamp !== 0) updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
+                updateMiningButtonState(); return;
+            }
+            const mineButton = document.getElementById('mineBtn');
+            mineButton.disabled = true; mineButton.innerText = '⏳ Cooldown Active'; mineButton.style.background = '#808080';
+            document.getElementById('miningCountdown').innerText = 'Next Mine in: ' + formatTime(remaining);
+            updateAdStatus(); 
+        }, 1000);
+    }
+    function updateMiningButtonState() {
+        const mineButton = document.getElementById('mineBtn');
+        const countdownDisplay = document.getElementById('miningCountdown');
         updateAdStatus(); 
-    }, 1000);
-}
-function updateMiningButtonState() {
-    const miningStillActive = window.miningEndTime > Date.now();
-    const isAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
-    updateAdStatus(); 
-    if (miningStillActive) { updateCountdown(); } 
-    else if (!window.canMineToday() && window.dailyMinedTimestamp !== 0) { startCooldownCountdown(); } 
-    else if (isAdsComplete) {
-        mineCircle.classList.remove('mining-active-glow');
-        mineButton.disabled = false;
-        mineButton.innerText = '🪙 Start Mining';
-        mineButton.style.background = '#32cd32';
-        countdownDisplay.innerText = 'Click to start 1 hour session';
-    } else {
-        mineCircle.classList.remove('mining-active-glow');
-        mineButton.disabled = true;
-        mineButton.innerText = `🔒 Watch Ads to Unlock`;
-        mineButton.style.background = '#808080';
-        countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
-    }
-}
-window.showWithdrawalModal = () => {
-    withdrawalModal.style.display = "block";
-    document.getElementById('upiAmount').value = '';
-    document.getElementById('upiId').value = window.upiId;
-    document.getElementById('inrValueText').innerText = '';
-    submitWithdrawalBtn.disabled = true;
-}
-window.closeWithdrawalModal = () => { withdrawalModal.style.display = "none"; }
-window.checkWithdrawalEligibility = () => {
-    const amountInput = document.getElementById('upiAmount');
-    const amount = Number(amountInput.value);
-    const inrValueText = document.getElementById('inrValueText');
-    inrValueText.style.color = '#90ee90';
-    inrValueText.innerText = amount > 0 ? `Equivalent to ₹${(amount / 1000).toFixed(2)}` : '';
-    if (amount >= MIN_WITHDRAWAL_COINS && amount <= window.coins) {
-        submitWithdrawalBtn.disabled = false;
-    } else {
-        submitWithdrawalBtn.disabled = true;
-        if (amount > 0 && amount < MIN_WITHDRAWAL_COINS) {
-            inrValueText.innerText = `Error: Minimum is ${MIN_WITHDRAWAL_COINS} Coins.`;
-            inrValueText.style.color = '#f44336';
-        } else if (amount > window.coins) {
-             inrValueText.innerText = `Error: Insufficient balance.`;
-             inrValueText.style.color = '#f44336';
+        if (window.miningEndTime > Date.now()) updateCountdown(); 
+        else if (!( (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS) && window.dailyMinedTimestamp !== 0) startCooldownCountdown(); 
+        else if (window.adsWatched >= window.ADS_REQUIRED) {
+            document.getElementById('mineCircle').classList.remove('mining-active-glow');
+            mineButton.disabled = false; mineButton.innerText = '🪙 Start Mining'; mineButton.style.background = '#32cd32';
+            countdownDisplay.innerText = 'Click to start 1 hour session';
+        } else {
+            document.getElementById('mineCircle').classList.remove('mining-active-glow');
+            mineButton.disabled = true; mineButton.innerText = `🔒 Watch Ads to Unlock`; mineButton.style.background = '#808080';
+            countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
         }
     }
-}
-window.submitWithdrawal = () => {
-    const amount = Number(document.getElementById('upiAmount').value);
-    const upiId = document.getElementById('upiId').value.trim();
-    if (amount < MIN_WITHDRAWAL_COINS || amount > window.coins) { WebApp.showAlert(`Withdrawal failed: Amount must be valid.`); return; }
-    if (upiId.length < 5 || !upiId.includes('@')) { WebApp.showAlert("Withdrawal failed: Please enter a valid UPI ID."); return; }
-    const newCoinBalance = window.coins - amount;
-    window.updateDatabase({ coins: newCoinBalance, upiId: upiId });
-    const withdrawalRequest = { userId: TELEGRAM_USER_ID, userName: USER_NAME, amount: amount, upiId: upiId, timestamp: Date.now(), status: 'Pending' };
-    push(WITHDRAWALS_REF, withdrawalRequest).then(() => {
-        closeWithdrawalModal();
-        WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
-    }).catch(error => {
-         WebApp.showAlert("Withdrawal failed to submit. Please try again.");
-         window.updateDatabase({ coins: window.coins });
-    });
-}
-window.onclick = function(event) { 
-    if (event.target == withdrawalModal) { window.closeWithdrawalModal(); } 
-    if (event.target == taskDetailModal) { closeTaskModal(); }
-}
-window.shareReferralLink = () => {
-    const link = document.getElementById('refLink').innerText;
-    const shareText = `💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 500 bonus Coins, and I get a 5% lifetime commission on your mining!`;
-    WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`);
-}
-async function loadClaimSettings() {
-    const snapshot = await get(CLAIM_SETTINGS_REF);
-    claimSettings = snapshot.val() || {};
-    const btn = document.getElementById('claimBtn1');
-    const setting = claimSettings.claim1;
-    if (setting && setting.url) { btn.onclick = () => window.claimCode(btn, setting.url); } 
-    else { btn.onclick = () => window.claimCode(btn, 'placeholder'); }
-    checkClaimStatus();
-}
-async function checkClaimStatus() {
-    const claimContainer = document.getElementById('claimButtonContainer');
-    const redeemedMsg = document.getElementById('redeemedMessage');
-    const claimCode = claimSettings.claim1?.code;
-    if (!claimCode) return;
-    const snapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
-    const claimRedeemed = Object.values(snapshot.val() || {}).some(redemption => redemption.code === claimCode);
-    claimContainer.style.display = claimRedeemed ? 'none' : 'block';
-    redeemedMsg.style.display = claimRedeemed ? 'block' : 'none';
-}
-window.redeemCode = async () => {
-    let code = document.getElementById("giftCode").value.trim().toUpperCase();
-    if (code === "") { WebApp.showAlert("Please enter a gift code!"); return; }
-    try {
-        let codeData = null;
-        if (claimSettings.claim1?.code === code) codeData = claimSettings.claim1;
-        if (!codeData && claimSettings.common?.code === code) codeData = claimSettings.common;
-        if (!codeData) { WebApp.showAlert("Invalid Gift Code!"); return; }
-        const redemptionSnapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
-        const alreadyRedeemed = Object.values(redemptionSnapshot.val() || {}).some(r => r.code === code);
-        if (alreadyRedeemed) { WebApp.showAlert("You have already redeemed this code."); return; }
-        const coinsAwarded = codeData.coins;
-        const redemptionData = { code, coins: coinsAwarded, redeemedAt: Date.now(), userId: TELEGRAM_USER_ID, userName: USER_NAME };
-        window.coins += coinsAwarded;
-        window.updateDatabase({ coins: window.coins }); 
-        push(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`), { code, coins: coinsAwarded });
-        push(REDEEMED_CODES_REF, redemptionData); 
-        WebApp.showPopup({message: `Code redeemed! 🎉 You won ${coinsAwarded} coins!`});
-        document.getElementById("giftCode").value = "";
-        if (code === claimSettings.claim1?.code) checkClaimStatus();
-    } catch (error) {
-        console.error("Redemption Error:", error);
-        WebApp.showAlert("Redemption failed! Please try again later.");
+    window.showWithdrawalModal = () => {
+        const modal = document.getElementById('withdrawalModal');
+        modal.style.display = "block";
+        document.getElementById('upiAmount').value = '';
+        document.getElementById('upiId').value = window.upiId;
+        document.getElementById('inrValueText').innerText = '';
+        document.getElementById('submitWithdrawalBtn').disabled = true;
     }
-}
-window.claimCode = (button, url) => {
-    if (!url || url === 'placeholder') { WebApp.showAlert("The link for this code is not available yet."); return; }
-    WebApp.openLink(url);
-}
-document.addEventListener('DOMContentLoaded', () => {
-    loadAdminSettings();
-    loadUserData(); 
-    loadLiveTasks();
-    loadClaimSettings();
-    loadWithdrawalHistory();
-});
-window.showSection = (sectionId, button) => {
-  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
-  document.getElementById(sectionId).style.display='block';
-  document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
-  button.classList.add('active');
-}
-window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); } 
-window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
+    window.closeWithdrawalModal = () => { document.getElementById('withdrawalModal').style.display = "none"; }
+    window.checkWithdrawalEligibility = () => {
+        const amount = Number(document.getElementById('upiAmount').value);
+        const inrText = document.getElementById('inrValueText');
+        inrText.style.color = '#90ee90';
+        inrText.innerText = amount > 0 ? `Equivalent to ₹${(amount / 1000).toFixed(2)}` : '';
+        document.getElementById('submitWithdrawalBtn').disabled = !(amount >= MIN_WITHDRAWAL_COINS && amount <= window.coins);
+        if (amount > 0 && amount < MIN_WITHDRAWAL_COINS) { inrText.innerText = `Error: Minimum is ${MIN_WITHDRAWAL_COINS} Coins.`; inrText.style.color = '#f44336'; }
+        else if (amount > window.coins) { inrText.innerText = `Error: Insufficient balance.`; inrText.style.color = '#f44336'; }
+    }
+    window.submitWithdrawal = () => {
+        const amount = Number(document.getElementById('upiAmount').value);
+        const upiId = document.getElementById('upiId').value.trim();
+        if (amount < MIN_WITHDRAWAL_COINS || amount > window.coins) { WebApp.showAlert(`Withdrawal failed: Amount must be valid.`); return; }
+        if (upiId.length < 5 || !upiId.includes('@')) { WebApp.showAlert("Withdrawal failed: Please enter a valid UPI ID."); return; }
+        updateDatabase({ coins: window.coins - amount, upiId: upiId });
+        push(WITHDRAWALS_REF, { userId: TELEGRAM_USER_ID, userName: USER_NAME, amount, upiId, timestamp: Date.now(), status: 'Pending' }).then(() => {
+            closeWithdrawalModal();
+            WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
+        }).catch(error => { WebApp.showAlert("Withdrawal failed to submit. Please try again."); updateDatabase({ coins: window.coins }); });
+    }
+    window.onclick = function(event) { if (event.target == document.getElementById('withdrawalModal')) closeWithdrawalModal(); if (event.target == taskDetailModal) closeTaskModal(); }
+    window.shareReferralLink = () => { const link = document.getElementById('refLink').innerText; WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 500 bonus Coins, and I get a 5% lifetime commission on your mining!`)}`); }
+    async function loadClaimSettings() {
+        const snapshot = await get(CLAIM_SETTINGS_REF);
+        claimSettings = snapshot.val() || {};
+        const btn = document.getElementById('claimBtn1');
+        const setting = claimSettings.claim1;
+        btn.onclick = () => window.claimCode(btn, (setting && setting.url) ? setting.url : 'placeholder');
+        checkClaimStatus();
+    }
+    async function checkClaimStatus() {
+        const claimCode = claimSettings.claim1?.code;
+        if (!claimCode) return;
+        const snapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
+        const redeemed = Object.values(snapshot.val() || {}).some(r => r.code === claimCode);
+        document.getElementById('claimButtonContainer').style.display = redeemed ? 'none' : 'block';
+        document.getElementById('redeemedMessage').style.display = redeemed ? 'block' : 'none';
+    }
+    window.redeemCode = async () => {
+        let code = document.getElementById("giftCode").value.trim().toUpperCase();
+        if (code === "") { WebApp.showAlert("Please enter a gift code!"); return; }
+        try {
+            let codeData = (claimSettings.claim1?.code === code) ? claimSettings.claim1 : (claimSettings.common?.code === code) ? claimSettings.common : null;
+            if (!codeData) { WebApp.showAlert("Invalid Gift Code!"); return; }
+            const snapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
+            if (Object.values(snapshot.val() || {}).some(r => r.code === code)) { WebApp.showAlert("You have already redeemed this code."); return; }
+            const coinsAwarded = codeData.coins;
+            window.coins += coinsAwarded;
+            updateDatabase({ coins: window.coins }); 
+            push(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`), { code, coins: coinsAwarded });
+            push(ref(database, 'redeemed_codes'), { code, coins: coinsAwarded, redeemedAt: Date.now(), userId: TELEGRAM_USER_ID, userName: USER_NAME }); 
+            WebApp.showPopup({message: `Code redeemed! 🎉 You won ${coinsAwarded} coins!`});
+            document.getElementById("giftCode").value = "";
+            if (code === claimSettings.claim1?.code) checkClaimStatus();
+        } catch (error) { WebApp.showAlert("Redemption failed! Please try again later."); }
+    }
+    window.claimCode = (button, url) => { if (!url || url === 'placeholder') { WebApp.showAlert("The link for this code is not available yet."); return; } WebApp.openLink(url); }
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAdminSettings();
+        loadUserData(); 
+        loadLiveTasks();
+        loadClaimSettings();
+        loadWithdrawalHistory();
+        listenForNotifications();
+    });
+    window.showSection = (sectionId, button) => {
+      document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+      document.getElementById(sectionId).style.display='block';
+      document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
+      button.classList.add('active');
+    }
+    window.showProfile = () => WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); 
+    window.showMsg = () => WebApp.showPopup({message: 'Welcome to CoinMine!'});
 </script>
 </body>
 </html>
