@@ -328,7 +328,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     display: flex;
     align-items: center;
     gap: 15px;
-    overflow: hidden; /* prevents long names from breaking layout */
+    overflow: hidden;
 }
 .task-info img {
     width: 40px;
@@ -353,10 +353,10 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .verify-btn {
     width: 100%;
     padding: 10px;
-    margin-top: -10px; /* Connects with the item above */
+    margin-top: -10px;
     margin-bottom: 10px;
     border: none;
-    border-radius: 0 0 8px 8px; /* Rounds bottom corners */
+    border-radius: 0 0 8px 8px;
     background: #ffd700;
     color: #000;
     font-weight: 700;
@@ -372,7 +372,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 <body>
 
 <div id="app-content" style="width: 100%;">
-    <!-- आपका सारा HTML यहाँ है... (कोई बदलाव नहीं) -->
     <header>
     <div class="profile" onclick="showProfile()">
     <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
@@ -394,30 +393,17 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
+    <!-- === TASK SECTION (UPDATED) === -->
     <section id="task" class="section">
         <div id="taskList">
-            <div class="task-notice" style="background: #2a2a2a; border-left: 4px solid #ffd700; padding: 15px; border-radius: 8px; margin: 0 0 25px 0;">
-                <h4 style="color: #ffd700; margin-bottom: 10px;">After Completing a Task:</h4>
-                <p style="font-size: 14px; color: #ccc; line-height: 1.6;">
-                    Please send your <strong>User ID</strong> and the <strong>Task Name</strong> to our Customer Service Team for quick verification and reward processing.
-                </p>
-                <div class="user-id-actions" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                    <div style="background: #1c1c1c; padding: 8px 12px; border-radius: 6px; font-size: 14px;">
-                        Your User ID: <span id="taskUserId" style="font-weight: bold; color: #90ee90;"></span>
-                    </div>
-                    <div>
-                        <button onclick="copyUserId()" style="background: #555; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copy UID</button>
-                        <a href="https://t.me/MiningFatherhelp" target="_blank" style="background: #32cd32; color: #000; text-decoration: none; padding: 8px 15px; border-radius: 6px; font-weight: 600;">✉️ Send Msg</a>
-                    </div>
-                </div>
-            </div>
-            <h2 style="text-align: center;">🧩 Daily Tasks</h2>
-            <p style="margin-bottom: 20px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
+            <h2 style="text-align: center; margin-bottom: 10px;">🧩 Daily Tasks</h2>
+            <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
             <div id="task-items-container">
                 <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
             </div>
         </div>
     </section>
+    <!-- === END OF TASK SECTION === -->
 
     <section id="wallet" class="section">
         <h2 style="text-align: center;">💼 Wallet</h2>
@@ -537,7 +523,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 import { getDatabase, ref, set, onValue, update, push, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// --- TELEGRAM & FIREBASE SETUP (No Changes) ---
+// --- TELEGRAM & FIREBASE SETUP ---
 const WebApp = window.Telegram.WebApp;
 WebApp.ready();
 const telegramUser = WebApp.initDataUnsafe.user;
@@ -718,30 +704,20 @@ window.startTask = (taskId, taskLink) => {
     loadLiveTasks();
 }
 
-// === UPDATED verifyTask FUNCTION ===
 window.verifyTask = (taskName) => {
-    // 1. Verification text को तैयार करें।
     const verificationText = `User ID: ${TELEGRAM_USER_ID}\nTask Name: ${taskName}`;
-    
-    // 2. Text को URL-encode करें ताकि इसे लिंक में इस्तेमाल किया जा सके।
     const encodedText = encodeURIComponent(verificationText);
-
-    // 3. पहले से भरे हुए टेक्स्ट के साथ विशेष टेलीग्राम लिंक बनाएं।
     const telegramUrl = `https://t.me/MiningFatherhelp?text=${encodedText}`;
-
-    // 4. उपयोगकर्ता को एक बेहतर पॉपअप दिखाएं।
     WebApp.showPopup({
         title: 'Ready to Verify!',
         message: 'You will be redirected to our support chat. Your verification details are ready to be sent. Just press the "Send" button in Telegram.',
         buttons: [{ id: 'ok', type: 'ok', text: 'Open Chat' }]
     }, (buttonId) => {
-        // 5. जब उपयोगकर्ता "Open Chat" पर क्लिक करे तो लिंक खोलें।
         if (buttonId === 'ok') {
             WebApp.openTelegramLink(telegramUrl);
         }
     });
 }
-// === END OF UPDATED FUNCTION ===
 
 closeTaskModalBtn.onclick = closeTaskModal;
 
@@ -1005,7 +981,6 @@ window.shareReferralLink = () => {
     const shareText = `💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 500 bonus Coins, and I get a 5% lifetime commission on your mining!`;
     WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`);
 }
-window.copyUserId = () => { navigator.clipboard.writeText(TELEGRAM_USER_ID).then(() => { WebApp.showPopup({message: 'User ID Copied!'}); }).catch(err => WebApp.showAlert('Failed to copy User ID.')); }
 async function loadClaimSettings() {
     const snapshot = await get(CLAIM_SETTINGS_REF);
     claimSettings = snapshot.val() || {};
@@ -1055,7 +1030,6 @@ window.claimCode = (button, url) => {
     WebApp.openLink(url);
 }
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('taskUserId').innerText = TELEGRAM_USER_ID;
     loadAdminSettings();
     loadUserData(); 
     loadLiveTasks();
