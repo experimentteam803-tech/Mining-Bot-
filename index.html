@@ -11,7 +11,7 @@
 <!-- =================================================================== -->
 
 <style>
-/* आपका सारा CSS यहाँ है... (कुछ नए स्टाइल जोड़े गए हैं) */
+/* आपका सारा CSS यहाँ है... (कोई बदलाव नहीं) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif}
 body{
   background:linear-gradient(180deg,#000000,#141e30);
@@ -307,7 +307,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .status-pending { color: #ffd700; font-weight: 600; }
 .status-approved { color: #32cd32; font-weight: 600; }
 .status-rejected { color: #f44336; font-weight: 600; }
-/* --- TASK SECTION KE LIYE NAYE STYLES --- */
+/* --- TASK SECTION KE LIYE STYLES --- */
 .task-item {
     display: flex;
     align-items: center;
@@ -372,7 +372,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 <body>
 
 <div id="app-content" style="width: 100%;">
-    <!-- आपका सारा HTML यहाँ है... (Task section में बदलाव) -->
+    <!-- आपका सारा HTML यहाँ है... (कोई बदलाव नहीं) -->
     <header>
     <div class="profile" onclick="showProfile()">
     <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
@@ -394,7 +394,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
-    <!-- === TASK SECTION (UPDATED) === -->
     <section id="task" class="section">
         <div id="taskList">
             <div class="task-notice" style="background: #2a2a2a; border-left: 4px solid #ffd700; padding: 15px; border-radius: 8px; margin: 0 0 25px 0;">
@@ -419,7 +418,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
             </div>
         </div>
     </section>
-    <!-- === END OF TASK SECTION === -->
 
     <section id="wallet" class="section">
         <h2 style="text-align: center;">💼 Wallet</h2>
@@ -520,7 +518,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     </div>
 </div>
 
-<!-- Task Detail Modal (NEW) -->
 <div id="taskDetailModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" id="closeTaskModal">&times;</span>
@@ -528,7 +525,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
         <p style="font-weight: 600; margin-bottom: 15px;">Reward: <span id="taskDetailReward" style="color: #ffd700;"></span></p>
         <p style="font-size: 14px; color: #ccc; margin-top: 10px;">Instructions:</p>
         <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;">
-            <!-- Instructions will be populated here by JavaScript -->
         </ul>
         <button id="taskDetailCompleteBtn" class="action-btn" style="width: 100%; margin: 0; background: #32cd32; color: #000;">Complete Task</button>
     </div>
@@ -595,13 +591,9 @@ const mineCircle = document.getElementById('mineCircle');
 const countdownDisplay = document.getElementById('miningCountdown');
 const withdrawalModal = document.getElementById('withdrawalModal');
 const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
-
-// --- NEW TASK MODAL ELEMENTS ---
 const taskDetailModal = document.getElementById('taskDetailModal');
 const closeTaskModalBtn = document.getElementById('closeTaskModal');
-let allTasks = {}; // To store all tasks globally for easy access
-
-// --- FIREBASE DATA HANDLING (No Changes) ---
+let allTasks = {}; 
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
         let data = snapshot.val();
@@ -659,14 +651,12 @@ function loadAdminSettings() {
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
-
-// --- UPDATED loadLiveTasks FUNCTION ---
 function loadLiveTasks() {
     const taskContainer = document.getElementById('task-items-container');
     onValue(TASKS_REF, (snapshot) => {
         taskContainer.innerHTML = '';
         const tasks = snapshot.val();
-        allTasks = tasks; // Store tasks globally to access details later
+        allTasks = tasks;
         let taskHtml = '';
         let activeTasksFound = false;
         if (tasks) {
@@ -674,12 +664,8 @@ function loadLiveTasks() {
                 const task = tasks[taskId];
                 if (task.active) {
                     activeTasksFound = true;
-                    // Check localStorage to see if the user has already started this task
                     const taskStarted = localStorage.getItem('task_started_' + taskId) === 'true';
-
                     taskHtml += `<div class="task-item-wrapper">`;
-                    
-                    // Task item (clickable to show details)
                     taskHtml += `
                         <div class="task-item" onclick="showTaskDetails('${taskId}')">
                             <div class="task-info">
@@ -689,13 +675,10 @@ function loadLiveTasks() {
                             <div class="task-reward">${task.reward.toLocaleString()} C</div>
                         </div>
                     `;
-
-                    // If task has been started, show the "Verify Task" button underneath
                     if (taskStarted) {
                         taskHtml += `<button class="verify-btn" onclick="verifyTask('${task.name}')">Verify Task</button>`;
                     }
-
-                    taskHtml += `</div>`; // Close wrapper
+                    taskHtml += `</div>`;
                 }
             }
         }
@@ -710,23 +693,16 @@ function loadLiveTasks() {
     });
 }
 
-
-// --- NEW FUNCTIONS FOR TASK MODAL AND VERIFICATION ---
+// --- TASK MODAL AND VERIFICATION FUNCTIONS ---
 
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
     if (!task) return;
-
-    // Populate the modal with details from the selected task
     document.getElementById('taskDetailTitle').innerText = task.name;
     document.getElementById('taskDetailReward').innerText = `${task.reward.toLocaleString()} Coins`;
     document.getElementById('taskDetailInstructions').innerHTML = task.instructions.map(inst => `<li>${inst}</li>`).join('');
-
-    // Set the "Complete Task" button to call the startTask function
     const completeBtn = document.getElementById('taskDetailCompleteBtn');
     completeBtn.onclick = () => startTask(taskId, task.link);
-
-    // Display the modal
     taskDetailModal.style.display = 'block';
 }
 
@@ -735,40 +711,38 @@ function closeTaskModal() {
 }
 
 window.startTask = (taskId, taskLink) => {
-    // Set a flag in the browser's local storage to remember that the user started this task
     localStorage.setItem('task_started_' + taskId, 'true');
-    
     closeTaskModal();
     WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
-
-    // Open the task link
     WebApp.openLink(taskLink);
-
-    // Refresh the task list to show the "Verify" button
     loadLiveTasks();
 }
 
+// === UPDATED verifyTask FUNCTION ===
 window.verifyTask = (taskName) => {
+    // 1. Verification text को तैयार करें।
     const verificationText = `User ID: ${TELEGRAM_USER_ID}\nTask Name: ${taskName}`;
+    
+    // 2. Text को URL-encode करें ताकि इसे लिंक में इस्तेमाल किया जा सके।
+    const encodedText = encodeURIComponent(verificationText);
 
-    // Try to copy the verification text to the clipboard
-    navigator.clipboard.writeText(verificationText).then(() => {
-        WebApp.showPopup({
-            title: 'Copied to Clipboard!',
-            message: 'Your User ID and Task Name have been copied. Now opening the support chat. Please paste the message there to get verified.',
-            buttons: [{ id: 'ok', type: 'ok', text: 'Open Chat' }]
-        }, (buttonId) => {
-            if (buttonId === 'ok') {
-                WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
-            }
-        });
-    }).catch(err => {
-        WebApp.showAlert('Failed to copy details. Please copy your User ID manually and send it with the task name to our support chat.');
-        WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
+    // 3. पहले से भरे हुए टेक्स्ट के साथ विशेष टेलीग्राम लिंक बनाएं।
+    const telegramUrl = `https://t.me/MiningFatherhelp?text=${encodedText}`;
+
+    // 4. उपयोगकर्ता को एक बेहतर पॉपअप दिखाएं।
+    WebApp.showPopup({
+        title: 'Ready to Verify!',
+        message: 'You will be redirected to our support chat. Your verification details are ready to be sent. Just press the "Send" button in Telegram.',
+        buttons: [{ id: 'ok', type: 'ok', text: 'Open Chat' }]
+    }, (buttonId) => {
+        // 5. जब उपयोगकर्ता "Open Chat" पर क्लिक करे तो लिंक खोलें।
+        if (buttonId === 'ok') {
+            WebApp.openTelegramLink(telegramUrl);
+        }
     });
 }
+// === END OF UPDATED FUNCTION ===
 
-// Add event listeners to close the task modal
 closeTaskModalBtn.onclick = closeTaskModal;
 
 
@@ -829,10 +803,6 @@ function formatTime(ms) {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 window.canMineToday = () => { return (Date.now() - window.dailyMinedTimestamp) >= ONE_DAY_MS; }
-
-// ===================================================================
-// UPDATED AD-BASED MINING LOGIC
-// ===================================================================
 window.watchAd = () => {
     const miningStillActive = window.miningEndTime > Date.now(); 
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
@@ -850,14 +820,10 @@ window.watchAd = () => {
     watchAdBtn.innerText = '🎥 Loading Ad...';
 
     show_9969043().then(() => {
-        // विज्ञापन सफल होने पर यह कोड चलेगा
         console.log("Ad watched successfully. Awarding user.");
-        
         window.adsWatched++;
         window.coins += window.AD_REWARD_COINS; 
-        
         window.updateDatabase({ coins: window.coins, adsWatched: window.adsWatched, adsWatchedTimestamp: Date.now() });
-        
         if (window.adsWatched < window.ADS_REQUIRED) {
             watchAdBtn.disabled = false;
             watchAdBtn.innerText = '🎬 Watch Ad';
@@ -866,17 +832,13 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
         }
-
     }).catch((error) => {
-        // विज्ञापन में त्रुटि होने पर यह कोड चलेगा
         console.error("Monetag ad error:", error);
         WebApp.showAlert("Ad could not be shown. Please try again.");
-
         watchAdBtn.disabled = false;
         watchAdBtn.innerText = '🎬 Watch Ad';
     });
 }
-
 function updateAdStatus() {
     const isInCooldown = !window.canMineToday() && window.dailyMinedTimestamp !== 0; 
     if (window.adsWatched >= window.ADS_REQUIRED) {
@@ -893,8 +855,6 @@ function updateAdStatus() {
         watchAdBtn.innerText = '🎬 Watch Ad';
     }
 }
-
-// --- MINING & OTHER FUNCTIONS (No Changes) ---
 function startMiningAnimation(){
   const numParticles = Math.floor(Math.random() * 5) + 4; 
   for(let i=0;i<numParticles;i++){
@@ -1038,7 +998,6 @@ window.submitWithdrawal = () => {
 }
 window.onclick = function(event) { 
     if (event.target == withdrawalModal) { window.closeWithdrawalModal(); } 
-    // Close task modal if clicked outside
     if (event.target == taskDetailModal) { closeTaskModal(); }
 }
 window.shareReferralLink = () => {
