@@ -307,7 +307,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .status-pending { color: #ffd700; font-weight: 600; }
 .status-approved { color: #32cd32; font-weight: 600; }
 .status-rejected { color: #f44336; font-weight: 600; }
-/* --- TASK SECTION KE LIYE STYLES --- */
+/* --- TASK SECTION STYLES --- */
 .task-item {
     display: flex;
     align-items: center;
@@ -393,7 +393,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
-    <!-- === TASK SECTION (UPDATED) === -->
     <section id="task" class="section">
         <div id="taskList">
             <h2 style="text-align: center; margin-bottom: 10px;">🧩 Daily Tasks</h2>
@@ -403,7 +402,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
             </div>
         </div>
     </section>
-    <!-- === END OF TASK SECTION === -->
 
     <section id="wallet" class="section">
         <h2 style="text-align: center;">💼 Wallet</h2>
@@ -552,7 +550,6 @@ const ADMIN_SETTINGS_REF = ref(database, 'admin_settings');
 const TASKS_REF = ref(database, 'tasks');
 const WITHDRAWALS_REF = ref(database, 'withdrawals');
 const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
-const REDEEMED_CODES_REF = ref(database, 'redeemed_codes');
 window.coins = 0; 
 window.dailyMinedTimestamp = 0; 
 window.miningEndTime = 0; 
@@ -580,11 +577,23 @@ const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 const taskDetailModal = document.getElementById('taskDetailModal');
 const closeTaskModalBtn = document.getElementById('closeTaskModal');
 let allTasks = {}; 
+
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
         let data = snapshot.val();
         if (!data) {
-            const initialData = { coins: 0, dailyMinedTimestamp: 0, miningEndTime: 0, adsWatched: 0, adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID, userName: USER_NAME, lastActive: Date.now() };
+            const initialData = { 
+                coins: 0, 
+                dailyMinedTimestamp: 0, 
+                miningEndTime: 0, 
+                adsWatched: 0, 
+                adsWatchedTimestamp: 0, 
+                upiId: '', 
+                telegramId: TELEGRAM_USER_ID, 
+                userName: USER_NAME, 
+                lastActive: Date.now(),
+                joinDate: Date.now() // <-- Add joinDate for new users
+            };
             set(window.dbRef, initialData).then(() => { isInitialLoadComplete = true; });
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -637,8 +646,18 @@ function loadAdminSettings() {
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
-function loadLiveTasks() {
+
+// --- UPDATED TASK FUNCTIONS ---
+
+async function loadLiveTasks() {
     const taskContainer = document.getElementById('task-items-container');
+    
+    const userTasksRef = ref(database, `users/${TELEGRAM_USER_ID}`);
+    const userSnapshot = await get(userTasksRef);
+    const userData = userSnapshot.val() || {};
+    const startedTasks = userData.startedTasks || {};
+    const completedTasks = userData.completedTasks || {};
+
     onValue(TASKS_REF, (snapshot) => {
         taskContainer.innerHTML = '';
         const tasks = snapshot.val();
@@ -650,8 +669,21 @@ function loadLiveTasks() {
                 const task = tasks[taskId];
                 if (task.active) {
                     activeTasksFound = true;
-                    const taskStarted = localStorage.getItem('task_started_' + taskId) === 'true';
+                    
                     taskHtml += `<div class="task-item-wrapper">`;
+                    
+                    const isCompleted = completedTasks[taskId];
+                    const startStatus = startedTasks[taskId];
+
+                    let actionButton = '';
+                    if (isCompleted) {
+                        actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
+                    } else if (startStatus === 'pending') {
+                        actionButton = `<button class="verify-btn" style="background: #808080;" disabled>⏳ Pending Verification</button>`;
+                    } else if (startStatus) {
+                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
+                    }
+                    
                     taskHtml += `
                         <div class="task-item" onclick="showTaskDetails('${taskId}')">
                             <div class="task-info">
@@ -660,10 +692,8 @@ function loadLiveTasks() {
                             </div>
                             <div class="task-reward">${task.reward.toLocaleString()} C</div>
                         </div>
+                        ${actionButton}
                     `;
-                    if (taskStarted) {
-                        taskHtml += `<button class="verify-btn" onclick="verifyTask('${task.name}')">Verify Task</button>`;
-                    }
                     taskHtml += `</div>`;
                 }
             }
@@ -673,13 +703,8 @@ function loadLiveTasks() {
         } else {
             taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
         }
-    }, (error) => {
-        console.error("Firebase Read Error (Tasks):", error);
-        taskContainer.innerHTML = '<p style="text-align: center; color: #f44336;">Could not load tasks.</p>';
-    });
+    }, { onlyOnce: true });
 }
-
-// --- TASK MODAL AND VERIFICATION FUNCTIONS ---
 
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
@@ -697,30 +722,43 @@ function closeTaskModal() {
 }
 
 window.startTask = (taskId, taskLink) => {
-    localStorage.setItem('task_started_' + taskId, 'true');
-    closeTaskModal();
-    WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
-    WebApp.openLink(taskLink);
-    loadLiveTasks();
-}
-
-window.verifyTask = (taskName) => {
-    const verificationText = `User ID: ${TELEGRAM_USER_ID}\nTask Name: ${taskName}`;
-    const encodedText = encodeURIComponent(verificationText);
-    const telegramUrl = `https://t.me/MiningFatherhelp?text=${encodedText}`;
-    WebApp.showPopup({
-        title: 'Ready to Verify!',
-        message: 'You will be redirected to our support chat. Your verification details are ready to be sent. Just press the "Send" button in Telegram.',
-        buttons: [{ id: 'ok', type: 'ok', text: 'Open Chat' }]
-    }, (buttonId) => {
-        if (buttonId === 'ok') {
-            WebApp.openTelegramLink(telegramUrl);
-        }
+    const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
+    set(userTaskStatusRef, true).then(() => {
+        closeTaskModal();
+        WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
+        WebApp.openLink(taskLink);
+        loadLiveTasks();
+    }).catch(error => {
+        WebApp.showAlert("Could not start the task. Please try again.");
+        console.error("Error starting task:", error);
     });
-}
+};
+
+window.verifyTask = (taskId, taskName) => {
+    const verificationsRef = ref(database, 'task_verifications');
+    const newVerificationRef = push(verificationsRef);
+
+    set(newVerificationRef, {
+        userId: TELEGRAM_USER_ID,
+        userName: USER_NAME,
+        taskId: taskId,
+        taskName: taskName,
+        timestamp: Date.now(),
+        status: 'pending'
+    }).then(() => {
+        WebApp.showAlert("Your task has been submitted for verification. Please wait for it to be approved by an admin.");
+        const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
+        set(userTaskStatusRef, 'pending'); 
+        loadLiveTasks();
+    }).catch((error) => {
+        WebApp.showAlert("Could not submit task for verification. Please try again.");
+        console.error("Verification submission error: ", error);
+    });
+};
 
 closeTaskModalBtn.onclick = closeTaskModal;
 
+// --- (The rest of the code is unchanged) ---
 
 function loadWithdrawalHistory() {
     const historyTableBody = document.getElementById('withdrawal-history-table');
