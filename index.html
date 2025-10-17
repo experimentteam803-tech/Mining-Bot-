@@ -11,7 +11,7 @@
 <!-- =================================================================== -->
 
 <style>
-/* आपका सारा CSS यहाँ है... (कोई बदलाव नहीं) */
+/* आपका सारा CSS यहाँ है... (कुछ नए स्टाइल जोड़े गए हैं) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif}
 body{
   background:linear-gradient(180deg,#000000,#141e30);
@@ -147,7 +147,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     transition: 0.3s;
     width: 80%;
 }
-.modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); padding-top: 100px;}
+.modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); padding-top: 60px; animation: fadeIn 0.3s; }
 .modal-content { background: #282828; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; color: white; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);}
 .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
 .withdraw-button { width: 100%; padding: 12px; background: #ffd700; color: #000; font-weight: 700; border: none; border-radius: 8px; margin-top: 15px; cursor: pointer; transition: 0.3s;}
@@ -307,13 +307,72 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
 .status-pending { color: #ffd700; font-weight: 600; }
 .status-approved { color: #32cd32; font-weight: 600; }
 .status-rejected { color: #f44336; font-weight: 600; }
+/* --- TASK SECTION KE LIYE NAYE STYLES --- */
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1c1c1c;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-left-color 0.2s;
+    border-left: 4px solid #333;
+}
+.task-item:hover {
+    background: #2a2a2a;
+    border-left-color: #ffd700;
+}
+.task-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    overflow: hidden; /* prevents long names from breaking layout */
+}
+.task-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+.task-info .task-name {
+    font-weight: 600;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.task-reward {
+    font-weight: 700;
+    font-size: 16px;
+    color: #ffd700;
+    flex-shrink: 0;
+    padding-left: 10px;
+}
+.verify-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: -10px; /* Connects with the item above */
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 0 0 8px 8px; /* Rounds bottom corners */
+    background: #ffd700;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+.verify-btn:hover {
+    filter: brightness(1.1);
+}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
 <div id="app-content" style="width: 100%;">
-    <!-- आपका सारा HTML यहाँ है... (कोई बदलाव नहीं) -->
+    <!-- आपका सारा HTML यहाँ है... (Task section में बदलाव) -->
     <header>
     <div class="profile" onclick="showProfile()">
     <img id="profile-img" src="https://i.pravatar.cc/45" alt="Profile">
@@ -334,6 +393,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">🪙 Start Mining</button>
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
+
+    <!-- === TASK SECTION (UPDATED) === -->
     <section id="task" class="section">
         <div id="taskList">
             <div class="task-notice" style="background: #2a2a2a; border-left: 4px solid #ffd700; padding: 15px; border-radius: 8px; margin: 0 0 25px 0;">
@@ -347,7 +408,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
                     </div>
                     <div>
                         <button onclick="copyUserId()" style="background: #555; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copy UID</button>
-                        <a href="https://t.me/MiningFatherhelp " target="_blank" style="background: #32cd32; color: #000; text-decoration: none; padding: 8px 15px; border-radius: 6px; font-weight: 600;">✉️ Send Msg</a>
+                        <a href="https://t.me/MiningFatherhelp" target="_blank" style="background: #32cd32; color: #000; text-decoration: none; padding: 8px 15px; border-radius: 6px; font-weight: 600;">✉️ Send Msg</a>
                     </div>
                 </div>
             </div>
@@ -358,6 +419,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
             </div>
         </div>
     </section>
+    <!-- === END OF TASK SECTION === -->
+
     <section id="wallet" class="section">
         <h2 style="text-align: center;">💼 Wallet</h2>
         <div class="wallet-summary">
@@ -457,6 +520,21 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.7;}
     </div>
 </div>
 
+<!-- Task Detail Modal (NEW) -->
+<div id="taskDetailModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeTaskModal">&times;</span>
+        <h3 id="taskDetailTitle" style="color: #90ee90; margin-bottom: 5px;">Task Details</h3>
+        <p style="font-weight: 600; margin-bottom: 15px;">Reward: <span id="taskDetailReward" style="color: #ffd700;"></span></p>
+        <p style="font-size: 14px; color: #ccc; margin-top: 10px;">Instructions:</p>
+        <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;">
+            <!-- Instructions will be populated here by JavaScript -->
+        </ul>
+        <button id="taskDetailCompleteBtn" class="action-btn" style="width: 100%; margin: 0; background: #32cd32; color: #000;">Complete Task</button>
+    </div>
+</div>
+
+
 <script type="module">
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -518,6 +596,11 @@ const countdownDisplay = document.getElementById('miningCountdown');
 const withdrawalModal = document.getElementById('withdrawalModal');
 const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 
+// --- NEW TASK MODAL ELEMENTS ---
+const taskDetailModal = document.getElementById('taskDetailModal');
+const closeTaskModalBtn = document.getElementById('closeTaskModal');
+let allTasks = {}; // To store all tasks globally for easy access
+
 // --- FIREBASE DATA HANDLING (No Changes) ---
 function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
@@ -576,11 +659,14 @@ function loadAdminSettings() {
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
+
+// --- UPDATED loadLiveTasks FUNCTION ---
 function loadLiveTasks() {
     const taskContainer = document.getElementById('task-items-container');
     onValue(TASKS_REF, (snapshot) => {
         taskContainer.innerHTML = '';
         const tasks = snapshot.val();
+        allTasks = tasks; // Store tasks globally to access details later
         let taskHtml = '';
         let activeTasksFound = false;
         if (tasks) {
@@ -588,14 +674,104 @@ function loadLiveTasks() {
                 const task = tasks[taskId];
                 if (task.active) {
                     activeTasksFound = true;
-                    taskHtml += `<div class="referral-details" style="border-left: 5px solid #ffd700; padding: 15px; margin-bottom: 15px; background: #1c1c1c;"><h3 style="color: #90ee90; margin-bottom: 5px;">${task.name}</h3><p style="color: #fff; font-weight: 600;">Reward: <span style="color: #ffd700;">${task.reward.toLocaleString()} Coins</span></p><p style="font-size: 14px; color: #ccc; margin-top: 10px;">Instructions:</p><ul class="referral-instruction-list" style="margin-bottom: 15px;">${task.instructions.map(inst => `<li>${inst}</li>`).join('')}</ul><a href="${task.link}" target="_blank" style="text-decoration: none;"><button class="action-btn ad-btn" style="width: 100%; margin: 0; background: #32cd32; color: #000;">${task.logoUrl ? `<img src="${task.logoUrl}" style="width: 20px; height: 20px; margin-right: 5px; vertical-align: middle;">` : ''} Complete Task</button></a></div>`;
+                    // Check localStorage to see if the user has already started this task
+                    const taskStarted = localStorage.getItem('task_started_' + taskId) === 'true';
+
+                    taskHtml += `<div class="task-item-wrapper">`;
+                    
+                    // Task item (clickable to show details)
+                    taskHtml += `
+                        <div class="task-item" onclick="showTaskDetails('${taskId}')">
+                            <div class="task-info">
+                                <img src="${task.logoUrl || 'https://via.placeholder.com/40'}" alt="task logo">
+                                <span class="task-name">${task.name}</span>
+                            </div>
+                            <div class="task-reward">${task.reward.toLocaleString()} C</div>
+                        </div>
+                    `;
+
+                    // If task has been started, show the "Verify Task" button underneath
+                    if (taskStarted) {
+                        taskHtml += `<button class="verify-btn" onclick="verifyTask('${task.name}')">Verify Task</button>`;
+                    }
+
+                    taskHtml += `</div>`; // Close wrapper
                 }
             }
         }
-        if (activeTasksFound) { taskContainer.innerHTML = taskHtml; } 
-        else { taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>'; }
+        if (activeTasksFound) {
+            taskContainer.innerHTML = taskHtml;
+        } else {
+            taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
+        }
+    }, (error) => {
+        console.error("Firebase Read Error (Tasks):", error);
+        taskContainer.innerHTML = '<p style="text-align: center; color: #f44336;">Could not load tasks.</p>';
     });
 }
+
+
+// --- NEW FUNCTIONS FOR TASK MODAL AND VERIFICATION ---
+
+window.showTaskDetails = (taskId) => {
+    const task = allTasks[taskId];
+    if (!task) return;
+
+    // Populate the modal with details from the selected task
+    document.getElementById('taskDetailTitle').innerText = task.name;
+    document.getElementById('taskDetailReward').innerText = `${task.reward.toLocaleString()} Coins`;
+    document.getElementById('taskDetailInstructions').innerHTML = task.instructions.map(inst => `<li>${inst}</li>`).join('');
+
+    // Set the "Complete Task" button to call the startTask function
+    const completeBtn = document.getElementById('taskDetailCompleteBtn');
+    completeBtn.onclick = () => startTask(taskId, task.link);
+
+    // Display the modal
+    taskDetailModal.style.display = 'block';
+}
+
+function closeTaskModal() {
+    taskDetailModal.style.display = 'none';
+}
+
+window.startTask = (taskId, taskLink) => {
+    // Set a flag in the browser's local storage to remember that the user started this task
+    localStorage.setItem('task_started_' + taskId, 'true');
+    
+    closeTaskModal();
+    WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
+
+    // Open the task link
+    WebApp.openLink(taskLink);
+
+    // Refresh the task list to show the "Verify" button
+    loadLiveTasks();
+}
+
+window.verifyTask = (taskName) => {
+    const verificationText = `User ID: ${TELEGRAM_USER_ID}\nTask Name: ${taskName}`;
+
+    // Try to copy the verification text to the clipboard
+    navigator.clipboard.writeText(verificationText).then(() => {
+        WebApp.showPopup({
+            title: 'Copied to Clipboard!',
+            message: 'Your User ID and Task Name have been copied. Now opening the support chat. Please paste the message there to get verified.',
+            buttons: [{ id: 'ok', type: 'ok', text: 'Open Chat' }]
+        }, (buttonId) => {
+            if (buttonId === 'ok') {
+                WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
+            }
+        });
+    }).catch(err => {
+        WebApp.showAlert('Failed to copy details. Please copy your User ID manually and send it with the task name to our support chat.');
+        WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
+    });
+}
+
+// Add event listeners to close the task modal
+closeTaskModalBtn.onclick = closeTaskModal;
+
+
 function loadWithdrawalHistory() {
     const historyTableBody = document.getElementById('withdrawal-history-table');
     const userWithdrawalsQuery = query(WITHDRAWALS_REF, orderByChild('userId'), equalTo(TELEGRAM_USER_ID));
@@ -860,7 +1036,11 @@ window.submitWithdrawal = () => {
          window.updateDatabase({ coins: window.coins });
     });
 }
-window.onclick = function(event) { if (event.target == withdrawalModal) { window.closeWithdrawalModal(); } }
+window.onclick = function(event) { 
+    if (event.target == withdrawalModal) { window.closeWithdrawalModal(); } 
+    // Close task modal if clicked outside
+    if (event.target == taskDetailModal) { closeTaskModal(); }
+}
 window.shareReferralLink = () => {
     const link = document.getElementById('refLink').innerText;
     const shareText = `💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 500 bonus Coins, and I get a 5% lifetime commission on your mining!`;
