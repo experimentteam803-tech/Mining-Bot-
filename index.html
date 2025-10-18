@@ -11,7 +11,7 @@
 <!-- =================================================================== -->
 
 <style>
-/* आपका सारा CSS यहाँ है... (बदलावों के साथ) */
+/* आपका सारा CSS यहाँ है... (कोई बदलाव नहीं) */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif}
 body{
   background:linear-gradient(180deg,#000000,#141e30);
@@ -588,6 +588,7 @@ const ADMIN_SETTINGS_REF = ref(database, 'admin_settings');
 const TASKS_REF = ref(database, 'tasks');
 const WITHDRAWALS_REF = ref(database, 'withdrawals');
 const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
+const GLOBAL_POPUP_REF = ref(database, 'global_popup'); // <<<--- नया रेफेरेंस जोड़ा गया
 window.coins = 0; 
 window.dailyMinedTimestamp = 0; 
 window.miningEndTime = 0; 
@@ -687,6 +688,44 @@ function listenForNotifications() {
         }
     });
 }
+
+// <<<--- नया फंक्शन: एडमिन पैनल से भेजे गए पॉप-अप संदेशों को सुनने के लिए --->>>
+function listenForAdminPopups() {
+    // व्यक्तिगत पॉप-अप (सिर्फ इस यूज़र के लिए)
+    const userPopupRef = ref(database, `users/${TELEGRAM_USER_ID}/popup`);
+    onValue(userPopupRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const popupData = snapshot.val();
+            WebApp.showPopup({
+                title: popupData.title,
+                message: popupData.message,
+                buttons: [{ type: 'ok', text: 'Close' }]
+            });
+            // संदेश दिखाने के बाद उसे डेटाबेस से हटा दें ताकि वह दोबारा न दिखे
+            remove(userPopupRef);
+        }
+    });
+
+    // ग्लोबल पॉप-अप (सभी यूज़र्स के लिए)
+    onValue(GLOBAL_POPUP_REF, (snapshot) => {
+        if (snapshot.exists()) {
+            const popupData = snapshot.val();
+            // लोकल स्टोरेज का उपयोग करके यह जांचें कि क्या यह पॉप-अप पहले ही दिखाया जा चुका है
+            const lastShownTimestamp = localStorage.getItem('lastGlobalPopupTimestamp') || 0;
+            
+            if (popupData.timestamp > lastShownTimestamp) {
+                WebApp.showPopup({
+                    title: popupData.title,
+                    message: popupData.message,
+                    buttons: [{ type: 'ok', text: 'Got it!' }]
+                });
+                // नए पॉप-अप का टाइमस्टैम्प लोकल स्टोरेज में सेव करें
+                localStorage.setItem('lastGlobalPopupTimestamp', popupData.timestamp);
+            }
+        }
+    });
+}
+
 
 function loadAdminSettings() {
     onValue(ADMIN_SETTINGS_REF, (snapshot) => {
@@ -1143,6 +1182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadClaimSettings();
     loadWithdrawalHistory();
     listenForNotifications();
+    listenForAdminPopups(); // <<<--- नए फंक्शन को यहाँ कॉल किया गया
 });
 window.showSection = (sectionId, button) => {
   document.querySelectorAll('.section').forEach(s=>s.style.display='none');
@@ -1154,4 +1194,4 @@ window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
 </script>
 </body>
-</html>```
+</html>
