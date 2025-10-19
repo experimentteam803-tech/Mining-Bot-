@@ -340,7 +340,12 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </section>
 
     <section id="wallet" class="section">
-        <h2 style="text-align: center;">💼 Wallet</h2>
+        <!-- === नया बदलाव: कस्टमर केयर लोगो === -->
+        <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
+            <h2 style="text-align: center; margin: 0;">💼 Wallet</h2>
+            <a id="customerCareLink" title="Contact Support" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 28px; text-decoration: none; cursor: pointer;">🎧</a>
+        </div>
+        <!-- === बदलाव समाप्त === -->
         <div class="wallet-summary">
             <div class="balance-info">
                 <div class="balance-label">Current Balance (Coins)</div>
@@ -496,7 +501,8 @@ let remainingTimeInterval = null;
 let incrementCounter = 0;
 const MINING_RATE_MS = 360; 
 const ONE_HOUR_MS = 60 * 60 * 1000;
-const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+// === बदला हुआ मान: 6 घंटे से 2 घंटे ===
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000; 
 const MIN_WITHDRAWAL_COINS = 10000;
 const REFERRAL_BONUS = 500;
 window.ADS_REQUIRED = 10;
@@ -782,13 +788,14 @@ function formatTime(ms) {
     const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
-window.canMineAgain = () => { return (Date.now() - window.dailyMinedTimestamp) >= SIX_HOURS_MS; }
+// === बदला हुआ मान: 6 घंटे से 2 घंटे ===
+window.canMineAgain = () => { return (Date.now() - window.dailyMinedTimestamp) >= TWO_HOURS_MS; }
 window.watchAd = () => {
     const miningStillActive = window.miningEndTime > Date.now(); 
     const isInCooldown = !window.canMineAgain() && window.dailyMinedTimestamp !== 0; 
 
     if (window.adsWatched >= window.ADS_REQUIRED) {
-        WebApp.showAlert(window.canMineAgain() ? "A new session is ready. Click 'Start Mining'." : "Ads are complete. Wait for the 6h reset.");
+        WebApp.showAlert(window.canMineAgain() ? "A new session is ready. Click 'Start Mining'." : "Ads are complete. Wait for the 2h reset.");
         return;
     }
     if (miningStillActive || isInCooldown) {
@@ -826,7 +833,8 @@ function updateAdStatus() {
         watchAdBtn.disabled = true;
         watchAdBtn.innerText = '✅ Ads Complete';
         if (isInCooldown) {
-            const remainingCooldown = (window.dailyMinedTimestamp + SIX_HOURS_MS) - Date.now();
+            // === बदला हुआ मान: 6 घंटे से 2 घंटे ===
+            const remainingCooldown = (window.dailyMinedTimestamp + TWO_HOURS_MS) - Date.now();
             adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime(remainingCooldown)}`;
         }
     } else {
@@ -915,7 +923,8 @@ function startCooldownCountdown() {
     clearInterval(remainingTimeInterval);
     if(miningEffectContainer) miningEffectContainer.innerHTML = '';
     remainingTimeInterval = setInterval(() => {
-        const remainingCooldown = (window.dailyMinedTimestamp + SIX_HOURS_MS) - Date.now();
+        // === बदला हुआ मान: 6 घंटे से 2 घंटे ===
+        const remainingCooldown = (window.dailyMinedTimestamp + TWO_HOURS_MS) - Date.now();
         if (remainingCooldown <= 0) {
             clearInterval(remainingTimeInterval);
             remainingTimeInterval = null;
@@ -1062,6 +1071,26 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWithdrawalHistory();
     listenForNotifications();
     listenForAdminPopups();
+
+    // === नया इवेंट हैंडलर: कस्टमर केयर लिंक के लिए ===
+    document.getElementById('customerCareLink').addEventListener('click', function(event) {
+        event.preventDefault(); // लिंक को तुरंत खुलने से रोकें
+        const userIdToCopy = TELEGRAM_USER_ID;
+        
+        // यूजर आईडी कॉपी करने के लिए नेविगेटर क्लिपबोर्ड API का उपयोग करें
+        navigator.clipboard.writeText(userIdToCopy).then(() => {
+            // कॉपी सफल होने पर उपयोगकर्ता को सूचित करें
+            WebApp.showAlert('Your User ID has been copied to the clipboard! You will now be redirected to support.');
+            // सपोर्ट लिंक खोलें
+            WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
+        }).catch(err => {
+            // यदि कॉपी विफल हो जाती है तो एरर हैंडल करें
+            console.error('Failed to copy User ID: ', err);
+            WebApp.showAlert('Could not copy your User ID automatically. Please copy it manually.');
+            // फिर भी लिंक खोलें
+            WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
+        });
+    });
 });
 window.showSection = (sectionId, button) => {
   document.querySelectorAll('.section').forEach(s=>s.style.display='none');
