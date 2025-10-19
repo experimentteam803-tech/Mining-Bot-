@@ -457,7 +457,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 
 
 <script type="module">
-// --- JavaScript में कोई बदलाव नहीं है ---
+// --- JavaScript में बदलाव किए गए हैं ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, update, push, get, query, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
@@ -501,7 +501,6 @@ let remainingTimeInterval = null;
 let incrementCounter = 0;
 const MINING_RATE_MS = 360; 
 const ONE_HOUR_MS = 60 * 60 * 1000;
-// === बदला हुआ मान: 6 घंटे से 2 घंटे ===
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000; 
 const MIN_WITHDRAWAL_COINS = 10000;
 const REFERRAL_BONUS = 500;
@@ -525,6 +524,7 @@ function loadUserData() {
     onValue(window.dbRef, (snapshot) => {
         let data = snapshot.val();
         if (!data) {
+            // === नया यूजर सेटअप ===
             const initialData = { 
                 coins: 0, 
                 dailyMinedTimestamp: 0, 
@@ -537,26 +537,49 @@ function loadUserData() {
                 lastActive: Date.now(),
                 joinDate: Date.now()
             };
-            set(window.dbRef, initialData).then(() => { isInitialLoadComplete = true; });
+
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
+                // यह एक रेफरल है, नए यूजर के डेटा में इसे जोड़ें
+                initialData.referredBy = referrerId;
+                
+                // रेफर करने वाले को बोनस दें और लॉग करें
                 const referrerRef = ref(database, 'users/' + referrerId);
-                get(referrerRef).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const referrerData = snapshot.val();
+                get(referrerRef).then((referrerSnapshot) => {
+                    if (referrerSnapshot.exists()) {
+                        const referrerData = referrerSnapshot.val();
                         const newBalance = (referrerData.coins || 0) + REFERRAL_BONUS;
-                        update(referrerRef, { coins: newBalance });
+                        
+                        // रेफर करने वाले के लिए अपडेट तैयार करें
+                        const referrerUpdates = {};
+                        referrerUpdates.coins = newBalance;
+                        
+                        // रेफर करने वाले के लिए कॉइन हिस्ट्री लॉग जोड़ें
+                        const historyRef = push(ref(database, `users/${referrerId}/coin_history`));
+                        const historyKey = historyRef.key;
+                        referrerUpdates[`coin_history/${historyKey}`] = {
+                            reason: `Referral Bonus for ${USER_NAME}`,
+                            amount: REFERRAL_BONUS,
+                            timestamp: Date.now()
+                        };
+                        
+                        update(referrerRef, referrerUpdates);
                     }
                 }).catch(error => console.error("Error awarding referral bonus:", error));
             }
+            
+            set(window.dbRef, initialData).then(() => { isInitialLoadComplete = true; });
             updateGlobalState(initialData);
             return;
         }
+
         if (!isInitialLoadComplete) {
+            // === मौजूदा यूजर के लिए ऑफलाइन कमाई की गणना ===
             const lastSeen = data.lastActive || 0;
             const sessionEndTime = data.miningEndTime || 0;
             const now = Date.now();
             let offlineCoinsEarned = 0;
+
             if (sessionEndTime > lastSeen) {
                 const calculationEndTime = Math.min(now, sessionEndTime);
                 const offlineDurationMs = calculationEndTime - lastSeen;
@@ -567,8 +590,20 @@ function loadUserData() {
                     if (offlineCoinsEarned > 0) { data.coins += offlineCoinsEarned; }
                 }
             }
+
             const updates = { lastActive: now, userName: USER_NAME };
-            if(offlineCoinsEarned > 0) { updates.coins = data.coins; }
+            if(offlineCoinsEarned > 0) {
+                updates.coins = data.coins;
+                
+                // ऑफलाइन माइनिंग के लिए लॉग एंट्री जोड़ें
+                const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
+                const historyKey = historyRef.key;
+                updates[`coin_history/${historyKey}`] = {
+                    reason: 'Offline Mining',
+                    amount: parseFloat(offlineCoinsEarned.toFixed(2)),
+                    timestamp: Date.now()
+                };
+            }
             update(window.dbRef, updates);
             isInitialLoadComplete = true;
         }
@@ -579,6 +614,7 @@ function loadUserData() {
         WebApp.showAlert("Failed to load user data.");
     });
 }
+
 
 function listenForNotifications() {
     const notificationRef = ref(database, `users/${TELEGRAM_USER_ID}/notifications`);
@@ -788,7 +824,6 @@ function formatTime(ms) {
     const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
-// === बदला हुआ मान: 6 घंटे से 2 घंटे ===
 window.canMineAgain = () => { return (Date.now() - window.dailyMinedTimestamp) >= TWO_HOURS_MS; }
 window.watchAd = () => {
     const miningStillActive = window.miningEndTime > Date.now(); 
@@ -807,10 +842,23 @@ window.watchAd = () => {
     watchAdBtn.innerText = '🎥 Loading Ad...';
 
     show_9969043().then(() => {
-        console.log("Ad watched successfully. Awarding user.");
         window.adsWatched++;
-        window.coins += window.AD_REWARD_COINS; 
-        window.updateDatabase({ coins: window.coins, adsWatched: window.adsWatched, adsWatchedTimestamp: Date.now() });
+        window.coins += window.AD_REWARD_COINS;
+
+        // कॉइन अपडेट और लॉग को एक साथ बंडल करें
+        const updates = {};
+        updates.coins = window.coins;
+        updates.adsWatched = window.adsWatched;
+        updates.adsWatchedTimestamp = Date.now();
+        const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
+        const historyKey = historyRef.key;
+        updates[`coin_history/${historyKey}`] = {
+            reason: 'Ad Reward',
+            amount: window.AD_REWARD_COINS,
+            timestamp: Date.now()
+        };
+        update(window.dbRef, updates);
+
         if (window.adsWatched < window.ADS_REQUIRED) {
             watchAdBtn.disabled = false;
             watchAdBtn.innerText = '🎬 Watch Ad';
@@ -833,7 +881,6 @@ function updateAdStatus() {
         watchAdBtn.disabled = true;
         watchAdBtn.innerText = '✅ Ads Complete';
         if (isInCooldown) {
-            // === बदला हुआ मान: 6 घंटे से 2 घंटे ===
             const remainingCooldown = (window.dailyMinedTimestamp + TWO_HOURS_MS) - Date.now();
             adStatusDisplay.innerHTML = `Ads/Mining Reset in: ${formatTime(remainingCooldown)}`;
         }
@@ -923,7 +970,6 @@ function startCooldownCountdown() {
     clearInterval(remainingTimeInterval);
     if(miningEffectContainer) miningEffectContainer.innerHTML = '';
     remainingTimeInterval = setInterval(() => {
-        // === बदला हुआ मान: 6 घंटे से 2 घंटे ===
         const remainingCooldown = (window.dailyMinedTimestamp + TWO_HOURS_MS) - Date.now();
         if (remainingCooldown <= 0) {
             clearInterval(remainingTimeInterval);
@@ -1045,10 +1091,23 @@ window.redeemCode = async () => {
         const redemptionSnapshot = await get(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`));
         const alreadyRedeemed = Object.values(redemptionSnapshot.val() || {}).some(r => r.code === code);
         if (alreadyRedeemed) { WebApp.showAlert("You have already redeemed this code."); return; }
+        
         const coinsAwarded = codeData.coins;
         const redemptionData = { code, coins: coinsAwarded, redeemedAt: Date.now(), userId: TELEGRAM_USER_ID, userName: USER_NAME };
+        
         window.coins += coinsAwarded;
-        window.updateDatabase({ coins: window.coins }); 
+
+        // कॉइन अपडेट और लॉग को एक साथ बंडल करें
+        const updates = { coins: window.coins };
+        const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
+        const historyKey = historyRef.key;
+        updates[`coin_history/${historyKey}`] = {
+            reason: 'Gift Code Redeemed',
+            amount: coinsAwarded,
+            timestamp: Date.now()
+        };
+        update(window.dbRef, updates); 
+        
         push(ref(database, `redemptions_by_user/${TELEGRAM_USER_ID}`), { code, coins: coinsAwarded });
         push(ref(database, 'redeemed_codes'), redemptionData); 
         WebApp.showPopup({message: `Code redeemed! 🎉 You won ${coinsAwarded} coins!`});
