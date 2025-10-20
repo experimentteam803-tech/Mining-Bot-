@@ -963,7 +963,7 @@ function showMiningIncrement() {
     const xPos = Math.random() * 50 + 25;
     const yPos = Math.random() * 40 + 40;
     incrementEl.style.left = `${xPos}%`;
-    incrementEl.style.top = `${yPos}%';
+    incrementEl.style.top = `${yPos}%`;
     miningEffectContainer.appendChild(incrementEl);
     setTimeout(() => { incrementEl.remove(); }, 1200);
 }
@@ -1090,7 +1090,9 @@ window.checkWithdrawalEligibility = () => {
         }
     }
 }
-window.submitWithdrawal = () => {
+
+// === बदला हुआ WITHDRAWAL फ़ंक्शन ===
+window.submitWithdrawal = async () => {
     const amount = Number(document.getElementById('upiAmount').value);
     const upiId = document.getElementById('upiId').value.trim();
 
@@ -1103,13 +1105,18 @@ window.submitWithdrawal = () => {
         return;
     }
 
-    // Check for completed tasks
-    const userTasksRef = ref(database, `users/${TELEGRAM_USER_ID}/completedTasks`);
-    get(userTasksRef).then((snapshot) => {
-        if (snapshot.exists() && Object.keys(snapshot.val()).length > 0) {
-            // User has completed at least one task, proceed with withdrawal
+    try {
+        const userRef = ref(database, `users/${TELEGRAM_USER_ID}`);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+
+        // जांचें कि क्या completedTasks मौजूद है और उसमें कम से कम एक एंट्री है
+        if (userData && userData.completedTasks && Object.keys(userData.completedTasks).length > 0) {
+            // उपयोगकर्ता योग्य है, निकासी के साथ आगे बढ़ें
             const newCoinBalance = window.coins - amount;
-            window.updateDatabase({ coins: newCoinBalance, upiId: upiId });
+            
+            // डेटाबेस में कॉइन बैलेंस और UPI ID अपडेट करें
+            await update(window.dbRef, { coins: newCoinBalance, upiId: upiId });
 
             const withdrawalRequest = {
                 userId: TELEGRAM_USER_ID,
@@ -1120,23 +1127,21 @@ window.submitWithdrawal = () => {
                 status: 'Pending'
             };
 
-            push(WITHDRAWALS_REF, withdrawalRequest).then(() => {
-                closeWithdrawalModal();
-                WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
-            }).catch(error => {
-                WebApp.showAlert("Withdrawal failed to submit. Please try again.");
-                // Rollback coin balance if withdrawal submission fails
-                window.updateDatabase({ coins: window.coins });
-            });
+            await push(WITHDRAWALS_REF, withdrawalRequest);
+            
+            closeWithdrawalModal();
+            WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
+
         } else {
-            // User has not completed any tasks
+            // उपयोगकर्ता योग्य नहीं है
             WebApp.showAlert("You must complete at least one task before you can withdraw.");
         }
-    }).catch((error) => {
-        console.error("Error checking for completed tasks: ", error);
-        WebApp.showAlert("Could not verify task completion. Please try again.");
-    });
+    } catch (error) {
+        console.error("Withdrawal Error:", error);
+        WebApp.showAlert("An error occurred during withdrawal. Please try again.");
+    }
 };
+
 window.onclick = function(event) {
     if (event.target == withdrawalModal) { window.closeWithdrawalModal(); }
     if (event.target == taskDetailModal) { closeTaskModal(); }
