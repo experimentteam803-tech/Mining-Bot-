@@ -550,12 +550,15 @@ async function getUserCountry() {
     }
 }
 
-
-function loadUserData() {
-    onValue(window.dbRef, (snapshot) => {
+// ===================================================================
+// === बदला हुआ फ़ंक्शन: डेटाबेस में देश को सेव करने के लिए ===
+// ===================================================================
+async function loadUserData() {
+    onValue(window.dbRef, async (snapshot) => {
         let data = snapshot.val();
         if (!data) {
             // === नया यूजर सेटअप ===
+            const userCountry = await getUserCountry(); // देश की जानकारी प्राप्त करें
             const initialData = {
                 coins: 0,
                 dailyMinedTimestamp: 0,
@@ -566,7 +569,8 @@ function loadUserData() {
                 telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME,
                 lastActive: Date.now(),
-                joinDate: Date.now()
+                joinDate: Date.now(),
+                country: userCountry || 'N/A' // देश को डेटा में जोड़ें
             };
 
             const referrerId = WebApp.initDataUnsafe.start_param;
@@ -580,12 +584,8 @@ function loadUserData() {
                     if (referrerSnapshot.exists()) {
                         const referrerData = referrerSnapshot.val();
                         const newBalance = (referrerData.coins || 0) + REFERRAL_BONUS;
-
-                        // रेफर करने वाले के लिए अपडेट तैयार करें
                         const referrerUpdates = {};
                         referrerUpdates.coins = newBalance;
-
-                        // रेफर करने वाले के लिए कॉइन हिस्ट्री लॉग जोड़ें
                         const historyRef = push(ref(database, `users/${referrerId}/coin_history`));
                         const historyKey = historyRef.key;
                         referrerUpdates[`coin_history/${historyKey}`] = {
@@ -593,7 +593,6 @@ function loadUserData() {
                             amount: REFERRAL_BONUS,
                             timestamp: Date.now()
                         };
-
                         update(referrerRef, referrerUpdates);
                     }
                 }).catch(error => console.error("Error awarding referral bonus:", error));
@@ -604,8 +603,18 @@ function loadUserData() {
             return;
         }
 
+        // === मौजूदा यूजर के लिए ===
+        const updates = { lastActive: Date.now(), userName: USER_NAME };
+        
+        // === बदलाव: यदि देश मौजूद नहीं है, तो उसे जोड़ें ===
+        if (!data.country) {
+            const userCountry = await getUserCountry();
+            if (userCountry) {
+                updates.country = userCountry;
+            }
+        }
+
         if (!isInitialLoadComplete) {
-            // === मौजूदा यूजर के लिए ऑफलाइन कमाई की गणना ===
             const lastSeen = data.lastActive || 0;
             const sessionEndTime = data.miningEndTime || 0;
             const now = Date.now();
@@ -621,12 +630,9 @@ function loadUserData() {
                     if (offlineCoinsEarned > 0) { data.coins += offlineCoinsEarned; }
                 }
             }
-
-            const updates = { lastActive: now, userName: USER_NAME };
+            
             if(offlineCoinsEarned > 0) {
                 updates.coins = data.coins;
-
-                // ऑफलाइन माइनिंग के लिए लॉग एंट्री जोड़ें
                 const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
                 const historyKey = historyRef.key;
                 updates[`coin_history/${historyKey}`] = {
@@ -635,9 +641,10 @@ function loadUserData() {
                     timestamp: Date.now()
                 };
             }
-            update(window.dbRef, updates);
             isInitialLoadComplete = true;
         }
+        
+        update(window.dbRef, updates); // सभी अपडेट्स को एक साथ भेजें
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
@@ -697,17 +704,9 @@ function loadAdminSettings() {
         }
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
-
-// =========================================================================================
-// === बदला हुआ फ़ंक्शन: देश के आधार पर कार्यों को फ़िल्टर करने के लिए ===
-// =========================================================================================
 async function loadLiveTasks() {
     const taskContainer = document.getElementById('task-items-container');
-
-    // चरण 1: उपयोगकर्ता का देश कोड प्राप्त करें
     const userCountry = await getUserCountry();
-
-    // यदि देश का पता नहीं चल पाता है तो एक संदेश दिखाएँ
     if (!userCountry) {
         taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">Could not determine your location to show relevant tasks.</p>';
         return;
@@ -728,23 +727,13 @@ async function loadLiveTasks() {
         if (tasks) {
             for (const taskId in tasks) {
                 const task = tasks[taskId];
-
-                // चरण 2: देश मिलान के लिए लॉजिक
-                // एक टास्क तब मेल खाता है जब:
-                // 1. उसमें 'countries' फ़ील्ड न हो (पुराने टास्क के साथ संगतता)।
-                // 2. 'countries' ऐरे खाली हो (सभी के लिए)।
-                // 3. 'countries' ऐरे में उपयोगकर्ता का देश कोड शामिल हो।
                 const isCountryMatch = !task.countries || task.countries.length === 0 || task.countries.includes(userCountry);
 
-                // चरण 3: केवल सक्रिय और देश से मेल खाने वाले कार्यों को दिखाएँ
                 if (task.active && isCountryMatch) {
                     activeTasksFound = true;
-
                     taskHtml += `<div class="task-item-wrapper">`;
-
                     const isCompleted = completedTasks[taskId];
                     const startStatus = startedTasks[taskId];
-
                     let actionButton = '';
                     if (isCompleted) {
                         actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
@@ -898,8 +887,6 @@ window.watchAd = () => {
     show_9969043().then(() => {
         window.adsWatched++;
         window.coins += window.AD_REWARD_COINS;
-
-        // कॉइन अपडेट और लॉग को एक साथ बंडल करें
         const updates = {};
         updates.coins = window.coins;
         updates.adsWatched = window.adsWatched;
@@ -1090,8 +1077,6 @@ window.checkWithdrawalEligibility = () => {
         }
     }
 }
-
-// === बदला हुआ WITHDRAWAL फ़ंक्शन ===
 window.submitWithdrawal = async () => {
     const amount = Number(document.getElementById('upiAmount').value);
     const upiId = document.getElementById('upiId').value.trim();
@@ -1110,12 +1095,8 @@ window.submitWithdrawal = async () => {
         const snapshot = await get(userRef);
         const userData = snapshot.val();
 
-        // जांचें कि क्या completedTasks मौजूद है और उसमें कम से कम एक एंट्री है
         if (userData && userData.completedTasks && Object.keys(userData.completedTasks).length > 0) {
-            // उपयोगकर्ता योग्य है, निकासी के साथ आगे बढ़ें
             const newCoinBalance = window.coins - amount;
-            
-            // डेटाबेस में कॉइन बैलेंस और UPI ID अपडेट करें
             await update(window.dbRef, { coins: newCoinBalance, upiId: upiId });
 
             const withdrawalRequest = {
@@ -1133,7 +1114,6 @@ window.submitWithdrawal = async () => {
             WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
 
         } else {
-            // उपयोगकर्ता योग्य नहीं है
             WebApp.showAlert("You must complete at least one task before you can withdraw.");
         }
     } catch (error) {
@@ -1186,8 +1166,6 @@ window.redeemCode = async () => {
         const redemptionData = { code, coins: coinsAwarded, redeemedAt: Date.now(), userId: TELEGRAM_USER_ID, userName: USER_NAME };
 
         window.coins += coinsAwarded;
-
-        // कॉइन अपडेट और लॉग को एक साथ बंडल करें
         const updates = { coins: window.coins };
         const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
         const historyKey = historyRef.key;
@@ -1215,28 +1193,20 @@ window.claimCode = (button, url) => {
 document.addEventListener('DOMContentLoaded', () => {
     loadAdminSettings();
     loadUserData();
-    loadLiveTasks(); // यह फ़ंक्शन अब देश के अनुसार फ़िल्टर करेगा
+    loadLiveTasks();
     loadClaimSettings();
     loadWithdrawalHistory();
     listenForNotifications();
     listenForAdminPopups();
-
-    // === नया इवेंट हैंडलर: कस्टमर केयर लिंक के लिए ===
     document.getElementById('customerCareLink').addEventListener('click', function(event) {
-        event.preventDefault(); // लिंक को तुरंत खुलने से रोकें
+        event.preventDefault();
         const userIdToCopy = TELEGRAM_USER_ID;
-
-        // यूजर आईडी कॉपी करने के लिए नेविगेटर क्लिपबोर्ड API का उपयोग करें
         navigator.clipboard.writeText(userIdToCopy).then(() => {
-            // कॉपी सफल होने पर उपयोगकर्ता को सूचित करें
             WebApp.showAlert('Your User ID has been copied to the clipboard! You will now be redirected to support.');
-            // सपोर्ट लिंक खोलें
             WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
         }).catch(err => {
-            // यदि कॉपी विफल हो जाती है तो एरर हैंडल करें
             console.error('Failed to copy User ID: ', err);
             WebApp.showAlert('Could not copy your User ID automatically. Please copy it manually.');
-            // फिर भी लिंक खोलें
             WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
         });
     });
