@@ -493,8 +493,7 @@ window.dbRef = ref(database, DB_NODE_PATH);
 let miningInterval = null;
 let remainingTimeInterval = null;
 let incrementCounter = 0;
-// === CHANGE 1: Adjusted mining rate to 450ms for ~800 coins/hr ===
-const MINING_RATE_MS = 450;
+const MINING_RATE_MS = 360;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
@@ -514,6 +513,37 @@ const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 const taskDetailModal = document.getElementById('taskDetailModal');
 const closeTaskModalBtn = document.getElementById('closeTaskModal');
 let allTasks = {};
+// === CHANGE 1: Added variables and functions for task timers ===
+let activeTaskTimers = {};
+
+function clearAllTaskTimers() {
+    for (const taskId in activeTaskTimers) {
+        clearInterval(activeTaskTimers[taskId]);
+    }
+    activeTaskTimers = {};
+}
+
+function startVerificationTimer(taskId, startTime, taskName) {
+    const button = document.getElementById(`verify-btn-${taskId}`);
+    if (!button) return;
+
+    const ONE_MINUTE_MS = 60 * 1000;
+
+    const timerId = setInterval(() => {
+        const timePassed = Date.now() - startTime;
+        if (timePassed >= ONE_MINUTE_MS) {
+            clearInterval(timerId);
+            delete activeTaskTimers[taskId];
+            button.outerHTML = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${taskName}')">Verify Task</button>`;
+        } else {
+            const remainingSeconds = Math.ceil((ONE_MINUTE_MS - timePassed) / 1000);
+            button.innerText = `Verify in ${remainingSeconds}s`;
+        }
+    }, 1000);
+
+    activeTaskTimers[taskId] = timerId;
+}
+// === END OF CHANGE 1 ===
 
 async function getUserCountry() {
     const storedCountry = localStorage.getItem('userCountryCode');
@@ -612,8 +642,7 @@ function loadUserData() {
 
             if (sessionEndTime > lastSeen) {
                 const calculationEndTime = Math.min(now, sessionEndTime);
-                // === CHANGE 2: Capped offline duration to 1 hour to prevent coin exploit ===
-                const offlineDurationMs = Math.min(calculationEndTime - lastSeen, ONE_HOUR_MS);
+                const offlineDurationMs = calculationEndTime - lastSeen;
                 if (offlineDurationMs > 0) {
                     const coinsPerIncrement = 0.1;
                     const incrementsMissed = Math.floor(offlineDurationMs / MINING_RATE_MS);
@@ -713,6 +742,9 @@ async function loadLiveTasks() {
     const startedTasks = userData.startedTasks || {};
     const completedTasks = userData.completedTasks || {};
 
+    // === CHANGE 2: Clear previous timers before re-rendering the task list ===
+    clearAllTaskTimers();
+
     onValue(TASKS_REF, (snapshot) => {
         taskContainer.innerHTML = '';
         const tasks = snapshot.val();
@@ -730,13 +762,28 @@ async function loadLiveTasks() {
                     const isCompleted = completedTasks[taskId];
                     const startStatus = startedTasks[taskId];
                     let actionButton = '';
+
+                    // === CHANGE 3: Modified button logic to handle the 1-minute timer ===
                     if (isCompleted) {
                         actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
                     } else if (startStatus === 'pending') {
                         actionButton = `<button class="verify-btn" style="background: #808080;" disabled>⏳ Pending Verification</button>`;
-                    } else if (startStatus) {
+                    } else if (typeof startStatus === 'number') { // Check if a task has been started (timestamp)
+                        const ONE_MINUTE_MS = 60 * 1000;
+                        const timeSinceStart = Date.now() - startStatus;
+
+                        if (timeSinceStart < ONE_MINUTE_MS) {
+                            // If less than a minute, show a disabled button with a timer
+                            const remainingSeconds = Math.ceil((ONE_MINUTE_MS - timeSinceStart) / 1000);
+                            actionButton = `<button class="verify-btn" style="background: #808080;" disabled id="verify-btn-${taskId}">Verify in ${remainingSeconds}s</button>`;
+                        } else {
+                            // If more than a minute has passed, show the active verify button
+                            actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
+                        }
+                    } else if (startStatus === true) { // Fallback for any old data that is just 'true'
                         actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                     }
+                    // === END OF CHANGE 3 ===
 
                     taskHtml += `
                         <div class="task-item" onclick="showTaskDetails('${taskId}')">
@@ -752,8 +799,24 @@ async function loadLiveTasks() {
                 }
             }
         }
+
         if (activeTasksFound) {
             taskContainer.innerHTML = taskHtml;
+
+            // === CHANGE 4: After rendering HTML, find and start timers for relevant tasks ===
+            for (const taskId in tasks) {
+                const startStatus = startedTasks[taskId];
+                if (typeof startStatus === 'number') {
+                    const ONE_MINUTE_MS = 60 * 1000;
+                    if (Date.now() - startStatus < ONE_MINUTE_MS) {
+                        const taskName = tasks[taskId]?.name;
+                        if (taskName) {
+                            startVerificationTimer(taskId, startStatus, taskName);
+                        }
+                    }
+                }
+            }
+            // === END OF CHANGE 4 ===
         } else {
             taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>';
         }
@@ -775,16 +838,19 @@ function closeTaskModal() {
 }
 window.startTask = (taskId, taskLink) => {
     const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
-    set(userTaskStatusRef, true).then(() => {
+    // === CHANGE 5: Store the current timestamp when a task is started ===
+    set(userTaskStatusRef, Date.now()).then(() => {
         closeTaskModal();
         WebApp.showPopup({ message: "Redirecting to task... Return here to verify after completion!" });
         WebApp.openLink(taskLink);
-        loadLiveTasks();
+        loadLiveTasks(); // Reload the task list to show the new timer state
     }).catch(error => {
         WebApp.showAlert("Could not start the task. Please try again.");
         console.error("Error starting task:", error);
     });
 };
+// === END OF CHANGE 5 ===
+
 window.verifyTask = (taskId, taskName) => {
     const verificationsRef = ref(database, 'task_verifications');
     const newVerificationRef = push(verificationsRef);
