@@ -349,8 +349,11 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
                 <div class="value-inr">₹ <span id="walletValue">0.00</span> (1000 Coins ≈ ₹1)</div>
             </div>
             <button onclick="showWithdrawalModal()">UPI Withdrawal</button>
+            <button onclick="showPaypalModal()" style="margin-top: 10px; background: #0070BA; animation: none;">PayPal Withdrawal</button>
+            <button onclick="showCryptoModal()" style="margin-top: 10px; background: #F7931A; animation: none;">Crypto (USDT)</button>
             <div class="withdrawal-note">
-                Minimum withdrawal amount is **10,000 Coins** (₹10.00).
+                Minimum UPI withdrawal: <strong>10,000 Coins</strong> (₹10.00).<br>
+                Minimum International withdrawal: <strong>100,000 Coins</strong>.
             </div>
         </div>
         <div class="history-container">
@@ -439,6 +442,44 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<div id="paypalModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closePaypalModal()">&times;</span>
+        <h3>PayPal Withdrawal</h3>
+        <p style="color:#aaa; text-align: center; margin-bottom: 15px;">Minimum: 100,000 Coins</p>
+        <div class="form-group">
+            <label for="paypalAmount">Coins to Withdraw:</label>
+            <input type="number" id="paypalAmount" placeholder="Min 100000" oninput="checkPaypalEligibility()">
+        </div>
+        <div class="form-group">
+            <label for="paypalEmail">Your PayPal Email:</label>
+            <input type="email" id="paypalEmail" placeholder="example@email.com">
+        </div>
+        <button class="withdraw-button" id="submitPaypalBtn" disabled onclick="submitPaypalWithdrawal()">Submit Withdrawal Request</button>
+        <small style="display: block; text-align: center; color: #f44336; margin-top: 10px;">Withdrawals processed within 48 hours.</small>
+    </div>
+</div>
+
+<div id="cryptoModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeCryptoModal()">&times;</span>
+        <h3>Crypto (USDT) Withdrawal</h3>
+        <p style="color:#aaa; text-align: center; margin-bottom: 15px;">Minimum: 100,000 Coins</p>
+         <p style="color:var(--secondary-glow); font-size: 12px; text-align: center; margin-bottom: 15px;">Network: TRC20 (Tron). Sending to other networks will result in loss of funds.</p>
+        <div class="form-group">
+            <label for="cryptoAmount">Coins to Withdraw:</label>
+            <input type="number" id="cryptoAmount" placeholder="Min 100000" oninput="checkCryptoEligibility()">
+        </div>
+        <div class="form-group">
+            <label for="cryptoAddress">Your USDT (TRC20) Wallet Address:</label>
+            <input type="text" id="cryptoAddress" placeholder="T...">
+        </div>
+        <button class="withdraw-button" id="submitCryptoBtn" disabled onclick="submitCryptoWithdrawal()">Submit Withdrawal Request</button>
+        <small style="display: block; text-align: center; color: #f44336; margin-top: 10px;">Withdrawals processed within 48 hours.</small>
+    </div>
+</div>
+
+
 <div id="taskDetailModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" id="closeTaskModal">&times;</span>
@@ -497,6 +538,7 @@ const MINING_RATE_MS = 360;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
+const MIN_INTL_WITHDRAWAL_COINS = 100000;
 const REFERRAL_BONUS = 500;
 window.ADS_REQUIRED = 10;
 window.AD_REWARD_COINS = 5;
@@ -513,6 +555,10 @@ const submitWithdrawalBtn = document.getElementById('submitWithdrawalBtn');
 const taskDetailModal = document.getElementById('taskDetailModal');
 const closeTaskModalBtn = document.getElementById('closeTaskModal');
 let allTasks = {};
+const paypalModal = document.getElementById('paypalModal');
+const cryptoModal = document.getElementById('cryptoModal');
+const submitPaypalBtn = document.getElementById('submitPaypalBtn');
+const submitCryptoBtn = document.getElementById('submitCryptoBtn');
 
 async function getUserCountry() {
     const storedCountry = localStorage.getItem('userCountryCode');
@@ -538,9 +584,6 @@ async function getUserCountry() {
     }
 }
 
-// ==============================================================================
-// === बदला हुआ और बेहतर loadUserData फ़ंक्शन (अंतिम सुधार) ===
-// ==============================================================================
 function loadUserData() {
     onValue(window.dbRef, async (snapshot) => {
         let data = snapshot.val();
@@ -599,21 +642,15 @@ function loadUserData() {
 
         if (!isInitialLoadComplete) {
             isInitialLoadComplete = true; 
-            
             const lastSeen = data.lastActive || 0;
             const sessionStartTime = data.dailyMinedTimestamp || 0;
             const sessionEndTime = data.miningEndTime || 0;
             const now = Date.now();
             let offlineCoinsEarned = 0;
 
-            // === निर्णायक सुधार: ऑफ़लाइन गणना अब पूरी तरह से सुरक्षित है ===
             if (sessionStartTime > 0 && sessionEndTime > lastSeen) {
-                // गणना केवल तब शुरू होती है जब उपयोगकर्ता पिछली बार सक्रिय था या जब खनन शुरू हुआ था, जो भी बाद में हो।
                 const calculationStartTime = Math.max(lastSeen, sessionStartTime);
-                
-                // गणना वर्तमान समय या सत्र के अंत में समाप्त होती है, जो भी पहले हो।
                 const calculationEndTime = Math.min(now, sessionEndTime);
-                
                 const offlineDurationMs = calculationEndTime - calculationStartTime;
 
                 if (offlineDurationMs > 0) {
@@ -744,7 +781,7 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else if (startStatus === true) { 
+                    } else if (startStatus === true) {
                         actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                     }
 
@@ -788,9 +825,9 @@ function closeTaskModal() {
 window.startTask = (taskId, taskLink) => {
     const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
     set(userTaskStatusRef, Date.now()).then(() => {
-        sessionStorage.setItem('awaitingVerificationPopup', 'true'); 
+        sessionStorage.setItem('awaitingVerificationPopup', 'true');
         closeTaskModal();
-        WebApp.openLink(taskLink); 
+        WebApp.openLink(taskLink);
         loadLiveTasks();
     }).catch(error => {
         WebApp.showAlert("Could not start the task. Please try again.");
@@ -1112,6 +1149,7 @@ window.submitWithdrawal = async () => {
                 userName: USER_NAME,
                 amount: amount,
                 upiId: upiId,
+                type: 'UPI',
                 timestamp: Date.now(),
                 status: 'Pending'
             };
@@ -1130,10 +1168,142 @@ window.submitWithdrawal = async () => {
     }
 };
 
+window.showPaypalModal = () => {
+    paypalModal.style.display = "block";
+    document.getElementById('paypalAmount').value = '';
+    document.getElementById('paypalEmail').value = '';
+    submitPaypalBtn.disabled = true;
+}
+window.closePaypalModal = () => { paypalModal.style.display = "none"; }
+
+window.showCryptoModal = () => {
+    cryptoModal.style.display = "block";
+    document.getElementById('cryptoAmount').value = '';
+    document.getElementById('cryptoAddress').value = '';
+    submitCryptoBtn.disabled = true;
+}
+window.closeCryptoModal = () => { cryptoModal.style.display = "none"; }
+
+window.checkPaypalEligibility = () => {
+    const amount = Number(document.getElementById('paypalAmount').value);
+    if (amount >= MIN_INTL_WITHDRAWAL_COINS && amount <= window.coins) {
+        submitPaypalBtn.disabled = false;
+    } else {
+        submitPaypalBtn.disabled = true;
+    }
+}
+
+window.checkCryptoEligibility = () => {
+    const amount = Number(document.getElementById('cryptoAmount').value);
+    if (amount >= MIN_INTL_WITHDRAWAL_COINS && amount <= window.coins) {
+        submitCryptoBtn.disabled = false;
+    } else {
+        submitCryptoBtn.disabled = true;
+    }
+}
+
+window.submitPaypalWithdrawal = async () => {
+    const amount = Number(document.getElementById('paypalAmount').value);
+    const paypalEmail = document.getElementById('paypalEmail').value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (amount < MIN_INTL_WITHDRAWAL_COINS || amount > window.coins) {
+        WebApp.showAlert(`Withdrawal failed: Amount must be valid.`);
+        return;
+    }
+    if (!emailRegex.test(paypalEmail)) {
+        WebApp.showAlert("Withdrawal failed: Please enter a valid PayPal email address.");
+        return;
+    }
+
+    try {
+        const userRef = ref(database, `users/${TELEGRAM_USER_ID}`);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+
+        if (userData && userData.completedTasks && Object.keys(userData.completedTasks).length > 0) {
+            const newCoinBalance = window.coins - amount;
+            await update(window.dbRef, { coins: newCoinBalance });
+
+            const withdrawalRequest = {
+                userId: TELEGRAM_USER_ID,
+                userName: USER_NAME,
+                amount: amount,
+                paypalEmail: paypalEmail,
+                type: 'PayPal',
+                timestamp: Date.now(),
+                status: 'Pending'
+            };
+
+            await push(WITHDRAWALS_REF, withdrawalRequest);
+            
+            closePaypalModal();
+            WebApp.showAlert(`Withdrawal of ${amount} Coins to PayPal submitted successfully. Processing in 48 hours.`);
+
+        } else {
+            WebApp.showAlert("You must complete at least one task before you can withdraw.");
+        }
+    } catch (error) {
+        console.error("PayPal Withdrawal Error:", error);
+        WebApp.showAlert("An error occurred during withdrawal. Please try again.");
+    }
+};
+
+window.submitCryptoWithdrawal = async () => {
+    const amount = Number(document.getElementById('cryptoAmount').value);
+    const cryptoAddress = document.getElementById('cryptoAddress').value.trim();
+
+    if (amount < MIN_INTL_WITHDRAWAL_COINS || amount > window.coins) {
+        WebApp.showAlert(`Withdrawal failed: Amount must be valid.`);
+        return;
+    }
+    if (cryptoAddress.length < 26) {
+        WebApp.showAlert("Withdrawal failed: Please enter a valid USDT (TRC20) wallet address.");
+        return;
+    }
+
+    try {
+        const userRef = ref(database, `users/${TELEGRAM_USER_ID}`);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+
+        if (userData && userData.completedTasks && Object.keys(userData.completedTasks).length > 0) {
+            const newCoinBalance = window.coins - amount;
+            await update(window.dbRef, { coins: newCoinBalance });
+
+            const withdrawalRequest = {
+                userId: TELEGRAM_USER_ID,
+                userName: USER_NAME,
+                amount: amount,
+                cryptoAddress: cryptoAddress,
+                network: 'USDT_TRC20',
+                type: 'Crypto',
+                timestamp: Date.now(),
+                status: 'Pending'
+            };
+
+            await push(WITHDRAWALS_REF, withdrawalRequest);
+            
+            closeCryptoModal();
+            WebApp.showAlert(`Withdrawal of ${amount} Coins to Crypto Wallet submitted successfully. Processing in 48 hours.`);
+
+        } else {
+            WebApp.showAlert("You must complete at least one task before you can withdraw.");
+        }
+    } catch (error) {
+        console.error("Crypto Withdrawal Error:", error);
+        WebApp.showAlert("An error occurred during withdrawal. Please try again.");
+    }
+};
+
+
 window.onclick = function(event) {
     if (event.target == withdrawalModal) { window.closeWithdrawalModal(); }
     if (event.target == taskDetailModal) { closeTaskModal(); }
+    if (event.target == paypalModal) { window.closePaypalModal(); }
+    if (event.target == cryptoModal) { window.closeCryptoModal(); }
 }
+
 window.shareReferralLink = () => {
     const link = document.getElementById('refLink').innerText;
     const shareText = `💰 Join CoinMine and start earning! Use my referral link: ${link}. You get 500 bonus Coins, and I get a 5% lifetime commission on your mining!`;
