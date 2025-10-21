@@ -169,16 +169,48 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     box-shadow: 0 0 8px var(--secondary-glow), 0 0 20px var(--secondary-glow), 0 0 30px var(--secondary-glow);
     animation: pulse-glow-secondary 2.5s infinite alternate;
 }
-/* === नया: वॉलेट पेज के बटन से ग्लो हटाया गया === */
-.wallet-summary button {
+
+/* === नया और बेहतर वॉलेट बटन स्टाइल === */
+.withdrawal-option-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    color: #0D1117;
+}
+
+.withdrawal-option-btn:first-child {
+    margin-top: 0;
+}
+
+.withdrawal-option-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.upi-btn {
     background: var(--primary-glow);
-    color: #000;
-    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
-    animation: none; /* ग्लो एनीमेशन हटाया गया */
+    box-shadow: 0 0 15px var(--primary-glow), 0 0 25px rgba(0, 229, 255, 0.5);
 }
-.wallet-summary button:hover {
-    filter: brightness(1.2);
+
+.paypal-btn {
+    background: #0070BA;
+    color: white;
+    box-shadow: 0 0 15px #0070BA, 0 0 25px rgba(0, 112, 186, 0.5);
 }
+
+.crypto-btn {
+    background: #F7931A;
+    box-shadow: 0 0 15px #F7931A, 0 0 25px rgba(247, 147, 26, 0.5);
+}
+
 
 @keyframes pulse-glow-primary {
   from { box-shadow: 0 0 8px var(--primary-glow), 0 0 20px var(--primary-glow), 0 0 30px var(--primary-glow); }
@@ -348,9 +380,11 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
                 <div class="balance-value"><span id="walletCoins">0</span></div>
                 <div class="value-inr">₹ <span id="walletValue">0.00</span> (1000 Coins ≈ ₹1)</div>
             </div>
-            <button onclick="showWithdrawalModal()">UPI Withdrawal</button>
-            <button onclick="showPaypalModal()" style="margin-top: 10px; background: #0070BA; animation: none;">PayPal Withdrawal</button>
-            <button onclick="showCryptoModal()" style="margin-top: 10px; background: #F7931A; animation: none;">Crypto (USDT)</button>
+            <div class="withdrawal-options">
+                <button class="withdrawal-option-btn upi-btn" onclick="showWithdrawalModal()">UPI</button>
+                <button class="withdrawal-option-btn paypal-btn" onclick="showPaypalModal()">PAYPAL</button>
+                <button class="withdrawal-option-btn crypto-btn" onclick="showCryptoModal()">CRYPTO</button>
+            </div>
             <div class="withdrawal-note">
                 Minimum UPI withdrawal: <strong>10,000 Coins</strong> (₹10.00).<br>
                 Minimum International withdrawal: <strong>100,000 Coins</strong>.
@@ -534,7 +568,13 @@ window.dbRef = ref(database, DB_NODE_PATH);
 let miningInterval = null;
 let remainingTimeInterval = null;
 let incrementCounter = 0;
-const MINING_RATE_MS = 360;
+
+// === देश-आधारित माइनिंग दरें ===
+let COINS_PER_INCREMENT = 0.1; // भारतीय उपयोगकर्ताओं के लिए डिफ़ॉल्ट (800 सिक्के/घंटा)
+const MINING_RATE_MS = 450; 
+const INTL_COINS_PER_INCREMENT = 0.625; // अंतर्राष्ट्रीय उपयोगकर्ताओं के लिए (5000 सिक्के/घंटा)
+// ===============================
+
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
@@ -630,6 +670,14 @@ function loadUserData() {
             updateGlobalState(initialData);
             return;
         }
+        
+        // === देश के आधार पर माइनिंग दर निर्धारित करें ===
+        if (data.country && data.country !== 'IN') {
+            COINS_PER_INCREMENT = INTL_COINS_PER_INCREMENT;
+        } else {
+            COINS_PER_INCREMENT = 0.1;
+        }
+        // ============================================
 
         const updates = {
             lastActive: Date.now(),
@@ -654,9 +702,11 @@ function loadUserData() {
                 const offlineDurationMs = calculationEndTime - calculationStartTime;
 
                 if (offlineDurationMs > 0) {
-                    const coinsPerIncrement = 0.1;
                     const incrementsMissed = Math.floor(offlineDurationMs / MINING_RATE_MS);
-                    offlineCoinsEarned = incrementsMissed * coinsPerIncrement;
+                    // ऑफ़लाइन गणना के लिए सही दर का उपयोग करें
+                    const coinsPerIncrementForOffline = (data.country && data.country !== 'IN') ? INTL_COINS_PER_INCREMENT : 0.1;
+                    offlineCoinsEarned = incrementsMissed * coinsPerIncrementForOffline;
+                    
                     if (offlineCoinsEarned > 0) {
                         data.coins += offlineCoinsEarned;
                         updates.coins = data.coins; 
@@ -664,7 +714,7 @@ function loadUserData() {
                         const historyKey = historyRef.key;
                         updates[`coin_history/${historyKey}`] = {
                             reason: 'Offline Mining',
-                            amount: parseFloat(offlineCoinsEarned.toFixed(2)),
+                            amount: parseFloat(offlineCoinsEarned.toFixed(3)),
                             timestamp: Date.now()
                         };
                     }
@@ -991,7 +1041,7 @@ function showMiningIncrement() {
     if (!miningEffectContainer) return;
     const incrementEl = document.createElement('span');
     incrementEl.className = 'mining-increment';
-    incrementEl.innerText = '+0.1';
+    incrementEl.innerText = `+${COINS_PER_INCREMENT.toString()}`;
     const xPos = Math.random() * 50 + 25;
     const yPos = Math.random() * 40 + 40;
     incrementEl.style.left = `${xPos}%`;
@@ -1029,9 +1079,9 @@ function resumeMiningSession() {
     clearInterval(remainingTimeInterval);
     incrementCounter = 0;
     miningInterval = setInterval(() => {
-        window.coins += 0.1;
+        window.coins += COINS_PER_INCREMENT;
         incrementCounter++;
-        if (incrementCounter % 28 === 0) {
+        if (incrementCounter % 20 === 0) { // डेटाबेस अपडेट की आवृत्ति थोड़ी बढ़ा दी गई है
             window.updateDatabase({ coins: window.coins });
         }
         startMiningAnimation();
