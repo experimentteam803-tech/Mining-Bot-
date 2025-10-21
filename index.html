@@ -538,6 +538,9 @@ async function getUserCountry() {
     }
 }
 
+// ==============================================================================
+// === बदला हुआ और बेहतर loadUserData फ़ंक्शन (अंतिम सुधार) ===
+// ==============================================================================
 function loadUserData() {
     onValue(window.dbRef, async (snapshot) => {
         let data = snapshot.val();
@@ -596,14 +599,23 @@ function loadUserData() {
 
         if (!isInitialLoadComplete) {
             isInitialLoadComplete = true; 
+            
             const lastSeen = data.lastActive || 0;
+            const sessionStartTime = data.dailyMinedTimestamp || 0;
             const sessionEndTime = data.miningEndTime || 0;
             const now = Date.now();
             let offlineCoinsEarned = 0;
 
-            if (sessionEndTime > lastSeen) {
+            // === निर्णायक सुधार: ऑफ़लाइन गणना अब पूरी तरह से सुरक्षित है ===
+            if (sessionStartTime > 0 && sessionEndTime > lastSeen) {
+                // गणना केवल तब शुरू होती है जब उपयोगकर्ता पिछली बार सक्रिय था या जब खनन शुरू हुआ था, जो भी बाद में हो।
+                const calculationStartTime = Math.max(lastSeen, sessionStartTime);
+                
+                // गणना वर्तमान समय या सत्र के अंत में समाप्त होती है, जो भी पहले हो।
                 const calculationEndTime = Math.min(now, sessionEndTime);
-                const offlineDurationMs = calculationEndTime - lastSeen;
+                
+                const offlineDurationMs = calculationEndTime - calculationStartTime;
+
                 if (offlineDurationMs > 0) {
                     const coinsPerIncrement = 0.1;
                     const incrementsMissed = Math.floor(offlineDurationMs / MINING_RATE_MS);
@@ -719,7 +731,6 @@ async function loadLiveTasks() {
                     const startStatus = startedTasks[taskId];
                     let actionButton = '';
 
-                    // === CHANGE 1: Modified button logic to hide the timer ===
                     if (isCompleted) {
                         actionButton = `<button class="verify-btn" style="background: #4caf50; color: white;" disabled>✅ Completed</button>`;
                     } else if (startStatus === 'pending') {
@@ -733,10 +744,9 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else if (startStatus === true) {
+                    } else if (startStatus === true) { 
                         actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                     }
-                    // === END OF CHANGE 1 ===
 
                     taskHtml += `
                         <div class="task-item" onclick="showTaskDetails('${taskId}')">
@@ -775,20 +785,18 @@ function closeTaskModal() {
     taskDetailModal.style.display = 'none';
 }
 
-// === CHANGE 2: Modified startTask function for silent redirect ===
 window.startTask = (taskId, taskLink) => {
     const userTaskStatusRef = ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`);
     set(userTaskStatusRef, Date.now()).then(() => {
-        sessionStorage.setItem('awaitingVerificationPopup', 'true'); // Set flag for return pop-up
+        sessionStorage.setItem('awaitingVerificationPopup', 'true'); 
         closeTaskModal();
-        WebApp.openLink(taskLink); // Redirect directly without pop-up
+        WebApp.openLink(taskLink); 
         loadLiveTasks();
     }).catch(error => {
         WebApp.showAlert("Could not start the task. Please try again.");
         console.error("Error starting task:", error);
     });
 };
-// === END OF CHANGE 2 ===
 
 window.verifyTask = (taskId, taskName) => {
     const verificationsRef = ref(database, 'task_verifications');
@@ -1199,9 +1207,8 @@ document.addEventListener('DOMContentLoaded', () => {
     listenForNotifications();
     listenForAdminPopups();
     
-    // === CHANGE 3: Add event listener for returning to the app ===
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) { // User has returned to the app
+        if (!document.hidden) { 
             const awaitingPopup = sessionStorage.getItem('awaitingVerificationPopup');
             if (awaitingPopup) {
                 WebApp.showPopup({
@@ -1210,11 +1217,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 sessionStorage.removeItem('awaitingVerificationPopup');
             }
-            // Refresh tasks to update button states regardless
             loadLiveTasks();
         }
     });
-    // === END OF CHANGE 3 ===
 
     document.getElementById('customerCareLink').addEventListener('click', function(event) {
         event.preventDefault();
