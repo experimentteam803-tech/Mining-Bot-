@@ -526,6 +526,15 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<!-- =================================================================== -->
+<!-- ऑडियो एलीमेंट्स -->
+<!-- ज़रूरी: अपनी साउंड फ़ाइलों को 'Sound' फ़ोल्डर में रखें और यहाँ सही नाम दें -->
+<!-- =================================================================== -->
+<audio id="preMiningSound" src="Sound/pre-mining.mp3" preload="auto" loop></audio>
+<audio id="miningSound" src="Sound/mining.mp3" preload="auto" loop></audio>
+<audio id="clickSound" src="Sound/click.mp3" preload="auto"></audio>
+<audio id="successSound" src="Sound/success.mp3" preload="auto"></audio>
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -569,11 +578,9 @@ let miningInterval = null;
 let remainingTimeInterval = null;
 let incrementCounter = 0;
 
-// === देश-आधारित माइनिंग दरें ===
-let COINS_PER_INCREMENT = 0.1; // भारतीय उपयोगकर्ताओं के लिए डिफ़ॉल्ट (800 सिक्के/घंटा)
+let COINS_PER_INCREMENT = 0.1;
 const MINING_RATE_MS = 450; 
-const INTL_COINS_PER_INCREMENT = 0.625; // अंतर्राष्ट्रीय उपयोगकर्ताओं के लिए (5000 सिक्के/घंटा)
-// ===============================
+const INTL_COINS_PER_INCREMENT = 0.625;
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
@@ -599,6 +606,29 @@ const paypalModal = document.getElementById('paypalModal');
 const cryptoModal = document.getElementById('cryptoModal');
 const submitPaypalBtn = document.getElementById('submitPaypalBtn');
 const submitCryptoBtn = document.getElementById('submitCryptoBtn');
+
+const preMiningSound = document.getElementById('preMiningSound');
+const miningSound = document.getElementById('miningSound');
+const clickSound = document.getElementById('clickSound');
+const successSound = document.getElementById('successSound');
+
+function playClickSound() {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(e => {});
+}
+
+function playSuccessSound() {
+    successSound.currentTime = 0;
+    successSound.play().catch(e => {});
+}
+
+function stopAllMiningSounds() {
+    preMiningSound.pause();
+    preMiningSound.currentTime = 0;
+    miningSound.pause();
+    miningSound.currentTime = 0;
+}
+
 
 async function getUserCountry() {
     const storedCountry = localStorage.getItem('userCountryCode');
@@ -671,13 +701,11 @@ function loadUserData() {
             return;
         }
         
-        // === देश के आधार पर माइनिंग दर निर्धारित करें ===
         if (data.country && data.country !== 'IN') {
             COINS_PER_INCREMENT = INTL_COINS_PER_INCREMENT;
         } else {
             COINS_PER_INCREMENT = 0.1;
         }
-        // ============================================
 
         const updates = {
             lastActive: Date.now(),
@@ -703,7 +731,6 @@ function loadUserData() {
 
                 if (offlineDurationMs > 0) {
                     const incrementsMissed = Math.floor(offlineDurationMs / MINING_RATE_MS);
-                    // ऑफ़लाइन गणना के लिए सही दर का उपयोग करें
                     const coinsPerIncrementForOffline = (data.country && data.country !== 'IN') ? INTL_COINS_PER_INCREMENT : 0.1;
                     offlineCoinsEarned = incrementsMissed * coinsPerIncrementForOffline;
                     
@@ -1041,7 +1068,7 @@ function showMiningIncrement() {
     if (!miningEffectContainer) return;
     const incrementEl = document.createElement('span');
     incrementEl.className = 'mining-increment';
-    incrementEl.innerText = `+${COINS_PER_INCREMENT.toString()}`;
+    incrementEl.innerText = `+${COINS_PER_INCREMENT.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')}`;
     const xPos = Math.random() * 50 + 25;
     const yPos = Math.random() * 40 + 40;
     incrementEl.style.left = `${xPos}%`;
@@ -1050,6 +1077,7 @@ function showMiningIncrement() {
     setTimeout(() => { incrementEl.remove(); }, 1200);
 }
 window.stopMining = (doUpdateState = true) => {
+    stopAllMiningSounds();
     clearInterval(miningInterval);
     clearInterval(remainingTimeInterval);
     if(miningEffectContainer) miningEffectContainer.innerHTML = '';
@@ -1073,6 +1101,8 @@ function updateCountdown() {
 }
 function resumeMiningSession() {
     if (miningInterval) return;
+    stopAllMiningSounds();
+    miningSound.play().catch(e => {});
     const remainingTime = window.miningEndTime - Date.now();
     if (remainingTime <= 0) return;
     clearInterval(miningInterval);
@@ -1081,7 +1111,7 @@ function resumeMiningSession() {
     miningInterval = setInterval(() => {
         window.coins += COINS_PER_INCREMENT;
         incrementCounter++;
-        if (incrementCounter % 20 === 0) { // डेटाबेस अपडेट की आवृत्ति थोड़ी बढ़ा दी गई है
+        if (incrementCounter % 20 === 0) {
             window.updateDatabase({ coins: window.coins });
         }
         startMiningAnimation();
@@ -1103,6 +1133,7 @@ window.startDailyMining = () => {
   resumeMiningSession();
 }
 function startCooldownCountdown() {
+    stopAllMiningSounds();
     clearInterval(remainingTimeInterval);
     if(miningEffectContainer) miningEffectContainer.innerHTML = '';
     remainingTimeInterval = setInterval(() => {
@@ -1127,9 +1158,15 @@ function updateMiningButtonState() {
     const miningStillActive = window.miningEndTime > Date.now();
     const isAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
     updateAdStatus();
-    if (miningStillActive) { updateCountdown(); }
-    else if (!window.canMineAgain() && window.dailyMinedTimestamp !== 0) { startCooldownCountdown(); }
-    else if (isAdsComplete) {
+    if (miningStillActive) {
+        stopAllMiningSounds();
+        updateCountdown();
+    } else if (!window.canMineAgain() && window.dailyMinedTimestamp !== 0) {
+        stopAllMiningSounds();
+        startCooldownCountdown();
+    } else if (isAdsComplete) {
+        stopAllMiningSounds();
+        preMiningSound.play().catch(e => {});
         if(miningEffectContainer) miningEffectContainer.innerHTML = '';
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
@@ -1137,6 +1174,7 @@ function updateMiningButtonState() {
         mineButton.style.background = 'var(--primary-glow)';
         countdownDisplay.innerText = 'Click to start 1 hour session';
     } else {
+        stopAllMiningSounds();
         if(miningEffectContainer) miningEffectContainer.innerHTML = '';
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = true;
@@ -1206,6 +1244,7 @@ window.submitWithdrawal = async () => {
 
             await push(WITHDRAWALS_REF, withdrawalRequest);
             
+            playSuccessSound();
             closeWithdrawalModal();
             WebApp.showAlert(`Withdrawal of ${amount} Coins submitted successfully. Processing in 24 hours.`);
 
@@ -1287,6 +1326,7 @@ window.submitPaypalWithdrawal = async () => {
 
             await push(WITHDRAWALS_REF, withdrawalRequest);
             
+            playSuccessSound();
             closePaypalModal();
             WebApp.showAlert(`Withdrawal of ${amount} Coins to PayPal submitted successfully. Processing in 48 hours.`);
 
@@ -1334,6 +1374,7 @@ window.submitCryptoWithdrawal = async () => {
 
             await push(WITHDRAWALS_REF, withdrawalRequest);
             
+            playSuccessSound();
             closeCryptoModal();
             WebApp.showAlert(`Withdrawal of ${amount} Coins to Crypto Wallet submitted successfully. Processing in 48 hours.`);
 
@@ -1427,6 +1468,12 @@ document.addEventListener('DOMContentLoaded', () => {
     listenForNotifications();
     listenForAdminPopups();
     
+    document.body.addEventListener('click', (event) => {
+        if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn')) {
+            playClickSound();
+        }
+    });
+
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) { 
             const awaitingPopup = sessionStorage.getItem('awaitingVerificationPopup');
