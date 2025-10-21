@@ -493,7 +493,8 @@ window.dbRef = ref(database, DB_NODE_PATH);
 let miningInterval = null;
 let remainingTimeInterval = null;
 let incrementCounter = 0;
-const MINING_RATE_MS = 360;
+// === CHANGE 1: Adjusted mining rate to 450ms for ~800 coins/hr ===
+const MINING_RATE_MS = 450;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
@@ -611,7 +612,8 @@ function loadUserData() {
 
             if (sessionEndTime > lastSeen) {
                 const calculationEndTime = Math.min(now, sessionEndTime);
-                const offlineDurationMs = calculationEndTime - lastSeen;
+                // === CHANGE 2: Capped offline duration to 1 hour to prevent coin exploit ===
+                const offlineDurationMs = Math.min(calculationEndTime - lastSeen, ONE_HOUR_MS);
                 if (offlineDurationMs > 0) {
                     const coinsPerIncrement = 0.1;
                     const incrementsMissed = Math.floor(offlineDurationMs / MINING_RATE_MS);
