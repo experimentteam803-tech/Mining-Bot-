@@ -527,7 +527,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 </div>
 
 <!-- =================================================================== -->
-<!-- ऑडियो एलीमेंट्स - पथ से "Sound/" हटा दिया गया है -->
+<!-- ऑडियो एलीमेंट्स -->
+<!-- ज़रूरी: अपनी साउंड फ़ाइलों को 'Sound' फ़ोल्डर में रखें और यहाँ सही नाम दें -->
 <!-- =================================================================== -->
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
@@ -610,13 +611,25 @@ const preMiningSound = document.getElementById('preMiningSound');
 const miningSound = document.getElementById('miningSound');
 const clickSound = document.getElementById('clickSound');
 const successSound = document.getElementById('successSound');
+let hasInteracted = false;
+
+function primeAudio() {
+    if (hasInteracted) return;
+    hasInteracted = true;
+    const sounds = [preMiningSound, miningSound, clickSound, successSound];
+    sounds.forEach(sound => {
+        sound.play().then(() => sound.pause()).catch(() => {});
+    });
+}
 
 function playClickSound() {
+    if (!hasInteracted) return;
     clickSound.currentTime = 0;
     clickSound.play().catch(e => {});
 }
 
 function playSuccessSound() {
+    if (!hasInteracted) return;
     successSound.currentTime = 0;
     successSound.play().catch(e => {});
 }
@@ -1101,7 +1114,7 @@ function updateCountdown() {
 function resumeMiningSession() {
     if (miningInterval) return;
     stopAllMiningSounds();
-    miningSound.play().catch(e => {});
+    if (hasInteracted) miningSound.play().catch(e => {});
     const remainingTime = window.miningEndTime - Date.now();
     if (remainingTime <= 0) return;
     clearInterval(miningInterval);
@@ -1165,7 +1178,7 @@ function updateMiningButtonState() {
         startCooldownCountdown();
     } else if (isAdsComplete) {
         stopAllMiningSounds();
-        preMiningSound.play().catch(e => {});
+        if (hasInteracted) preMiningSound.play().catch(e => {});
         if(miningEffectContainer) miningEffectContainer.innerHTML = '';
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
@@ -1466,6 +1479,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWithdrawalHistory();
     listenForNotifications();
     listenForAdminPopups();
+    
+    // पहली बातचीत पर साउंड तैयार करने के लिए इवेंट लिसनर
+    document.body.addEventListener('click', primeAudio, { once: true });
     
     document.body.addEventListener('click', (event) => {
         if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn')) {
