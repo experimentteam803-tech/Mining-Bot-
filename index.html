@@ -662,6 +662,34 @@ function stopAllMiningSounds() {
     miningSound.currentTime = 0;
 }
 
+// === NEW SOUND CONTROLLER FUNCTION ===
+function updateSoundState() {
+    if (!hasInteracted) return;
+
+    const miningIsActive = window.miningEndTime > Date.now();
+    const isReadyToMine = window.canMineAgain() && window.adsWatched >= window.ADS_REQUIRED;
+    const homeSectionIsVisible = document.getElementById('home').style.display !== 'none';
+
+    if (miningIsActive) {
+        if (miningSound.paused) {
+            preMiningSound.pause();
+            preMiningSound.currentTime = 0;
+            miningSound.play().catch(e => {});
+        }
+    } else if (homeSectionIsVisible && isReadyToMine) {
+        if (preMiningSound.paused) {
+            miningSound.pause();
+            miningSound.currentTime = 0;
+            preMiningSound.play().catch(e => {});
+        }
+    } else {
+        preMiningSound.pause();
+        preMiningSound.currentTime = 0;
+        miningSound.pause();
+        miningSound.currentTime = 0;
+    }
+}
+
 
 async function getUserCountry() {
     const storedCountry = localStorage.getItem('userCountryCode');
@@ -1110,7 +1138,6 @@ function showMiningIncrement() {
     setTimeout(() => { incrementEl.remove(); }, 1200);
 }
 window.stopMining = (doUpdateState = true) => {
-    stopAllMiningSounds();
     clearInterval(miningInterval);
     clearInterval(remainingTimeInterval);
     if(miningEffectContainer) miningEffectContainer.innerHTML = '';
@@ -1122,6 +1149,7 @@ window.stopMining = (doUpdateState = true) => {
         if(doUpdateState) { window.updateDatabase({ miningEndTime: 0, coins: window.coins }); }
     }
     if (doUpdateState) updateMiningButtonState();
+    updateSoundState();
 }
 function updateCountdown() {
     const remainingSessionTime = window.miningEndTime - Date.now();
@@ -1134,8 +1162,7 @@ function updateCountdown() {
 }
 function resumeMiningSession() {
     if (miningInterval) return;
-    stopAllMiningSounds();
-    if (hasInteracted) miningSound.play().catch(e => {});
+    updateSoundState();
     const remainingTime = window.miningEndTime - Date.now();
     if (remainingTime <= 0) return;
     clearInterval(miningInterval);
@@ -1192,14 +1219,11 @@ function updateMiningButtonState() {
     const isAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
     updateAdStatus();
     if (miningStillActive) {
-        stopAllMiningSounds();
         updateCountdown();
     } else if (!window.canMineAgain() && window.dailyMinedTimestamp !== 0) {
         stopAllMiningSounds();
         startCooldownCountdown();
     } else if (isAdsComplete) {
-        stopAllMiningSounds();
-        if (hasInteracted) preMiningSound.play().catch(e => {});
         if(miningEffectContainer) miningEffectContainer.innerHTML = '';
         mineCircle.classList.remove('mining-active-glow');
         mineButton.disabled = false;
@@ -1215,6 +1239,7 @@ function updateMiningButtonState() {
         mineButton.style.background = '#808080';
         countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
     }
+    updateSoundState();
 }
 window.showWithdrawalModal = () => {
     withdrawalModal.style.display = "block";
@@ -1542,6 +1567,7 @@ window.showSection = (sectionId, button) => {
   document.getElementById(sectionId).style.display='block';
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
   button.classList.add('active');
+  updateSoundState();
 }
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
