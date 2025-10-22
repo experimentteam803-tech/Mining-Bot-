@@ -331,6 +331,28 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     background: var(--secondary-glow); color: #000; font-weight: 700; cursor: pointer; transition: filter 0.2s;
 }
 .verify-btn:hover { filter: brightness(1.2); }
+
+/* === नया स्टाइल: टास्क मॉडल के लिए === */
+.task-button-container {
+    display: flex;
+    gap: 10px; /* बटन के बीच की जगह */
+    margin-top: 20px;
+}
+.task-button-container .action-btn {
+    flex: 1; /* बटन को बराबर जगह दें */
+    margin: 0;
+    padding: 14px 10px; /* छोटे स्क्रीन के लिए पैडिंग */
+    font-size: 16px; /* छोटा फ़ॉन्ट आकार */
+}
+.help-btn {
+    background: var(--border-color);
+    color: var(--text-light);
+    box-shadow: none;
+    animation: none;
+}
+.help-btn:hover {
+    background: var(--text-dark);
+}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -522,7 +544,11 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
         <p style="font-size: 14px; color: #ccc; margin-top: 10px;">Instructions:</p>
         <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;">
         </ul>
-        <button id="taskDetailCompleteBtn" class="action-btn" style="width: 100%; margin: 0; background: var(--primary-glow); color: #000;">Complete Task</button>
+        <!-- === बदला हुआ बटन सेक्शन === -->
+        <div class="task-button-container">
+            <button class="action-btn help-btn" onclick="WebApp.openTelegramLink('https://t.me/MiningFatherhelp')">❓ Help</button>
+            <button id="taskDetailCompleteBtn" class="action-btn" style="background: var(--primary-glow); color: #000;">Complete Task</button>
+        </div>
     </div>
 </div>
 
