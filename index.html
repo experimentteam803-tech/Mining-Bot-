@@ -332,26 +332,23 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 }
 .verify-btn:hover { filter: brightness(1.2); }
 
-/* === नया स्टाइल: टास्क मॉडल के लिए === */
-.task-button-container {
-    display: flex;
-    gap: 10px; /* बटन के बीच की जगह */
-    margin-top: 20px;
+/* === नया स्टाइल: हेल्प बटन के लिए === */
+.task-help-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    display: block;
+    margin: 15px auto 0;
+    transition: all 0.2s ease;
 }
-.task-button-container .action-btn {
-    flex: 1; /* बटन को बराबर जगह दें */
-    margin: 0;
-    padding: 14px 10px; /* छोटे स्क्रीन के लिए पैडिंग */
-    font-size: 16px; /* छोटा फ़ॉन्ट आकार */
-}
-.help-btn {
+.task-help-btn:hover {
     background: var(--border-color);
     color: var(--text-light);
-    box-shadow: none;
-    animation: none;
-}
-.help-btn:hover {
-    background: var(--text-dark);
 }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -545,10 +542,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
         <ul id="taskDetailInstructions" class="referral-instruction-list" style="margin-bottom: 20px;">
         </ul>
         <!-- === बदला हुआ बटन सेक्शन === -->
-        <div class="task-button-container">
-            <button class="action-btn help-btn" onclick="WebApp.openTelegramLink('https://t.me/MiningFatherhelp')">❓ Help</button>
-            <button id="taskDetailCompleteBtn" class="action-btn" style="background: var(--primary-glow); color: #000;">Complete Task</button>
-        </div>
+        <button id="taskDetailCompleteBtn" class="action-btn" style="width: 100%; margin: 20px 0 0 0; background: var(--primary-glow); color: #000;">Complete Task</button>
+        <button class="task-help-btn" onclick="Telegram.WebApp.openTelegramLink('https://t.me/MiningFatherhelp')">❓ Need Help?</button>
     </div>
 </div>
 
