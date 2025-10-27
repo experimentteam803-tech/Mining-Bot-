@@ -70,12 +70,13 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 #totalCoins{font-size:48px;color:var(--secondary-glow);font-weight:700;margin-bottom:40px;text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);text-align: center;}
 .circle-container{position:relative;display:flex;align-items:center;justify-content:center;width: 100%;margin-top: 20px;}
 
+/* === बदला हुआ हिस्सा START === */
 .circle {
     width:280px;
     height:280px;
     border-radius:50%;
-    background: radial-gradient(ellipse at center, rgba(13, 17, 23, 0.1), transparent 70%),
-                radial-gradient(ellipse at center, rgba(0, 229, 255, 0.1), var(--bg-dark) 75%);
+    /* गैलेक्सी इफ़ेक्ट के लिए एक गहरा बेस रंग सेट किया गया है */
+    background-color: var(--gradient-end);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -86,6 +87,22 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
     box-shadow: inset 0 0 40px rgba(0, 229, 255, 0.2), 0 0 30px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.2);
     transition: box-shadow 0.3s ease-out;
 }
+
+/* घूमने वाले गैलेक्सी/नेबुला इफ़ेक्ट को जोड़ने के लिए स्यूडो-एलिमेंट */
+.circle::before {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
+    background-image:
+        radial-gradient(ellipse at 30% 70%, var(--gradient-start), transparent 60%),
+        radial-gradient(ellipse at 70% 30%, rgba(0, 229, 255, 0.4), transparent 50%);
+    animation: rotate-galaxy 40s linear infinite;
+}
+/* === बदला हुआ हिस्सा END === */
+
 .mining-visual {
     position: absolute;
     width: 100%;
@@ -115,6 +132,12 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 @keyframes rotate-anim {
     from { transform: translate(-50%, -50%) rotate(0deg); }
     to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* === गैलेक्सी इफ़ेक्ट के लिए कीफ़्रेम एनीमेशन === */
+@keyframes rotate-galaxy {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .circle.mining-active-glow {animation: pulseGlow 2s infinite alternate;}
