@@ -70,13 +70,12 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 #totalCoins{font-size:48px;color:var(--secondary-glow);font-weight:700;margin-bottom:40px;text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);text-align: center;}
 .circle-container{position:relative;display:flex;align-items:center;justify-content:center;width: 100%;margin-top: 20px;}
 
-/* === बदला हुआ हिस्सा START === */
 .circle {
     width:280px;
     height:280px;
     border-radius:50%;
-    /* गैलेक्सी इफ़ेक्ट के लिए एक गहरा बेस रंग सेट किया गया है */
-    background-color: var(--gradient-end);
+    background: radial-gradient(ellipse at center, rgba(13, 17, 23, 0.1), transparent 70%),
+                radial-gradient(ellipse at center, rgba(0, 229, 255, 0.1), var(--bg-dark) 75%);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -87,22 +86,6 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
     box-shadow: inset 0 0 40px rgba(0, 229, 255, 0.2), 0 0 30px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.2);
     transition: box-shadow 0.3s ease-out;
 }
-
-/* घूमने वाले गैलेक्सी/नेबुला इफ़ेक्ट को जोड़ने के लिए स्यूडो-एलिमेंट */
-.circle::before {
-    content: '';
-    position: absolute;
-    width: 150%;
-    height: 150%;
-    top: -25%;
-    left: -25%;
-    background-image:
-        radial-gradient(ellipse at 30% 70%, var(--gradient-start), transparent 60%),
-        radial-gradient(ellipse at 70% 30%, rgba(0, 229, 255, 0.4), transparent 50%);
-    animation: rotate-galaxy 40s linear infinite;
-}
-/* === बदला हुआ हिस्सा END === */
-
 .mining-visual {
     position: absolute;
     width: 100%;
@@ -132,12 +115,6 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 @keyframes rotate-anim {
     from { transform: translate(-50%, -50%) rotate(0deg); }
     to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* === गैलेक्सी इफ़ेक्ट के लिए कीफ़्रेम एनीमेशन === */
-@keyframes rotate-galaxy {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
 
 .circle.mining-active-glow {animation: pulseGlow 2s infinite alternate;}
@@ -284,6 +261,37 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 .verify-btn:hover { filter: brightness(1.2); }
 .task-help-btn { background: none; border: 1px solid var(--border-color); color: var(--text-dark); padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 20px; cursor: pointer; display: block; margin: 15px auto 0; transition: all 0.2s ease; }
 .task-help-btn:hover { background: var(--border-color); color: var(--text-light); }
+
+/* === बदला हुआ हिस्सा START === */
+.task-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+.task-nav-btn {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+.task-nav-btn.active, .task-nav-btn:hover {
+    color: var(--secondary-glow);
+    border-color: var(--secondary-glow);
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+.task-item.premium .task-name {
+    color: var(--secondary-glow);
+    font-weight: 700;
+}
+/* === बदला हुआ हिस्सा END === */
+
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -312,15 +320,35 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
+    <!-- === बदला हुआ हिस्सा START === -->
     <section id="task" class="section">
         <div id="taskList">
-            <h2 style="text-align: center; margin-bottom: 10px;">🧩 Daily Tasks</h2>
-            <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
-            <div id="task-items-container">
-                <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
+            <div class="task-nav">
+                <button class="task-nav-btn active" onclick="showTaskCategory('daily', this)">🧩 Daily</button>
+                <button class="task-nav-btn" onclick="showTaskCategory('premium', this)">⭐ Premium</button>
+            </div>
+
+            <!-- Daily Tasks Container -->
+            <div id="daily-tasks">
+                <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
+                <div id="task-items-container">
+                    <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
+                </div>
+            </div>
+
+            <!-- Premium Tasks Container -->
+            <div id="premium-tasks" style="display: none;">
+                <p style="padding: 12px 15px; text-align: center; color: var(--secondary-glow); font-weight: 600; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; margin-bottom: 25px;">
+                    Complete one premium task earn more coins and unlimited withdrawal access
+                </p>
+                <div id="premium-task-items-container">
+                     <p style="text-align: center; color: #777; margin-top: 50px;">Loading premium tasks...</p>
+                </div>
             </div>
         </div>
     </section>
+    <!-- === बदला हुआ हिस्सा END === -->
+
 
     <section id="wallet" class="section">
         <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
@@ -518,7 +546,6 @@ const TASKS_REF = ref(database, 'tasks');
 const WITHDRAWALS_REF = ref(database, 'withdrawals');
 const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
 const GLOBAL_POPUP_REF = ref(database, 'global_popup');
-// === बदला हुआ हिस्सा 1: नया फायरबेस रेफरेंस ===
 const WITHDRAWAL_SETTINGS_REF = ref(database, 'withdrawal_settings');
 
 window.coins = 0;
@@ -542,7 +569,6 @@ window.ADS_REQUIRED = 10;
 window.AD_REWARD_COINS = 5;
 let claimSettings = {};
 let isInitialLoadComplete = false;
-// === बदला हुआ हिस्सा 2: विथड्रावल सेटिंग्स के लिए ग्लोबल वैरिएबल ===
 let withdrawalSettings = {
     upi: { locked: false, message: '' },
     paypal: { locked: false, message: '' },
@@ -753,7 +779,6 @@ function loadAdminSettings() {
     }, (error) => console.error("Firebase Read Error (Admin Settings):", error));
 }
 
-// === बदला हुआ हिस्सा 3: विथड्रावल सेटिंग्स को लोड करने के लिए नया फंक्शन ===
 function loadWithdrawalLockSettings() {
     onValue(WITHDRAWAL_SETTINGS_REF, (snapshot) => {
         if (snapshot.exists()) {
@@ -761,15 +786,18 @@ function loadWithdrawalLockSettings() {
         }
     }, (error) => {
         console.error("Firebase Read Error (Withdrawal Settings):", error);
-        // अगर कोई एरर आता है तो डिफ़ॉल्ट रूप से सब कुछ अनलॉक रखें
     });
 }
 
+// === बदला हुआ हिस्सा START ===
 async function loadLiveTasks() {
-    const taskContainer = document.getElementById('task-items-container');
+    const dailyTaskContainer = document.getElementById('task-items-container');
+    const premiumTaskContainer = document.getElementById('premium-task-items-container');
     const userCountry = await getUserCountry();
     if (!userCountry) {
-        taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">Could not determine your location to show relevant tasks.</p>';
+        const errorMsg = '<p style="text-align: center; color: #777; margin-top: 50px;">Could not determine your location to show relevant tasks.</p>';
+        dailyTaskContainer.innerHTML = errorMsg;
+        premiumTaskContainer.innerHTML = errorMsg;
         return;
     }
     const userTasksRef = ref(database, `users/${TELEGRAM_USER_ID}`);
@@ -778,18 +806,20 @@ async function loadLiveTasks() {
     const startedTasks = userData.startedTasks || {};
     const completedTasks = userData.completedTasks || {};
     onValue(TASKS_REF, (snapshot) => {
-        taskContainer.innerHTML = '';
+        dailyTaskContainer.innerHTML = '';
+        premiumTaskContainer.innerHTML = '';
         const tasks = snapshot.val();
         allTasks = tasks;
-        let taskHtml = '';
-        let activeTasksFound = false;
+        let dailyTaskHtml = '';
+        let premiumTaskHtml = '';
+        let activeDailyTasksFound = false;
+        let activePremiumTasksFound = false;
+
         if (tasks) {
             for (const taskId in tasks) {
                 const task = tasks[taskId];
                 const isCountryMatch = !task.countries || task.countries.length === 0 || task.countries.includes(userCountry);
                 if (task.active && isCountryMatch) {
-                    activeTasksFound = true;
-                    taskHtml += `<div class="task-item-wrapper">`;
                     const isCompleted = completedTasks[taskId];
                     const startStatus = startedTasks[taskId];
                     let actionButton = '';
@@ -805,18 +835,48 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else if (startStatus === true) {
-                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
+                    } else { // Handles both undefined (not started) and 'true' (old start method)
+                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`; // Initially hide for non-started tasks
                     }
-                    taskHtml += `<div class="task-item" onclick="showTaskDetails('${taskId}')"> <div class="task-info"> <img src="${task.logoUrl || 'https://via.placeholder.com/40'}" alt="task logo"> <span class="task-name">${task.name}</span> </div> <div class="task-reward">${task.reward.toLocaleString()} C</div> </div> ${actionButton}`;
-                    taskHtml += `</div>`;
+                    
+                    const taskItemHtml = `
+                        <div class="task-item-wrapper">
+                            <div class="task-item ${task.isPremium ? 'premium' : ''}" onclick="showTaskDetails('${taskId}')">
+                                <div class="task-info">
+                                    <img src="${task.logoUrl || 'https://via.placeholder.com/40'}" alt="task logo">
+                                    <span class="task-name">${task.name}</span>
+                                </div>
+                                <div class="task-reward">${task.reward.toLocaleString()} C</div>
+                            </div>
+                            ${actionButton}
+                        </div>`;
+                    
+                    if (task.isPremium) {
+                        activePremiumTasksFound = true;
+                        premiumTaskHtml += taskItemHtml;
+                    } else {
+                        activeDailyTasksFound = true;
+                        dailyTaskHtml += taskItemHtml;
+                    }
                 }
             }
         }
-        if (activeTasksFound) { taskContainer.innerHTML = taskHtml; }
-        else { taskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No tasks available right now. Check back later!</p>'; }
+        if (activeDailyTasksFound) {
+            dailyTaskContainer.innerHTML = dailyTaskHtml;
+        } else {
+            dailyTaskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No daily tasks available right now. Check back later!</p>';
+        }
+        if (activePremiumTasksFound) {
+            premiumTaskContainer.innerHTML = premiumTaskHtml;
+        } else {
+            premiumTaskContainer.innerHTML = '<p style="text-align: center; color: #777; margin-top: 50px;">No premium tasks available right now. Check back later!</p>';
+        }
+
     }, { onlyOnce: true });
 }
+// === बदला हुआ हिस्सा END ===
+
+
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
     if (!task) return;
@@ -1059,7 +1119,6 @@ function updateMiningButtonState() {
     }
     updateSoundState();
 }
-// === बदला हुआ हिस्सा 4: विथड्रावल लॉक/अनलॉक चेक के साथ अपडेट किए गए फंक्शन ===
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
         WebApp.showPopup({
@@ -1104,7 +1163,6 @@ window.showCryptoModal = () => {
 window.closeWithdrawalModal = () => { withdrawalModal.style.display = "none"; }
 window.closePaypalModal = () => { paypalModal.style.display = "none"; }
 window.closeCryptoModal = () => { cryptoModal.style.display = "none"; }
-// === बदलाव समाप्त ===
 
 window.checkWithdrawalEligibility = () => {
     const amountInput = document.getElementById('upiAmount');
@@ -1283,7 +1341,6 @@ window.claimCode = (button, url) => {
     WebApp.openLink(url);
 }
 document.addEventListener('DOMContentLoaded', () => {
-    // === बदला हुआ हिस्सा 5: ऐप लोड होते ही विथड्रावल सेटिंग्स को लोड करें ===
     loadWithdrawalLockSettings();
     loadAdminSettings();
     loadUserData();
@@ -1294,7 +1351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     listenForAdminPopups();
     document.body.addEventListener('click', primeAudio, { once: true });
     document.body.addEventListener('click', (event) => {
-        if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn')) {
+        if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn, .task-nav-btn')) {
             playClickSound();
         }
     });
@@ -1331,6 +1388,17 @@ window.showSection = (sectionId, button) => {
   button.classList.add('active');
   updateSoundState();
 }
+
+// === बदला हुआ हिस्सा START ===
+window.showTaskCategory = (category, button) => {
+    document.getElementById('daily-tasks').style.display = 'none';
+    document.getElementById('premium-tasks').style.display = 'none';
+    document.getElementById(`${category}-tasks`).style.display = 'block';
+    document.querySelectorAll('.task-nav-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+}
+// === बदला हुआ हिस्सा END ===
+
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
 </script>
