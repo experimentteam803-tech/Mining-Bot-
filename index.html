@@ -262,7 +262,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 .task-help-btn { background: none; border: 1px solid var(--border-color); color: var(--text-dark); padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 20px; cursor: pointer; display: block; margin: 15px auto 0; transition: all 0.2s ease; }
 .task-help-btn:hover { background: var(--border-color); color: var(--text-light); }
 
-/* === बदला हुआ हिस्सा START === */
 .task-nav {
     display: flex;
     justify-content: center;
@@ -290,8 +289,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     color: var(--secondary-glow);
     font-weight: 700;
 }
-/* === बदला हुआ हिस्सा END === */
-
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -325,23 +322,18 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
-    <!-- === बदला हुआ हिस्सा START === -->
     <section id="task" class="section">
         <div id="taskList">
             <div class="task-nav">
                 <button class="task-nav-btn active" onclick="showTaskCategory('daily', this)">🧩 Daily</button>
                 <button class="task-nav-btn" onclick="showTaskCategory('premium', this)">⭐ Premium</button>
             </div>
-
-            <!-- Daily Tasks Container -->
             <div id="daily-tasks">
                 <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
                 <div id="task-items-container">
                     <p style="text-align: center; color: #777; margin-top: 50px;">Loading tasks...</p>
                 </div>
             </div>
-
-            <!-- Premium Tasks Container -->
             <div id="premium-tasks" style="display: none;">
                 <p style="padding: 12px 15px; text-align: center; color: var(--secondary-glow); font-weight: 600; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; margin-bottom: 25px;">
                     Complete one premium task earn more coins and unlimited withdrawal access
@@ -352,8 +344,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
             </div>
         </div>
     </section>
-    <!-- === बदला हुआ हिस्सा END === -->
-
 
     <section id="wallet" class="section">
         <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
@@ -513,22 +503,21 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
-<!-- बदला हुआ हिस्सा START -->
 <div id="extraAdModal" class="modal" style="background-color: rgba(0,0,0,0.9);">
     <div class="modal-content" style="padding: 0; border: 2px solid var(--secondary-glow); position: relative;">
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--bg-dark); border-bottom: 1px solid var(--border-color);">
-            <h3 style="color: var(--secondary-glow); margin: 0; font-size: 16px;">
+            <h3 style="color: var(--secondary-glow); margin: 0; font-size: 14px;">
                 Click ads instant reward <span id="adProgressCounter" style="color: var(--primary-glow);"></span>
             </h3>
             <span id="adTimer" style="font-size: 18px; font-weight: 700; color: var(--primary-glow);">15s</span>
             <span id="closeAdBtn" class="close-btn" style="display: none; cursor: pointer;">&times;</span>
         </div>
-        <iframe id="adFrame" src="" style="width: 100%; height: 80vh; border: none;"></iframe>
-        <!-- iframe के ऊपर पारदर्शी (transparent) div ताकि क्लिक को पकड़ा जा सके -->
-        <div id="iframeOverlay" style="position: absolute; top: 50px; left: 0; width: 100%; height: calc(80vh - 50px); z-index: 2; cursor: pointer;"></div>
+        <div style="position: relative; width: 100%; height: 80vh;">
+            <iframe id="adFrame" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            <div id="iframeOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; cursor: pointer;"></div>
+        </div>
     </div>
 </div>
-<!-- बदला हुआ हिस्सा END -->
 
 
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
@@ -602,7 +591,7 @@ let withdrawalSettings = {
 let extraAdSettings = {};
 let extraAdsWatched = 0;
 let adTimerInterval = null;
-let hasAdBeenClicked = false;
+let adWatchInProgress = false;
 
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
@@ -630,10 +619,8 @@ const extraAdModal = document.getElementById('extraAdModal');
 const adFrame = document.getElementById('adFrame');
 const adTimerDisplay = document.getElementById('adTimer');
 const closeAdBtn = document.getElementById('closeAdBtn');
-// बदला हुआ हिस्सा START
 const adProgressCounter = document.getElementById('adProgressCounter');
 const iframeOverlay = document.getElementById('iframeOverlay');
-// बदला हुआ हिस्सा END
 
 function primeAudio() {
     if (hasInteracted) return;
@@ -828,7 +815,6 @@ function loadWithdrawalLockSettings() {
     });
 }
 
-// === बदला हुआ हिस्सा START ===
 async function loadLiveTasks() {
     const dailyTaskContainer = document.getElementById('task-items-container');
     const premiumTaskContainer = document.getElementById('premium-task-items-container');
@@ -874,8 +860,8 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else { // Handles both undefined (not started) and 'true' (old start method)
-                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`; // Initially hide for non-started tasks
+                    } else { 
+                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`;
                     }
                     
                     const taskItemHtml = `
@@ -913,7 +899,6 @@ async function loadLiveTasks() {
 
     }, { onlyOnce: true });
 }
-// === बदला हुआ हिस्सा END ===
 
 
 window.showTaskDetails = (taskId) => {
@@ -1382,7 +1367,8 @@ window.claimCode = (button, url) => {
     WebApp.openLink(url);
 }
 
-// बदला हुआ हिस्सा START: Extra 500 Coins Feature Logic
+// === Extra 500 Coins Feature Logic START ===
+
 function loadExtraAdSettings() {
     onValue(EXTRA_AD_TASK_REF, (snapshot) => {
         if (snapshot.exists()) {
@@ -1415,7 +1401,9 @@ window.startExtraCoinTask = async () => {
     const snapshot = await get(ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`));
     const taskData = snapshot.val() || { adsWatched: 0 };
     extraAdsWatched = taskData.adsWatched || 0;
-    if (extraAdsWatched >= extraAdSettings.ads_required) {
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+     if (taskData.completedTimestamp && (now - taskData.completedTimestamp) < twentyFourHours) {
         WebApp.showAlert("You have already completed this task for today.");
         return;
     }
@@ -1423,22 +1411,16 @@ window.startExtraCoinTask = async () => {
 }
 
 function showNextExtraAd() {
-    if (extraAdsWatched >= extraAdSettings.ads_required) return;
+    if (adWatchInProgress || extraAdsWatched >= extraAdSettings.ads_required) return;
 
     const adUrl = extraAdSettings.ad_links[extraAdsWatched];
     adFrame.src = adUrl;
-    hasAdBeenClicked = false;
     
-    // काउंटर को अपडेट करें
-    adProgressCounter.innerText = `(${extraAdsWatched}/${extraAdSettings.ads_required})`;
+    adProgressCounter.innerText = `(${extraAdsWatched + 1}/${extraAdSettings.ads_required})`;
 
-    // पारदर्शी परत (overlay) पर क्लिक इवेंट सेट करें
     iframeOverlay.onclick = () => {
-        if (!hasAdBeenClicked) {
-            hasAdBeenClicked = true; // दोबारा क्लिक होने से रोकें
-            window.open(adUrl, '_blank'); // लिंक को नए टैब में खोलें
-            adWatchedSuccessfully(); // तुरंत रिवॉर्ड दें
-        }
+        window.open(adUrl, '_blank');
+        adWatchedSuccessfully();
     };
 
     extraAdModal.style.display = 'block';
@@ -1446,6 +1428,7 @@ function showNextExtraAd() {
 }
 
 function startAdTimer() {
+    adWatchInProgress = true;
     let timeLeft = 15;
     adTimerDisplay.innerText = `${timeLeft}s`;
     closeAdBtn.style.display = 'none';
@@ -1462,19 +1445,22 @@ function startAdTimer() {
 }
 
 function adWatchedSuccessfully() {
-    if(adTimerInterval) clearInterval(adTimerInterval);
+    if (!adWatchInProgress) return;
+    adWatchInProgress = false; 
+    clearInterval(adTimerInterval);
+    
     extraAdsWatched++;
     const userExtraTaskRef = ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`);
     update(userExtraTaskRef, { adsWatched: extraAdsWatched });
+    
     closeAdModal();
 
     if (extraAdsWatched >= extraAdSettings.ads_required) {
         const finalReward = extraAdSettings.reward || 500;
         window.coins += finalReward;
-        const updates = { coins: window.coins };
-        const userTaskRef = ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`);
-        update(userTaskRef, { completedTimestamp: Date.now() });
-        update(window.dbRef, updates);
+        update(window.dbRef, { coins: window.coins });
+        update(userExtraTaskRef, { completedTimestamp: Date.now() });
+        
         WebApp.showPopup({
             title: 'Congratulations! 🎉',
             message: `You've earned ${finalReward} extra coins!`
@@ -1482,28 +1468,24 @@ function adWatchedSuccessfully() {
         playSuccessSound();
         extraCoinsBtn.style.display = 'none';
     } else {
-        WebApp.showPopup({
-            message: `Ad ${extraAdsWatched}/${extraAdSettings.ads_required} completed. Keep going!`
-        }, () => {
-            setTimeout(showNextExtraAd, 500);
-        });
+        setTimeout(showNextExtraAd, 500);
     }
 }
 
 function closeAdModal() {
     extraAdModal.style.display = 'none';
     adFrame.src = 'about:blank';
-    iframeOverlay.onclick = null; // क्लिक इवेंट को हटा दें
+    iframeOverlay.onclick = null;
 }
 
 closeAdBtn.onclick = () => {
-    // अगर टाइमर खत्म हो गया है और ऐड पर पहले से क्लिक नहीं हुआ है, तभी रिवॉर्ड दें
-    if (adTimerDisplay.innerText === '✅' && !hasAdBeenClicked) {
-        hasAdBeenClicked = true;
+    if (adTimerDisplay.innerText === '✅') {
         adWatchedSuccessfully();
     }
 };
-// बदला हुआ हिस्सा END
+
+// === Extra 500 Coins Feature Logic END ===
+
 
 document.addEventListener('DOMContentLoaded', () => {
     loadExtraAdSettings();
