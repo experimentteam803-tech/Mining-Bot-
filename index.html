@@ -314,6 +314,13 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
         <div id="miningEffectContainer"></div>
     </div>
     </div>
+    
+    <!-- === नया बटन START === -->
+    <button class="action-btn claim-btn" id="extraCoinsBtn" onclick="startExtraCoinTask()" style="display:none; margin-top: 15px;">
+        🎁 Extra 500 Coins
+    </button>
+    <!-- === नया बटन END === -->
+
     <button class="action-btn ad-btn" id="watchAdBtn" onclick="watchAd()">🎬 Watch Ad</button>
     <div id="adStatus">Ads Watched: 0/10</div>
     <button class="action-btn mine-btn" id="mineBtn" onclick="startDailyMining()">🪙 Start Mining</button>
@@ -508,6 +515,20 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<!-- === नया हिस्सा START: Extra Ad Modal === -->
+<div id="extraAdModal" class="modal" style="background-color: rgba(0,0,0,0.9);">
+    <div class="modal-content" style="padding: 0; border: 2px solid var(--secondary-glow);">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--bg-dark); border-bottom: 1px solid var(--border-color);">
+            <h3 style="color: var(--secondary-glow); margin: 0;">click ads instant reward</h3>
+            <span id="adTimer" style="font-size: 18px; font-weight: 700; color: var(--primary-glow);">15s</span>
+            <span id="closeAdBtn" class="close-btn" style="display: none; cursor: pointer;">&times;</span>
+        </div>
+        <iframe id="adFrame" src="" style="width: 100%; height: 80vh; border: none;"></iframe>
+    </div>
+</div>
+<!-- === नया हिस्सा END: Extra Ad Modal === -->
+
+
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
 <audio id="clickSound" src="click.mp3" preload="auto"></audio>
@@ -548,6 +569,10 @@ const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
 const GLOBAL_POPUP_REF = ref(database, 'global_popup');
 const WITHDRAWAL_SETTINGS_REF = ref(database, 'withdrawal_settings');
 
+// === नया हिस्सा START: Extra 500 Coins Feature References ===
+const EXTRA_AD_TASK_REF = ref(database, 'admin_settings/extra_ad_task');
+// === नया हिस्सा END ===
+
 window.coins = 0;
 window.dailyMinedTimestamp = 0;
 window.miningEndTime = 0;
@@ -575,6 +600,13 @@ let withdrawalSettings = {
     crypto: { locked: false, message: '' }
 };
 
+// === नया हिस्सा START: Extra 500 Coins Feature State ===
+let extraAdSettings = {};
+let extraAdsWatched = 0;
+let adTimerInterval = null;
+let hasAdBeenClicked = false;
+// === नया हिस्सा END ===
+
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
 const adStatusDisplay = document.getElementById('adStatus');
@@ -595,6 +627,15 @@ const miningSound = document.getElementById('miningSound');
 const clickSound = document.getElementById('clickSound');
 const successSound = document.getElementById('successSound');
 let hasInteracted = false;
+
+// === नया हिस्सा START: Extra 500 Coins Feature Element Refs ===
+const extraCoinsBtn = document.getElementById('extraCoinsBtn');
+const extraAdModal = document.getElementById('extraAdModal');
+const adFrame = document.getElementById('adFrame');
+const adTimerDisplay = document.getElementById('adTimer');
+const closeAdBtn = document.getElementById('closeAdBtn');
+// === नया हिस्सा END ===
+
 
 function primeAudio() {
     if (hasInteracted) return;
@@ -1001,6 +1042,8 @@ window.watchAd = () => {
         } else {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
+            // नया लॉजिक: 10 ऐड पूरे होने पर एक्स्ट्रा कॉइन बटन दिखाएं
+            checkAndShowExtraCoinButton();
         }
     }).catch((error) => {
         console.error("Monetag ad error:", error);
@@ -1118,6 +1161,8 @@ function updateMiningButtonState() {
         countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
     }
     updateSoundState();
+    // नया लॉजिक: एक्स्ट्रा कॉइन बटन की विजिबिलिटी अपडेट करें
+    checkAndShowExtraCoinButton();
 }
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
@@ -1340,7 +1385,152 @@ window.claimCode = (button, url) => {
     if (!url || url === 'placeholder') { WebApp.showAlert("The link for this code is not available yet."); return; }
     WebApp.openLink(url);
 }
+
+// ==========================================================
+// === नया हिस्सा START: Extra 500 Coins Feature Logic ===
+// ==========================================================
+
+// Firebase से एक्स्ट्रा ऐड की सेटिंग्स लोड करें
+function loadExtraAdSettings() {
+    onValue(EXTRA_AD_TASK_REF, (snapshot) => {
+        if (snapshot.exists()) {
+            extraAdSettings = snapshot.val();
+        }
+    }, (error) => console.error("Firebase Read Error (Extra Ad Settings):", error));
+}
+
+// चेक करें कि एक्स्ट्रा कॉइन बटन दिखाना है या नहीं
+async function checkAndShowExtraCoinButton() {
+    // यह तभी दिखेगा जब माइनिंग के 10 ऐड पूरे हो गए हों और माइनिंग एक्टिव न हो
+    if (window.adsWatched >= window.ADS_REQUIRED && !(window.miningEndTime > Date.now())) {
+        const snapshot = await get(ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`));
+        const taskData = snapshot.val();
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+
+        // अगर यूजर ने पिछले 24 घंटे में यह टास्क पूरा नहीं किया है
+        if (!taskData || (now - taskData.completedTimestamp) > twentyFourHours) {
+            extraCoinsBtn.style.display = 'block';
+        } else {
+            extraCoinsBtn.style.display = 'none';
+        }
+    } else {
+        extraCoinsBtn.style.display = 'none';
+    }
+}
+
+// जब यूजर "Extra 500 Coins" बटन पर क्लिक करे
+window.startExtraCoinTask = async () => {
+    if (!extraAdSettings.ad_links || extraAdSettings.ad_links.length < extraAdSettings.ads_required) {
+        WebApp.showAlert("The extra coin task is not available right now. Please try again later.");
+        return;
+    }
+
+    const snapshot = await get(ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`));
+    const taskData = snapshot.val() || { adsWatched: 0 };
+    extraAdsWatched = taskData.adsWatched || 0;
+
+    if (extraAdsWatched >= extraAdSettings.ads_required) {
+        WebApp.showAlert("You have already completed this task for today.");
+        return;
+    }
+    
+    showNextExtraAd();
+}
+
+// अगला ऐड दिखाएं
+function showNextExtraAd() {
+    if (extraAdsWatched >= extraAdSettings.ads_required) return;
+
+    const adUrl = extraAdSettings.ad_links[extraAdsWatched];
+    adFrame.src = adUrl;
+    hasAdBeenClicked = false;
+    
+    // इवेंट लिस्नर जो iframe के अंदर क्लिक को डिटेक्ट करेगा
+    window.onblur = () => {
+        if (extraAdModal.style.display === 'block' && !hasAdBeenClicked) {
+            hasAdBeenClicked = true;
+            adWatchedSuccessfully();
+        }
+    };
+
+    extraAdModal.style.display = 'block';
+    startAdTimer();
+}
+
+// ऐड का 15 सेकंड का टाइमर शुरू करें
+function startAdTimer() {
+    let timeLeft = 15;
+    adTimerDisplay.innerText = `${timeLeft}s`;
+    closeAdBtn.style.display = 'none';
+
+    clearInterval(adTimerInterval);
+    adTimerInterval = setInterval(() => {
+        timeLeft--;
+        adTimerDisplay.innerText = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(adTimerInterval);
+            adTimerDisplay.innerText = `✅`;
+            closeAdBtn.style.display = 'block';
+        }
+    }, 1000);
+}
+
+// जब ऐड सफलतापूर्वक देख लिया जाए
+function adWatchedSuccessfully() {
+    if(adTimerInterval) clearInterval(adTimerInterval);
+    
+    extraAdsWatched++;
+
+    const userExtraTaskRef = ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`);
+    update(userExtraTaskRef, { adsWatched: extraAdsWatched });
+    
+    closeAdModal();
+
+    if (extraAdsWatched >= extraAdSettings.ads_required) {
+        const finalReward = extraAdSettings.reward || 500;
+        window.coins += finalReward;
+        const updates = { 
+            coins: window.coins,
+        };
+        const userTaskRef = ref(database, `users/${TELEGRAM_USER_ID}/extraAdTask`);
+        update(userTaskRef, { completedTimestamp: Date.now() });
+        update(window.dbRef, updates);
+        
+        WebApp.showPopup({
+            title: 'Congratulations! 🎉',
+            message: `You've earned ${finalReward} extra coins!`
+        });
+        playSuccessSound();
+        extraCoinsBtn.style.display = 'none';
+    } else {
+        WebApp.showPopup({
+            message: `Ad ${extraAdsWatched}/${extraAdSettings.ads_required} completed. Keep going!`
+        }, () => {
+            setTimeout(showNextExtraAd, 500);
+        });
+    }
+}
+
+function closeAdModal() {
+    extraAdModal.style.display = 'none';
+    adFrame.src = 'about:blank';
+    window.onblur = null;
+}
+
+closeAdBtn.onclick = () => {
+    if (adTimerDisplay.innerText === '✅' && !hasAdBeenClicked) {
+        adWatchedSuccessfully();
+    }
+};
+
+// ========================================================
+// === नया हिस्सा END: Extra 500 Coins Feature Logic ===
+// ========================================================
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    loadExtraAdSettings(); // इस लाइन को जोड़ा गया है
     loadWithdrawalLockSettings();
     loadAdminSettings();
     loadUserData();
