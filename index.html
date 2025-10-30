@@ -262,6 +262,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 .task-help-btn { background: none; border: 1px solid var(--border-color); color: var(--text-dark); padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 20px; cursor: pointer; display: block; margin: 15px auto 0; transition: all 0.2s ease; }
 .task-help-btn:hover { background: var(--border-color); color: var(--text-light); }
 
+/* === बदला हुआ हिस्सा START === */
 .task-nav {
     display: flex;
     justify-content: center;
@@ -289,6 +290,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     color: var(--secondary-glow);
     font-weight: 700;
 }
+/* === बदला हुआ हिस्सा END === */
+
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -306,9 +309,9 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="totalCoins"><span id="coinCount">0</span></div>
     <h2>Your Coins</h2>
         
-    <!-- === बदला हुआ हिस्सा START === -->
-    <button class="action-btn" id="extraBonusBtn" onclick="handleBonusAdClick()" style="display: none; margin-top: 0; margin-bottom: 20px; background: var(--secondary-glow); color: #000; font-size: 16px; padding: 12px 24px;">🌟 Extra 500 Coins 🌟</button>
-    <!-- === बदला हुआ हिस्सा END === -->
+    <!-- === NEW FEATURE: EXTRA 500 COINS BUTTON (Initially Hidden) === -->
+    <button class="action-btn" id="extraBonusBtn" onclick="startBonusAds()" style="display: none; margin-top: 0; margin-bottom: 20px; background: var(--secondary-glow); color: #000; font-size: 16px; padding: 12px 24px;">🌟 Extra 500 Coins 🌟</button>
+    <!-- === END OF NEW FEATURE BUTTON === -->
         
     <div class="circle-container">
     <div class="circle" id="mineCircle">
@@ -322,6 +325,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
+    <!-- === बदला हुआ हिस्सा START === -->
     <section id="task" class="section">
         <div id="taskList">
             <div class="task-nav">
@@ -348,6 +352,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
             </div>
         </div>
     </section>
+    <!-- === बदला हुआ हिस्सा END === -->
+
 
     <section id="wallet" class="section">
         <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
@@ -507,6 +513,23 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<!-- === NEW FEATURE: BONUS AD MODAL === -->
+<div id="bonusAdModal" class="modal">
+    <div class="modal-content" style="padding: 10px; max-width: 95%; box-sizing: border-box;">
+        <div id="bonusAdHeader" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
+            <h3 id="bonusAdTitle" style="margin: 0; color: var(--primary-glow); font-size: 1.1em;">Bonus Ad</h3>
+            <span id="bonusAdTimer" style="font-weight: 700; color: var(--secondary-glow); font-size: 1.2em;">15s</span>
+        </div>
+        <div id="bonusAdFrameContainer" style="position: relative; width: 100%; padding-top: 177.78%; /* 9:16 Aspect Ratio */ background-color: #000;">
+             <iframe id="bonusAdFrame" src="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+             <div id="bonusAdFrameClickOverlay" onclick="adClicked()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;"></div>
+        </div>
+         <button id="closeBonusAdBtn" class="close-btn" onclick="closeBonusAdModal()" style="display: none; position: absolute; top: 12px; right: 18px; font-size: 32px;">&times;</button>
+    </div>
+</div>
+<!-- === END OF NEW FEATURE MODAL === -->
+
+
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
 <audio id="clickSound" src="click.mp3" preload="auto"></audio>
@@ -546,6 +569,8 @@ const WITHDRAWALS_REF = ref(database, 'withdrawals');
 const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
 const GLOBAL_POPUP_REF = ref(database, 'global_popup');
 const WITHDRAWAL_SETTINGS_REF = ref(database, 'withdrawal_settings');
+// === NEW FEATURE: Firebase Reference for Bonus Ads ===
+const BONUS_ADS_REF = ref(database, 'bonus_ads');
 
 window.coins = 0;
 window.dailyMinedTimestamp = 0;
@@ -574,13 +599,20 @@ let withdrawalSettings = {
     crypto: { locked: false, message: '' }
 };
 
-// === बदला हुआ हिस्सा START ===
+// === NEW FEATURE: Global Variables for Bonus System ===
+let bonusAds = [];
 let bonusAdState = { watchedCount: 0, lastResetTimestamp: 0 };
 let BONUS_ADS_REQUIRED = 8;
 let BONUS_REWARD = 500;
-let bonusAdLinks = [];
+let bonusAdTimerInterval = null;
+let currentBonusAdIndex = 0;
+const bonusAdModal = document.getElementById('bonusAdModal');
+const bonusAdFrame = document.getElementById('bonusAdFrame');
+const bonusAdTitle = document.getElementById('bonusAdTitle');
+const bonusAdTimer = document.getElementById('bonusAdTimer');
+const closeBonusAdBtn = document.getElementById('closeBonusAdBtn');
 const extraBonusBtn = document.getElementById('extraBonusBtn');
-// === बदला हुआ हिस्सा END ===
+// === END OF NEW FEATURE VARIABLES ===
 
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
@@ -672,7 +704,7 @@ function loadUserData() {
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME, lastActive: Date.now(), joinDate: Date.now(),
                 country: userCountry || 'N/A',
-                bonusAdState: { watchedCount: 0, lastResetTimestamp: 0 } 
+                bonusAdState: { watchedCount: 0, lastResetTimestamp: 0 } // Add initial bonus state for new users
             };
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -781,13 +813,10 @@ function loadAdminSettings() {
         if (settings) {
             window.ADS_REQUIRED = settings.miningAds?.required || 10;
             window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
-            
-            // === बदला हुआ हिस्सा START ===
+            // === NEW FEATURE: Load Bonus Ad settings from admin panel ===
             BONUS_ADS_REQUIRED = settings.bonusAds?.required || 8;
             BONUS_REWARD = settings.bonusAds?.reward || 500;
-            bonusAdLinks = settings.bonusAds?.links || [];
-            // === बदला हुआ हिस्सा END ===
-
+            // === END OF NEW FEATURE ===
             updateMiningButtonState();
             updateAdStatus();
         }
@@ -804,6 +833,7 @@ function loadWithdrawalLockSettings() {
     });
 }
 
+// === बदला हुआ हिस्सा START ===
 async function loadLiveTasks() {
     const dailyTaskContainer = document.getElementById('task-items-container');
     const premiumTaskContainer = document.getElementById('premium-task-items-container');
@@ -849,8 +879,8 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else { 
-                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`;
+                    } else { // Handles both undefined (not started) and 'true' (old start method)
+                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`; // Initially hide for non-started tasks
                     }
                     
                     const taskItemHtml = `
@@ -888,6 +918,8 @@ async function loadLiveTasks() {
 
     }, { onlyOnce: true });
 }
+// === बदला हुआ हिस्सा END ===
+
 
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
@@ -956,18 +988,22 @@ function updateGlobalState(data) {
     window.adsWatched = data.adsWatched || 0;
     window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
     window.upiId = data.upiId || '';
+    // === NEW FEATURE: Update global bonus state ===
     bonusAdState = data.bonusAdState || { watchedCount: 0, lastResetTimestamp: 0 };
+    // === END OF NEW FEATURE ===
 }
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) { resumeMiningSession(); }
     else { stopMining(false); }
     if (window.dailyMinedTimestamp !== 0 && window.canMineAgain()) {
         const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 };
+        // === NEW FEATURE: Reset bonus ad state with main ads ===
         if (bonusAdState.watchedCount > 0) {
             bonusAdState.watchedCount = 0;
             bonusAdState.lastResetTimestamp = Date.now();
             updates.bonusAdState = bonusAdState;
         }
+        // === END OF NEW FEATURE ===
         updateDatabase(updates);
         window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
     }
@@ -1021,7 +1057,9 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
         }
+        // === NEW FEATURE INTEGRATION POINT ===
         updateBonusButtonVisibility(); 
+        // === END OF INTEGRATION POINT ===
     }).catch((error) => {
         console.error("Monetag ad error:", error);
         WebApp.showAlert("Ad could not be shown. Please try again.");
@@ -1111,11 +1149,13 @@ function startCooldownCountdown() {
             clearInterval(remainingTimeInterval); remainingTimeInterval = null;
             if (window.dailyMinedTimestamp !== 0) {
                  const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 };
+                 // === NEW FEATURE: Reset bonus ad state on cooldown end ===
                  if (bonusAdState.watchedCount > 0) {
                      bonusAdState.watchedCount = 0;
                      bonusAdState.lastResetTimestamp = Date.now();
                      updates.bonusAdState = bonusAdState;
                  }
+                 // === END OF NEW FEATURE ===
                  window.updateDatabase(updates);
             }
             updateMiningButtonState(); return;
@@ -1144,7 +1184,9 @@ function updateMiningButtonState() {
         countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
     }
     updateSoundState();
+    // === NEW FEATURE INTEGRATION POINT ===
     updateBonusButtonVisibility();
+    // === END OF INTEGRATION POINT ===
 }
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
@@ -1368,58 +1410,101 @@ window.claimCode = (button, url) => {
     WebApp.openLink(url);
 }
 
-// === बदला हुआ हिस्सा START: नया बोनस विज्ञापन सिस्टम ===
+// =========================================================================================
+// === NEW FEATURE: EXTRA 500 COINS BONUS SYSTEM LOGIC (ALL NEW CODE) =======================
+// =========================================================================================
+
+function loadBonusAds() {
+    onValue(BONUS_ADS_REF, (snapshot) => {
+        if (snapshot.exists()) {
+            const adsData = snapshot.val();
+            bonusAds = Object.keys(adsData).map(key => ({ id: key, ...adsData[key] }));
+        } else {
+            bonusAds = [];
+        }
+    }, (error) => console.error("Firebase Read Error (Bonus Ads):", error));
+}
+
 function updateBonusButtonVisibility() {
     const miningIsActive = window.miningEndTime > Date.now();
     const isInCooldown = !window.canMineAgain() && window.dailyMinedTimestamp !== 0;
     const areMainAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
     const isBonusIncomplete = bonusAdState.watchedCount < BONUS_ADS_REQUIRED;
-    const haveBonusLinks = bonusAdLinks.length > 0;
 
-    if (areMainAdsComplete && isBonusIncomplete && !miningIsActive && !isInCooldown && haveBonusLinks) {
+    if (areMainAdsComplete && isBonusIncomplete && !miningIsActive && !isInCooldown) {
         extraBonusBtn.style.display = 'block';
-        extraBonusBtn.disabled = false;
         extraBonusBtn.innerText = `🌟 Extra ${BONUS_REWARD} Coins (${bonusAdState.watchedCount}/${BONUS_ADS_REQUIRED}) 🌟`;
     } else {
         extraBonusBtn.style.display = 'none';
     }
 }
 
-window.handleBonusAdClick = () => {
-    if (bonusAdState.watchedCount >= BONUS_ADS_REQUIRED || bonusAdState.watchedCount >= bonusAdLinks.length) {
-        WebApp.showAlert("You have already completed the bonus ads for this cycle.");
+window.startBonusAds = () => {
+    if (bonusAds.length === 0) {
+        WebApp.showAlert("Bonus ads are not available at the moment. Please try again later.");
         return;
     }
-    
-    const adLink = bonusAdLinks[bonusAdState.watchedCount];
-    
-    extraBonusBtn.disabled = true;
-    extraBonusBtn.innerText = 'Redirecting...';
+    showNextBonusAd();
+}
 
-    const newCount = bonusAdState.watchedCount + 1;
+function showNextBonusAd() {
+    if (bonusAdState.watchedCount >= BONUS_ADS_REQUIRED) return;
+
+    currentBonusAdIndex = bonusAdState.watchedCount % bonusAds.length;
+    const ad = bonusAds[currentBonusAdIndex];
+
+    bonusAdFrame.src = ad.displayUrl;
+    bonusAdTitle.innerText = `Bonus Ad (${bonusAdState.watchedCount + 1}/${BONUS_ADS_REQUIRED})`;
+    bonusAdModal.style.display = 'block';
     
-    const updates = {};
-    updates[`users/${TELEGRAM_USER_ID}/bonusAdState/watchedCount`] = newCount;
-    updates[`users/${TELEGRAM_USER_ID}/bonusAdState/lastResetTimestamp`] = Date.now();
-    
-    update(ref(database), updates).then(() => {
-        if (newCount >= BONUS_ADS_REQUIRED) {
-            grantBonusReward();
+    // Timer logic
+    let timeLeft = 15;
+    bonusAdTimer.innerText = `${timeLeft}s`;
+    closeBonusAdBtn.style.display = 'none';
+
+    clearInterval(bonusAdTimerInterval);
+    bonusAdTimerInterval = setInterval(() => {
+        timeLeft--;
+        bonusAdTimer.innerText = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(bonusAdTimerInterval);
+            bonusAdTimer.innerText = `✅`;
+            closeBonusAdBtn.style.display = 'block';
         }
-        WebApp.openLink(adLink);
-    }).catch(error => {
-        WebApp.showAlert("Could not process your click. Please try again.");
-        console.error("Bonus Ad Click Error:", error);
-        updateBonusButtonVisibility(); 
-    });
+    }, 1000);
+}
+
+window.adClicked = () => {
+    const ad = bonusAds[currentBonusAdIndex];
+    if (ad && ad.link) {
+        WebApp.openLink(ad.link);
+    }
+    bonusAdCompleted(true);
+}
+
+function bonusAdCompleted(wasClicked = false) {
+    clearInterval(bonusAdTimerInterval);
+    
+    bonusAdState.watchedCount++;
+    bonusAdState.lastResetTimestamp = Date.now();
+    
+    // Update Firebase immediately
+    update(ref(database, `users/${TELEGRAM_USER_ID}/bonusAdState`), bonusAdState);
+
+    if (bonusAdState.watchedCount >= BONUS_ADS_REQUIRED) {
+        grantBonusReward();
+    } else {
+        updateBonusButtonVisibility();
+        // Optionally show next ad automatically or let the user click the button again
+    }
+    
+    closeBonusAdModal();
 }
 
 function grantBonusReward() {
     window.coins += BONUS_REWARD;
     
-    const updates = {};
-    updates[`users/${TELEGRAM_USER_ID}/coins`] = window.coins;
-
+    const updates = { coins: window.coins };
     const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
     const historyKey = historyRef.key;
     updates[`coin_history/${historyKey}`] = {
@@ -1435,10 +1520,19 @@ function grantBonusReward() {
             message: `You've earned ${BONUS_REWARD} extra coins!`
         });
         updateCoinDisplays();
-        updateBonusButtonVisibility(); // यह बटन को छिपा देगा
+        updateBonusButtonVisibility();
     });
 }
-// === बदला हुआ हिस्सा END ===
+
+window.closeBonusAdModal = () => {
+    clearInterval(bonusAdTimerInterval);
+    bonusAdFrame.src = 'about:blank'; // Clear the iframe to stop any running content
+    bonusAdModal.style.display = 'none';
+}
+
+// =========================================================================================
+// === END OF NEW FEATURE CODE =============================================================
+// =========================================================================================
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1450,6 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWithdrawalHistory();
     listenForNotifications();
     listenForAdminPopups();
+    loadBonusAds(); // <-- NEW: Load bonus ads on app start
     document.body.addEventListener('click', primeAudio, { once: true });
     document.body.addEventListener('click', (event) => {
         if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn, .task-nav-btn')) {
@@ -1490,6 +1585,7 @@ window.showSection = (sectionId, button) => {
   updateSoundState();
 }
 
+// === बदला हुआ हिस्सा START ===
 window.showTaskCategory = (category, button) => {
     document.getElementById('daily-tasks').style.display = 'none';
     document.getElementById('premium-tasks').style.display = 'none';
@@ -1497,6 +1593,7 @@ window.showTaskCategory = (category, button) => {
     document.querySelectorAll('.task-nav-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 }
+// === बदला हुआ हिस्सा END ===
 
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
