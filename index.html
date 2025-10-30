@@ -262,6 +262,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 .task-help-btn { background: none; border: 1px solid var(--border-color); color: var(--text-dark); padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 20px; cursor: pointer; display: block; margin: 15px auto 0; transition: all 0.2s ease; }
 .task-help-btn:hover { background: var(--border-color); color: var(--text-light); }
 
+/* === बदला हुआ हिस्सा START === */
 .task-nav {
     display: flex;
     justify-content: center;
@@ -289,6 +290,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     color: var(--secondary-glow);
     font-weight: 700;
 }
+/* === बदला हुआ हिस्सा END === */
 
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -306,9 +308,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <section id="home" class="section">
     <div id="totalCoins"><span id="coinCount">0</span></div>
     <h2>Your Coins</h2>
-        
-    <button class="action-btn" id="extraBonusBtn" onclick="startBonusAds()" style="display: none; margin-top: 0; margin-bottom: 20px; background: var(--secondary-glow); color: #000; font-size: 16px; padding: 12px 24px;">🌟 Extra 500 Coins 🌟</button>
-        
     <div class="circle-container">
     <div class="circle" id="mineCircle">
         <div class="mining-visual"></div>
@@ -321,6 +320,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="miningCountdown">Click to start 1 hour session</div>
     </section>
 
+    <!-- === बदला हुआ हिस्सा START === -->
     <section id="task" class="section">
         <div id="taskList">
             <div class="task-nav">
@@ -328,6 +328,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
                 <button class="task-nav-btn" onclick="showTaskCategory('premium', this)">⭐ Premium</button>
             </div>
 
+            <!-- Daily Tasks Container -->
             <div id="daily-tasks">
                 <p style="margin-bottom: 25px; color:#aaa; text-align: center;">Complete simple tasks and earn rewards.</p>
                 <div id="task-items-container">
@@ -335,6 +336,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
                 </div>
             </div>
 
+            <!-- Premium Tasks Container -->
             <div id="premium-tasks" style="display: none;">
                 <p style="padding: 12px 15px; text-align: center; color: var(--secondary-glow); font-weight: 600; background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; margin-bottom: 25px;">
                     Complete one premium task earn more coins and unlimited withdrawal access
@@ -345,6 +347,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
             </div>
         </div>
     </section>
+    <!-- === बदला हुआ हिस्सा END === -->
+
 
     <section id="wallet" class="section">
         <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
@@ -504,20 +508,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
-<div id="bonusAdModal" class="modal">
-    <div class="modal-content" style="padding: 10px; max-width: 95%; box-sizing: border-box;">
-        <div id="bonusAdHeader" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
-            <h3 id="bonusAdTitle" style="margin: 0; color: var(--primary-glow); font-size: 1.1em;">Bonus Ad</h3>
-            <span id="bonusAdTimer" style="font-weight: 700; color: var(--secondary-glow); font-size: 1.2em;">15s</span>
-        </div>
-        <div id="bonusAdFrameContainer" style="position: relative; width: 100%; padding-top: 177.78%; /* 9:16 Aspect Ratio */ background-color: #000;">
-             <iframe id="bonusAdFrame" src="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
-             <div id="bonusAdFrameClickOverlay" onclick="adClicked()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;"></div>
-        </div>
-         <button id="closeBonusAdBtn" class="close-btn" onclick="closeBonusAdModal()" style="display: none; position: absolute; top: 12px; right: 18px; font-size: 32px;">&times;</button>
-    </div>
-</div>
-
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
 <audio id="clickSound" src="click.mp3" preload="auto"></audio>
@@ -557,10 +547,6 @@ const WITHDRAWALS_REF = ref(database, 'withdrawals');
 const CLAIM_SETTINGS_REF = ref(database, 'claim_settings');
 const GLOBAL_POPUP_REF = ref(database, 'global_popup');
 const WITHDRAWAL_SETTINGS_REF = ref(database, 'withdrawal_settings');
-// <!-- === बदला हुआ हिस्सा START === -->
-// बोनस विज्ञापन के लिए अलग से रेफरेंस की अब कोई आवश्यकता नहीं है।
-// const BONUS_ADS_REF = ref(database, 'bonus_ads');
-// <!-- === बदला हुआ हिस्सा END === -->
 
 window.coins = 0;
 window.dailyMinedTimestamp = 0;
@@ -588,19 +574,6 @@ let withdrawalSettings = {
     paypal: { locked: false, message: '' },
     crypto: { locked: false, message: '' }
 };
-
-let bonusAds = [];
-let bonusAdState = { watchedCount: 0, lastResetTimestamp: 0 };
-let BONUS_ADS_REQUIRED = 8;
-let BONUS_REWARD = 500;
-let bonusAdTimerInterval = null;
-let currentBonusAdIndex = 0;
-const bonusAdModal = document.getElementById('bonusAdModal');
-const bonusAdFrame = document.getElementById('bonusAdFrame');
-const bonusAdTitle = document.getElementById('bonusAdTitle');
-const bonusAdTimer = document.getElementById('bonusAdTimer');
-const closeBonusAdBtn = document.getElementById('closeBonusAdBtn');
-const extraBonusBtn = document.getElementById('extraBonusBtn');
 
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
@@ -691,8 +664,7 @@ function loadUserData() {
                 coins: 0, dailyMinedTimestamp: 0, miningEndTime: 0, adsWatched: 0,
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME, lastActive: Date.now(), joinDate: Date.now(),
-                country: userCountry || 'N/A',
-                bonusAdState: { watchedCount: 0, lastResetTimestamp: 0 }
+                country: userCountry || 'N/A'
             };
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -801,8 +773,6 @@ function loadAdminSettings() {
         if (settings) {
             window.ADS_REQUIRED = settings.miningAds?.required || 10;
             window.AD_REWARD_COINS = settings.adTasks?.reward || 5;
-            BONUS_ADS_REQUIRED = settings.bonusAds?.required || 8;
-            BONUS_REWARD = settings.bonusAds?.reward || 500;
             updateMiningButtonState();
             updateAdStatus();
         }
@@ -819,6 +789,7 @@ function loadWithdrawalLockSettings() {
     });
 }
 
+// === बदला हुआ हिस्सा START ===
 async function loadLiveTasks() {
     const dailyTaskContainer = document.getElementById('task-items-container');
     const premiumTaskContainer = document.getElementById('premium-task-items-container');
@@ -864,8 +835,8 @@ async function loadLiveTasks() {
                         } else {
                             actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')">Verify Task</button>`;
                         }
-                    } else {
-                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`; 
+                    } else { // Handles both undefined (not started) and 'true' (old start method)
+                        actionButton = `<button class="verify-btn" onclick="verifyTask('${taskId}', '${task.name}')" style="display:none;"></button>`; // Initially hide for non-started tasks
                     }
                     
                     const taskItemHtml = `
@@ -903,6 +874,8 @@ async function loadLiveTasks() {
 
     }, { onlyOnce: true });
 }
+// === बदला हुआ हिस्सा END ===
+
 
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
@@ -971,19 +944,12 @@ function updateGlobalState(data) {
     window.adsWatched = data.adsWatched || 0;
     window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
     window.upiId = data.upiId || '';
-    bonusAdState = data.bonusAdState || { watchedCount: 0, lastResetTimestamp: 0 };
 }
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) { resumeMiningSession(); }
     else { stopMining(false); }
     if (window.dailyMinedTimestamp !== 0 && window.canMineAgain()) {
-        const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 };
-        if (bonusAdState.watchedCount > 0) {
-            bonusAdState.watchedCount = 0;
-            bonusAdState.lastResetTimestamp = Date.now();
-            updates.bonusAdState = bonusAdState;
-        }
-        updateDatabase(updates);
+        updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
         window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
     }
     updateCoinDisplays();
@@ -1036,7 +1002,6 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
         }
-        updateBonusButtonVisibility(); 
     }).catch((error) => {
         console.error("Monetag ad error:", error);
         WebApp.showAlert("Ad could not be shown. Please try again.");
@@ -1125,13 +1090,7 @@ function startCooldownCountdown() {
         if (remainingCooldown <= 0) {
             clearInterval(remainingTimeInterval); remainingTimeInterval = null;
             if (window.dailyMinedTimestamp !== 0) {
-                 const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 };
-                 if (bonusAdState.watchedCount > 0) {
-                     bonusAdState.watchedCount = 0;
-                     bonusAdState.lastResetTimestamp = Date.now();
-                     updates.bonusAdState = bonusAdState;
-                 }
-                 window.updateDatabase(updates);
+                 window.updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
             }
             updateMiningButtonState(); return;
         }
@@ -1159,7 +1118,6 @@ function updateMiningButtonState() {
         countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
     }
     updateSoundState();
-    updateBonusButtonVisibility();
 }
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
@@ -1382,128 +1340,6 @@ window.claimCode = (button, url) => {
     if (!url || url === 'placeholder') { WebApp.showAlert("The link for this code is not available yet."); return; }
     WebApp.openLink(url);
 }
-
-// <!-- === बदला हुआ हिस्सा START === -->
-// बोनस विज्ञापनों को लोड करने वाले फ़ंक्शन को अपडेट किया गया
-function loadBonusAds() {
-    // अब हम admin_settings/bonusAds से बोनस विज्ञापन और उनकी सेटिंग्स लोड करेंगे
-    const bonusAdsSettingsRef = ref(database, 'admin_settings/bonusAds');
-    onValue(bonusAdsSettingsRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const bonusSettings = snapshot.val();
-            const adsData = bonusSettings.links || {};
-            // adsData ऑब्जेक्ट को एक ऐरे (array) में बदलें
-            // यह सुनिश्चित करेगा कि खाली स्लॉट को नजरअंदाज कर दिया जाए
-            bonusAds = Object.values(adsData); 
-        } else {
-            bonusAds = [];
-        }
-    }, (error) => console.error("Firebase Read Error (Bonus Ads Settings):", error));
-}
-// <!-- === बदला हुआ हिस्सा END === -->
-
-function updateBonusButtonVisibility() {
-    const miningIsActive = window.miningEndTime > Date.now();
-    const isInCooldown = !window.canMineAgain() && window.dailyMinedTimestamp !== 0;
-    const areMainAdsComplete = window.adsWatched >= window.ADS_REQUIRED;
-    const isBonusIncomplete = bonusAdState.watchedCount < BONUS_ADS_REQUIRED;
-
-    if (areMainAdsComplete && isBonusIncomplete && !miningIsActive && !isInCooldown) {
-        extraBonusBtn.style.display = 'block';
-        extraBonusBtn.innerText = `🌟 Extra ${BONUS_REWARD} Coins (${bonusAdState.watchedCount}/${BONUS_ADS_REQUIRED}) 🌟`;
-    } else {
-        extraBonusBtn.style.display = 'none';
-    }
-}
-
-window.startBonusAds = () => {
-    if (bonusAds.length === 0) {
-        WebApp.showAlert("Bonus ads are not available at the moment. Please try again later.");
-        return;
-    }
-    showNextBonusAd();
-}
-
-function showNextBonusAd() {
-    if (bonusAdState.watchedCount >= BONUS_ADS_REQUIRED) return;
-
-    currentBonusAdIndex = bonusAdState.watchedCount % bonusAds.length;
-    const ad = bonusAds[currentBonusAdIndex];
-
-    bonusAdFrame.src = ad.displayUrl;
-    bonusAdTitle.innerText = `Bonus Ad (${bonusAdState.watchedCount + 1}/${BONUS_ADS_REQUIRED})`;
-    bonusAdModal.style.display = 'block';
-    
-    let timeLeft = 15;
-    bonusAdTimer.innerText = `${timeLeft}s`;
-    closeBonusAdBtn.style.display = 'none';
-
-    clearInterval(bonusAdTimerInterval);
-    bonusAdTimerInterval = setInterval(() => {
-        timeLeft--;
-        bonusAdTimer.innerText = `${timeLeft}s`;
-        if (timeLeft <= 0) {
-            clearInterval(bonusAdTimerInterval);
-            bonusAdTimer.innerText = `✅`;
-            closeBonusAdBtn.style.display = 'block';
-        }
-    }, 1000);
-}
-
-window.adClicked = () => {
-    const ad = bonusAds[currentBonusAdIndex];
-    if (ad && ad.link) {
-        WebApp.openLink(ad.link);
-    }
-    bonusAdCompleted(true);
-}
-
-function bonusAdCompleted(wasClicked = false) {
-    clearInterval(bonusAdTimerInterval);
-    
-    bonusAdState.watchedCount++;
-    bonusAdState.lastResetTimestamp = Date.now();
-    
-    update(ref(database, `users/${TELEGRAM_USER_ID}/bonusAdState`), bonusAdState);
-
-    if (bonusAdState.watchedCount >= BONUS_ADS_REQUIRED) {
-        grantBonusReward();
-    } else {
-        updateBonusButtonVisibility();
-    }
-    
-    closeBonusAdModal();
-}
-
-function grantBonusReward() {
-    window.coins += BONUS_REWARD;
-    
-    const updates = { coins: window.coins };
-    const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
-    const historyKey = historyRef.key;
-    updates[`coin_history/${historyKey}`] = {
-        reason: 'Bonus Ads Reward',
-        amount: BONUS_REWARD,
-        timestamp: Date.now()
-    };
-    
-    update(window.dbRef, updates).then(() => {
-        playSuccessSound();
-        WebApp.showPopup({
-            title: 'Congratulations!',
-            message: `You've earned ${BONUS_REWARD} extra coins!`
-        });
-        updateCoinDisplays();
-        updateBonusButtonVisibility();
-    });
-}
-
-window.closeBonusAdModal = () => {
-    clearInterval(bonusAdTimerInterval);
-    bonusAdFrame.src = 'about:blank';
-    bonusAdModal.style.display = 'none';
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     loadWithdrawalLockSettings();
     loadAdminSettings();
@@ -1513,7 +1349,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWithdrawalHistory();
     listenForNotifications();
     listenForAdminPopups();
-    loadBonusAds(); // <-- यह फ़ंक्शन अब नए एडमिन पैनल के साथ काम करेगा
     document.body.addEventListener('click', primeAudio, { once: true });
     document.body.addEventListener('click', (event) => {
         if (event.target.matches('button, .nav-btn, .msg-icon, .profile, .task-item, .close-btn, .task-nav-btn')) {
@@ -1554,6 +1389,7 @@ window.showSection = (sectionId, button) => {
   updateSoundState();
 }
 
+// === बदला हुआ हिस्सा START ===
 window.showTaskCategory = (category, button) => {
     document.getElementById('daily-tasks').style.display = 'none';
     document.getElementById('premium-tasks').style.display = 'none';
@@ -1561,6 +1397,7 @@ window.showTaskCategory = (category, button) => {
     document.querySelectorAll('.task-nav-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 }
+// === बदला हुआ हिस्सा END ===
 
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
