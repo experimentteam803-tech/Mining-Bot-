@@ -1126,6 +1126,9 @@ function startCooldownCountdown() {
             clearInterval(remainingTimeInterval); remainingTimeInterval = null;
             if (window.dailyMinedTimestamp !== 0) {
                  updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0, 'extraAdTask/adsWatched': 0 });
+                 window.dailyMinedTimestamp = 0;
+                 window.adsWatched = 0;
+                 extraAdsWatched = 0;
             }
             updateMiningButtonState(); return;
         }
@@ -1542,7 +1545,6 @@ window.showSection = (sectionId, button) => {
   updateSoundState();
 }
 
-// === बदला हुआ हिस्सा START ===
 window.showTaskCategory = (category, button) => {
     document.getElementById('daily-tasks').style.display = 'none';
     document.getElementById('premium-tasks').style.display = 'none';
@@ -1550,7 +1552,6 @@ window.showTaskCategory = (category, button) => {
     document.querySelectorAll('.task-nav-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 }
-// === बदला हुआ हिस्सा END ===
 
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
