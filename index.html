@@ -354,7 +354,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
             </div>
         </div>
     </section>
-
     <section id="wallet" class="section">
         <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 10px;">
             <h2 style="text-align: center; margin: 0;">💼 Wallet</h2>
@@ -912,7 +911,6 @@ async function loadLiveTasks() {
 
     }, { onlyOnce: true });
 }
-
 window.showTaskDetails = (taskId) => {
     const task = allTasks[taskId];
     if (!task) return;
@@ -985,17 +983,7 @@ function updateGlobalState(data) {
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) { resumeMiningSession(); }
     else { stopMining(false); }
-    if (window.dailyMinedTimestamp !== 0 && window.canMineAgain()) {
-        const updates = { 
-            dailyMinedTimestamp: 0, 
-            adsWatched: 0, 
-            adsWatchedTimestamp: 0,
-            'extraAdTask/adsWatched': 0 
-        };
-        updateDatabase(updates);
-        window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
-        extraAdsWatched = 0;
-    }
+
     updateCoinDisplays();
     updateMiningButtonState();
 }
@@ -1041,7 +1029,7 @@ window.watchAd = () => {
         update(window.dbRef, updates);
 
         updateAdStatus();
-        checkAndShowExtraCoinButton();
+        checkAndShowExtraCoinButton(); 
 
         if (window.adsWatched < window.ADS_REQUIRED) {
             watchAdBtn.disabled = false;
@@ -1554,6 +1542,7 @@ window.showSection = (sectionId, button) => {
   updateSoundState();
 }
 
+// === बदला हुआ हिस्सा START ===
 window.showTaskCategory = (category, button) => {
     document.getElementById('daily-tasks').style.display = 'none';
     document.getElementById('premium-tasks').style.display = 'none';
@@ -1561,6 +1550,7 @@ window.showTaskCategory = (category, button) => {
     document.querySelectorAll('.task-nav-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 }
+// === बदला हुआ हिस्सा END ===
 
 window.showProfile = () => { WebApp.showAlert(`User Profile:\nName: ${USER_NAME}\nID: ${TELEGRAM_USER_ID}`); }
 window.showMsg = () => { WebApp.showPopup({message: 'Welcome to CoinMine!'}); }
