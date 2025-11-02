@@ -301,27 +301,73 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     animation: pulse-glow-secondary 2s infinite alternate;
 }
 
+/* === MODIFIED STYLES FOR FULL-SCREEN AD FRAME START === */
+#extraAdModal {
+    padding: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 999;
+    padding-top: 0; /* Override default modal padding */
+}
 #extraAdModal .modal-content {
-    padding: 20px;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
 }
 #extraAdFrame {
     width: 100%;
-    height: 300px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-dark);
+    height: 100%;
+    border: none;
+}
+#extraAdModalTitle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+    z-index: 1000;
+    color: var(--primary-glow);
+}
+.ad-overlay-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    z-index: 1000;
+    text-align: center;
 }
 #extraAdProgress {
-    font-size: 18px;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
     font-weight: 600;
     color: var(--primary-glow);
-    margin: 15px 0;
 }
 #extraAdTimer {
-    font-size: 16px;
-    color: var(--text-dark);
-    margin-bottom: 20px;
+    margin: 5px 0;
+    padding: 0;
+    font-size: 14px;
+    color: #fff;
 }
+#extraAdContinueBtn {
+    width: 90%;
+    margin-top: 5px;
+}
+/* === MODIFIED STYLES FOR FULL-SCREEN AD FRAME END === */
+
 
 /* === OFFERWALL FIX START === */
 #daily {
@@ -556,15 +602,23 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<!-- MODIFIED HTML STRUCTURE FOR FULL-SCREEN AD FRAME -->
 <div id="extraAdModal" class="modal">
     <div class="modal-content">
-        <h3 id="extraAdModalTitle" style="color: var(--primary-glow); margin-bottom: 15px;">⚠️ Warning: 18+ Ads may appear. View responsibly.</h3>
+        <h3 id="extraAdModalTitle">⚠️ Warning: 18+ Ads may appear. View responsibly.</h3>
         <iframe id="extraAdFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
-        <p id="extraAdProgress" style="text-align:center;"></p>
-        <p id="extraAdTimer" style="text-align:center;"></p>
-        <button id="extraAdContinueBtn" class="action-btn ad-btn" style="width: 100%; margin-top: 0;" disabled>Continue</button>
+        <div class="ad-overlay-controls">
+            <p id="extraAdProgress"></p>
+            <p id="extraAdTimer"></p>
+            <!-- NEW TEXT HINT ADDED HERE -->
+            <p style="font-size: 12px; color: #aaa; margin-top: 5px; font-style: italic;">
+                Click on the ad to skip the timer and continue.
+            </p>
+            <button id="extraAdContinueBtn" class="action-btn ad-btn" disabled>Continue</button>
+        </div>
     </div>
 </div>
+
 
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
