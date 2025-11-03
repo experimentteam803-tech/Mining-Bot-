@@ -1233,8 +1233,8 @@ window.watchBonusAd = () => {
     const bonusAdBtn = document.getElementById('watchBonusAdBtn');
     
     WebApp.showPopup({
-        message: "Stay in the ad for at least 15 seconds, otherwise it won’t be completed. ✅",
-        buttons: [{ id: 'ok', type: 'default', text: 'Open Ad' }, { type: 'cancel' }]
+        message: "Stay in the ad for at least 15 seconds,    ⚠️ Warning: 18+ Ads may appear. View responsibly.",
+        buttons: [{ id: 'ok', type: 'default', text: 'Open Ad👀' }, { type: 'cancel' }]
     }, (buttonId) => {
         if (buttonId === 'ok') {
             bonusAdBtn.disabled = true;
