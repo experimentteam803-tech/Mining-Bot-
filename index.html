@@ -1230,47 +1230,54 @@ window.watchBonusAd = () => {
         return;
     }
 
+    const bonusAdBtn = document.getElementById('watchBonusAdBtn');
+    
     WebApp.showPopup({
         message: "Stay in the ad for at least 15 seconds, otherwise it won’t be completed. ✅",
-        buttons: [{ type: 'ok', text: 'Open Ad' }]
+        buttons: [{ id: 'ok', type: 'default', text: 'Open Ad' }, { type: 'cancel' }]
     }, (buttonId) => {
         if (buttonId === 'ok') {
+            bonusAdBtn.disabled = true;
+            bonusAdBtn.innerText = 'Timer Running...';
+
             const adIndex = window.extraBonusAdsWatched % extraBonus_settings.ads.length;
             const adUrl = extraBonus_settings.ads[adIndex];
             
             WebApp.openLink(adUrl);
-
-            window.extraBonusAdsWatched++;
             
-            const updates = { extraBonusAdsWatched: window.extraBonusAdsWatched };
-            const now = Date.now();
+            setTimeout(() => {
+                const newCount = window.extraBonusAdsWatched + 1;
+                const updates = { extraBonusAdsWatched: newCount };
+                const now = Date.now();
 
-            if (window.extraBonusAdsWatched >= extraBonus_settings.requiredCount) {
-                const newCoinBalance = window.coins + extraBonus_settings.reward;
-                updates.coins = newCoinBalance;
-                updates.extraBonusClaimedTimestamp = now;
-                
-                const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
-                const historyKey = historyRef.key;
-                updates[`coin_history/${historyKey}`] = {
-                    reason: 'Extra Bonus Reward',
-                    amount: extraBonus_settings.reward,
-                    timestamp: now
-                };
-                
-                update(window.dbRef, updates).then(() => {
-                    playSuccessSound();
-                    WebApp.showPopup({ message: `Congratulations! You've earned an extra ${extraBonus_settings.reward} coins!` });
-                }).catch(error => {
-                    console.error("Error granting extra bonus:", error);
-                    WebApp.showAlert("Failed to add bonus coins. Please contact support.");
-                });
-            } else {
-                update(window.dbRef, updates);
-            }
+                if (newCount >= extraBonus_settings.requiredCount) {
+                    const newCoinBalance = window.coins + extraBonus_settings.reward;
+                    updates.coins = newCoinBalance;
+                    updates.extraBonusClaimedTimestamp = now;
+                    
+                    const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
+                    const historyKey = historyRef.key;
+                    updates[`coin_history/${historyKey}`] = {
+                        reason: 'Extra Bonus Reward',
+                        amount: extraBonus_settings.reward,
+                        timestamp: now
+                    };
+                    
+                    update(window.dbRef, updates).then(() => {
+                        playSuccessSound();
+                        WebApp.showPopup({ message: `Congratulations! You've earned an extra ${extraBonus_settings.reward} coins!` });
+                    }).catch(error => {
+                        console.error("Error granting extra bonus:", error);
+                        WebApp.showAlert("Failed to add bonus coins. Please contact support.");
+                    });
+                } else {
+                    update(window.dbRef, updates);
+                }
+            }, 15000); // 15 seconds
         }
     });
 };
+
 
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
