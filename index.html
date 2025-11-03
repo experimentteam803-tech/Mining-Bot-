@@ -304,12 +304,53 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 #extraAdModal .modal-content {
     padding: 20px;
 }
-#extraAdFrame {
+/* Styles for the new Iframe wrapper and overlay */
+.iframe-wrapper {
+    position: relative;
     width: 100%;
     height: 300px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-dark);
+    margin-bottom: 15px;
+}
+#extraAdFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+#iframeClickOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Allows clicks to pass through */
+    z-index: 10;
+}
+.click-ad-text {
+    background: rgba(255, 215, 0, 0.8);
+    color: #000;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px var(--secondary-glow), 0 0 25px var(--secondary-glow);
+    animation: pulse-click-ad 1.5s infinite alternate;
+}
+@keyframes pulse-click-ad {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 15px var(--secondary-glow), 0 0 25px var(--secondary-glow);
+    }
+    to {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px var(--secondary-glow), 0 0 40px var(--secondary-glow);
+    }
 }
 #extraAdProgress {
     font-size: 18px;
@@ -322,7 +363,6 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     color: var(--text-dark);
     margin-bottom: 20px;
 }
-
 /* === OFFERWALL FIX START === */
 #daily {
     padding: 0;
@@ -559,12 +599,18 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
 <div id="extraAdModal" class="modal">
     <div class="modal-content">
         <h3 id="extraAdModalTitle" style="color: var(--primary-glow); margin-bottom: 15px;">⚠️ Warning: 18+ Ads may appear. View responsibly.</h3>
-        <iframe id="extraAdFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+        <div class="iframe-wrapper">
+            <iframe id="extraAdFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+            <div id="iframeClickOverlay">
+                <span class="click-ad-text">Click Ads</span>
+            </div>
+        </div>
         <p id="extraAdProgress" style="text-align:center;"></p>
-        <p id="extraAdTimer" style="text-align:center;"></p>
+        <p id="extraAdTimer" style="text-align:center; display: none; color: var(--secondary-glow); font-weight: 600; margin-bottom: 20px;">Click the ad to complete instantly ✅</p>
         <button id="extraAdContinueBtn" class="action-btn ad-btn" style="width: 100%; margin-top: 0;" disabled>Continue</button>
     </div>
 </div>
+
 
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
@@ -1237,24 +1283,26 @@ function showNextExtraAd() {
     
     progressText.innerText = `Ad ${extraBonus_adsWatchedCount + 1}/${extraBonus_settings.requiredCount} Watched`;
     continueBtn.disabled = true;
+    timerText.style.display = 'none'; // Ensure it's hidden at the start of each ad
     modal.style.display = 'block';
 
     let countdown = extraBonus_adDuration;
-    timerText.innerText = `You can continue in ${countdown}s`;
 
     clearInterval(extraBonus_timerInterval);
     extraBonus_timerInterval = setInterval(() => {
         countdown--;
-        timerText.innerText = `You can continue in ${countdown}s`;
+        // Visual timer update is removed.
         if (countdown <= 0) {
             clearInterval(extraBonus_timerInterval);
-            timerText.innerText = "You can now continue!";
+            // Show the pre-written text instead of changing it.
+            timerText.style.display = 'block'; 
             continueBtn.disabled = false;
         }
     }, 1000);
 
     continueBtn.onclick = handleExtraAdCompletion;
 }
+
 
 function handleExtraAdCompletion() {
     extraBonus_adsWatchedCount++;
