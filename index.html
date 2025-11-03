@@ -600,6 +600,8 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div class="modal-content">
         <h3 id="extraAdModalTitle" style="color: var(--primary-glow); margin-bottom: 15px;">⚠️ Warning: 18+ Ads may appear. View responsibly.</h3>
         <div class="iframe-wrapper">
+            <!-- यह iframe सेटिंग किसी भी संगत लिंक (जैसे https://) को बाहर नेविगेट करने की अनुमति देती है। -->
+            <!-- market:// जैसे विशेष लिंक सुरक्षा कारणों से वेब ऐप में अवरुद्ध हो सकते हैं। -->
             <iframe id="extraAdFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
             <div id="iframeClickOverlay">
                 <span class="click-ad-text">Click Ads</span>
