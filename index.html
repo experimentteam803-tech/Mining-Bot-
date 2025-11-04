@@ -611,7 +611,7 @@ let remainingTimeInterval = null;
 let incrementCounter = 0;
 let COINS_PER_INCREMENT = 0.1;
 const MINING_RATE_MS = 450; 
-const INTL_COINS_PER_INCREMENT = 0.25; 
+const INTL_COINS_PER_INCREMENT = 0.125; // === CHANGE 1: Reward for international users changed from 0.25 to 0.125 (1000 coins/hr)
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
@@ -721,8 +721,9 @@ function loadUserData() {
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME, lastActive: Date.now(), joinDate: Date.now(),
                 country: userCountry || 'N/A',
+                currentStatus: 'Online', // === CHANGE 2: Added initial status for new users
                 extraBonusClaimedTimestamp: 0,
-                extraBonusAdsWatched: 0 // Initialize new field
+                extraBonusAdsWatched: 0
             };
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -749,7 +750,8 @@ function loadUserData() {
         }
         if (data.country && data.country !== 'IN') { COINS_PER_INCREMENT = INTL_COINS_PER_INCREMENT; }
         else { COINS_PER_INCREMENT = 0.1; }
-        const updates = { lastActive: Date.now(), userName: USER_NAME };
+        // === CHANGE 3: Update status to 'Online' every time the app is loaded
+        const updates = { lastActive: Date.now(), userName: USER_NAME, currentStatus: 'Online' };
         const fetchedCountry = await getUserCountry();
         if (fetchedCountry && data.country !== fetchedCountry) { updates.country = fetchedCountry; }
         if (!isInitialLoadComplete) {
@@ -779,9 +781,9 @@ function loadUserData() {
                 }
             }
         }
-        if (Object.keys(updates).length > 2 || (updates.country && data.country !== updates.country) || updates.coins) {
-             update(window.dbRef, updates);
-        }
+        // Always update the status and last active time
+        update(window.dbRef, updates);
+        
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
@@ -1107,7 +1109,8 @@ window.stopMining = (doUpdateState = true) => {
     mineCircle.classList.remove('mining-active-glow');
     if (window.miningEndTime !== 0) {
         window.miningEndTime = 0;
-        if(doUpdateState) { window.updateDatabase({ miningEndTime: 0, coins: window.coins }); }
+        // === CHANGE 4: When mining stops, update status to 'Online'
+        if(doUpdateState) { window.updateDatabase({ miningEndTime: 0, coins: window.coins, currentStatus: 'Online' }); }
     }
     if (doUpdateState) updateMiningButtonState();
     updateSoundState();
@@ -1141,7 +1144,8 @@ window.startDailyMining = () => {
   if (!window.canMineAgain()){ startCooldownCountdown(); return; }
   const currentTime = Date.now(); const endTime = currentTime + ONE_HOUR_MS;
   window.dailyMinedTimestamp = currentTime; window.miningEndTime = endTime;
-  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime });
+  // === CHANGE 5: When mining starts, update status to 'Mining'
+  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime, currentStatus: 'Mining' });
   resumeMiningSession();
 }
 function startCooldownCountdown() {
@@ -1541,6 +1545,15 @@ document.addEventListener('DOMContentLoaded', () => {
             WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
         });
     });
+
+    // === CHANGE 6: Add a heartbeat to update lastActive time every 60 seconds for live status
+    setInterval(() => {
+        // Only update if the app is visible to the user
+        if (document.visibilityState === 'visible') {
+            update(ref(database, DB_NODE_PATH), { lastActive: Date.now() });
+        }
+    }, 60000); // 60,000 milliseconds = 1 minute
+
 });
 
 window.showSection = (sectionId, button) => {
