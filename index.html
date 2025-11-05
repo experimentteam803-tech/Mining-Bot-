@@ -290,36 +290,37 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     font-weight: 700;
 }
 
-#extra-bonus-container {
-    width: 100%;
-    text-align: center;
-    margin-top: -10px;
-    margin-bottom: 15px;
-}
-
-#extra-bonus-container h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    background: linear-gradient(45deg, #ff8c00, #ffd700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-#watchBonusAdBtn {
-    padding: 12px 24px;
+#extraBonusBtn {
+    padding: 10px 20px;
     font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 15px;
     background: linear-gradient(45deg, #ff8c00, #ffd700);
     color: #000;
     box-shadow: 0 0 15px #ffd700, 0 0 25px rgba(255, 215, 0, 0.6);
     animation: pulse-glow-secondary 2s infinite alternate;
 }
 
-#bonusAdStatus {
-    color: var(--text-light);
-    font-size: 16px;
-    margin-top: 10px;
+#extraAdModal .modal-content {
+    padding: 20px;
+}
+#extraAdFrame {
+    width: 100%;
+    height: 300px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-dark);
+}
+#extraAdProgress {
+    font-size: 18px;
     font-weight: 600;
+    color: var(--primary-glow);
+    margin: 15px 0;
+}
+#extraAdTimer {
+    font-size: 16px;
+    color: var(--text-dark);
+    margin-bottom: 20px;
 }
 
 /* === OFFERWALL FIX START === */
@@ -352,11 +353,7 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     <div id="totalCoins"><span id="coinCount">0</span></div>
     <h2>Your Coins</h2>
         
-    <div id="extra-bonus-container" style="display:none;">
-        <h3>🎁 Extra 500 Coins</h3>
-        <button id="watchBonusAdBtn" class="action-btn" onclick="watchBonusAd()">🎬 Watch Bonus Ad</button>
-        <div id="bonusAdStatus">Ads Watched: 0/8</div>
-    </div>
+    <button id="extraBonusBtn" class="action-btn" style="display:none;" onclick="startExtraBonusFlow()">🎁 Extra 500 Coins</button>
 
     <div class="circle-container">
     <div class="circle" id="mineCircle">
@@ -559,6 +556,16 @@ button.action-btn:disabled{cursor: not-allowed; opacity: 0.6; animation: none;}
     </div>
 </div>
 
+<div id="extraAdModal" class="modal">
+    <div class="modal-content">
+        <h3 id="extraAdModalTitle" style="color: var(--primary-glow); margin-bottom: 15px;">⚠️ Warning: 18+ Ads may appear. View responsibly.</h3>
+        <iframe id="extraAdFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+        <p id="extraAdProgress" style="text-align:center;"></p>
+        <p id="extraAdTimer" style="text-align:center;"></p>
+        <button id="extraAdContinueBtn" class="action-btn ad-btn" style="width: 100%; margin-top: 0;" disabled>Continue</button>
+    </div>
+</div>
+
 <audio id="preMiningSound" src="pre-mining.mp3" preload="auto" loop></audio>
 <audio id="miningSound" src="mining.mp3" preload="auto" loop></audio>
 <audio id="clickSound" src="click.mp3" preload="auto"></audio>
@@ -611,7 +618,7 @@ let remainingTimeInterval = null;
 let incrementCounter = 0;
 let COINS_PER_INCREMENT = 0.1;
 const MINING_RATE_MS = 450; 
-const INTL_COINS_PER_INCREMENT = 0.125; // === CHANGE 1: Reward for international users changed from 0.25 to 0.125 (1000 coins/hr)
+const INTL_COINS_PER_INCREMENT = 0.25; 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const MIN_WITHDRAWAL_COINS = 10000;
@@ -628,8 +635,10 @@ let withdrawalSettings = {
 };
 
 let extraBonus_settings = { requiredCount: 8, reward: 500, ads: [] };
+let extraBonus_adsWatchedCount = 0;
 let extraBonus_claimedTimestamp = 0;
-window.extraBonusAdsWatched = 0; // Persistent count of watched bonus ads
+let extraBonus_timerInterval = null;
+const extraBonus_adDuration = 15;
 
 const mineButton = document.getElementById('mineBtn');
 const watchAdBtn = document.getElementById('watchAdBtn');
@@ -721,9 +730,7 @@ function loadUserData() {
                 adsWatchedTimestamp: 0, upiId: '', telegramId: TELEGRAM_USER_ID,
                 userName: USER_NAME, lastActive: Date.now(), joinDate: Date.now(),
                 country: userCountry || 'N/A',
-                currentStatus: 'Online', // === CHANGE 2: Added initial status for new users
-                extraBonusClaimedTimestamp: 0,
-                extraBonusAdsWatched: 0
+                extraBonusClaimedTimestamp: 0
             };
             const referrerId = WebApp.initDataUnsafe.start_param;
             if (referrerId && referrerId !== TELEGRAM_USER_ID) {
@@ -750,8 +757,7 @@ function loadUserData() {
         }
         if (data.country && data.country !== 'IN') { COINS_PER_INCREMENT = INTL_COINS_PER_INCREMENT; }
         else { COINS_PER_INCREMENT = 0.1; }
-        // === CHANGE 3: Update status to 'Online' every time the app is loaded
-        const updates = { lastActive: Date.now(), userName: USER_NAME, currentStatus: 'Online' };
+        const updates = { lastActive: Date.now(), userName: USER_NAME };
         const fetchedCountry = await getUserCountry();
         if (fetchedCountry && data.country !== fetchedCountry) { updates.country = fetchedCountry; }
         if (!isInitialLoadComplete) {
@@ -781,9 +787,9 @@ function loadUserData() {
                 }
             }
         }
-        // Always update the status and last active time
-        update(window.dbRef, updates);
-        
+        if (Object.keys(updates).length > 2 || (updates.country && data.country !== updates.country) || updates.coins) {
+             update(window.dbRef, updates);
+        }
         updateGlobalState(data);
         processDataForStateUpdate();
     }, (error) => {
@@ -1002,18 +1008,14 @@ function updateGlobalState(data) {
     window.adsWatchedTimestamp = data.adsWatchedTimestamp || 0;
     window.upiId = data.upiId || '';
     extraBonus_claimedTimestamp = data.extraBonusClaimedTimestamp || 0;
-    window.extraBonusAdsWatched = data.extraBonusAdsWatched || 0; // Update global state
 }
 function processDataForStateUpdate() {
     if (window.miningEndTime > Date.now()) { resumeMiningSession(); }
     else { stopMining(false); }
     if (window.dailyMinedTimestamp !== 0 && window.canMineAgain()) {
-        const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0, extraBonusAdsWatched: 0 };
+        const updates = { dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 };
         updateDatabase(updates);
-        window.dailyMinedTimestamp = 0; 
-        window.adsWatched = 0; 
-        window.adsWatchedTimestamp = 0;
-        window.extraBonusAdsWatched = 0;
+        window.dailyMinedTimestamp = 0; window.adsWatched = 0; window.adsWatchedTimestamp = 0;
     }
     updateCoinDisplays();
     updateMiningButtonState();
@@ -1065,7 +1067,7 @@ window.watchAd = () => {
             watchAdBtn.innerText = '✅ Ads Complete';
             WebApp.showPopup({message: `Congratulations! You can now start mining!`});
         }
-        updateBonusAdUI(); // Call UI update for bonus section
+        updateExtraBonusButtonVisibility();
     }).catch((error) => {
         console.error("Monetag ad error:", error);
         WebApp.showAlert("Ad could not be shown. Please try again.");
@@ -1109,8 +1111,7 @@ window.stopMining = (doUpdateState = true) => {
     mineCircle.classList.remove('mining-active-glow');
     if (window.miningEndTime !== 0) {
         window.miningEndTime = 0;
-        // === CHANGE 4: When mining stops, update status to 'Online'
-        if(doUpdateState) { window.updateDatabase({ miningEndTime: 0, coins: window.coins, currentStatus: 'Online' }); }
+        if(doUpdateState) { window.updateDatabase({ miningEndTime: 0, coins: window.coins }); }
     }
     if (doUpdateState) updateMiningButtonState();
     updateSoundState();
@@ -1144,8 +1145,7 @@ window.startDailyMining = () => {
   if (!window.canMineAgain()){ startCooldownCountdown(); return; }
   const currentTime = Date.now(); const endTime = currentTime + ONE_HOUR_MS;
   window.dailyMinedTimestamp = currentTime; window.miningEndTime = endTime;
-  // === CHANGE 5: When mining starts, update status to 'Mining'
-  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime, currentStatus: 'Mining' });
+  window.updateDatabase({ dailyMinedTimestamp: currentTime, miningEndTime: endTime });
   resumeMiningSession();
 }
 function startCooldownCountdown() {
@@ -1156,7 +1156,7 @@ function startCooldownCountdown() {
         if (remainingCooldown <= 0) {
             clearInterval(remainingTimeInterval); remainingTimeInterval = null;
             if (window.dailyMinedTimestamp !== 0) {
-                 window.updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0, extraBonusAdsWatched: 0 });
+                 window.updateDatabase({ dailyMinedTimestamp: 0, adsWatched: 0, adsWatchedTimestamp: 0 });
             }
             updateMiningButtonState(); return;
         }
@@ -1183,7 +1183,7 @@ function updateMiningButtonState() {
         mineButton.disabled = true; mineButton.innerText = `🔒 Watch Ads to Unlock`; mineButton.style.background = '#808080';
         countdownDisplay.innerText = `Watch ${window.ADS_REQUIRED - window.adsWatched} more ads to start.`;
     }
-    updateBonusAdUI();
+    updateExtraBonusButtonVisibility();
     updateSoundState();
 }
 
@@ -1198,90 +1198,97 @@ function loadExtraBonusSettings() {
     }, (error) => console.error("Firebase Read Error (Extra Bonus Settings):", error));
 }
 
-function updateBonusAdUI() {
-    const extraBonusContainer = document.getElementById('extra-bonus-container');
-    const bonusAdBtn = document.getElementById('watchBonusAdBtn');
-    const bonusAdStatus = document.getElementById('bonusAdStatus');
-    
+function updateExtraBonusButtonVisibility() {
+    const extraBonusBtn = document.getElementById('extraBonusBtn');
     const miningIsActive = window.miningEndTime > Date.now();
     const adsAreComplete = window.adsWatched >= window.ADS_REQUIRED;
     const isBonusAvailableForCycle = extraBonus_claimedTimestamp < window.dailyMinedTimestamp || window.dailyMinedTimestamp === 0;
 
     if (adsAreComplete && !miningIsActive && isBonusAvailableForCycle) {
-        extraBonusContainer.style.display = 'block';
-        bonusAdStatus.innerText = `Ads Watched: ${window.extraBonusAdsWatched}/${extraBonus_settings.requiredCount}`;
-
-        if (window.extraBonusAdsWatched >= extraBonus_settings.requiredCount) {
-            bonusAdBtn.disabled = true;
-            bonusAdBtn.innerText = '✅ Bonus Claimed';
-            bonusAdStatus.innerText = `Come back in the next cycle!`;
-        } else {
-            bonusAdBtn.disabled = false;
-            bonusAdBtn.innerText = '🎬 Watch Bonus Ad';
-        }
+        extraBonusBtn.style.display = 'block';
     } else {
-        extraBonusContainer.style.display = 'none';
+        extraBonusBtn.style.display = 'none';
     }
 }
 
-window.watchBonusAd = () => {
-    if (window.extraBonusAdsWatched >= extraBonus_settings.requiredCount) {
-        WebApp.showAlert("You have already completed the bonus for this cycle.");
-        return;
-    }
+window.startExtraBonusFlow = () => {
     if (!extraBonus_settings.ads || extraBonus_settings.ads.length === 0) {
         WebApp.showAlert("Bonus ads are not available at the moment. Please try again later.");
         return;
     }
-
-    const bonusAdBtn = document.getElementById('watchBonusAdBtn');
-    
-    WebApp.showPopup({
-        message: "Stay in the ad for at least 15 seconds,⚠️ Warning: 18+ Ads may appear. View responsibly.",
-        buttons: [{ id: 'ok', type: 'default', text: 'Open Ad👀' }, { type: 'cancel' }]
-    }, (buttonId) => {
-        if (buttonId === 'ok') {
-            bonusAdBtn.disabled = true;
-            bonusAdBtn.innerText = 'Timer Running...';
-
-            const adIndex = window.extraBonusAdsWatched % extraBonus_settings.ads.length;
-            const adUrl = extraBonus_settings.ads[adIndex];
-            
-            WebApp.openLink(adUrl);
-            
-            setTimeout(() => {
-                const newCount = window.extraBonusAdsWatched + 1;
-                const updates = { extraBonusAdsWatched: newCount };
-                const now = Date.now();
-
-                if (newCount >= extraBonus_settings.requiredCount) {
-                    const newCoinBalance = window.coins + extraBonus_settings.reward;
-                    updates.coins = newCoinBalance;
-                    updates.extraBonusClaimedTimestamp = now;
-                    
-                    const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
-                    const historyKey = historyRef.key;
-                    updates[`coin_history/${historyKey}`] = {
-                        reason: 'Extra Bonus Reward',
-                        amount: extraBonus_settings.reward,
-                        timestamp: now
-                    };
-                    
-                    update(window.dbRef, updates).then(() => {
-                        playSuccessSound();
-                        WebApp.showPopup({ message: `Congratulations! You've earned an extra ${extraBonus_settings.reward} coins!` });
-                    }).catch(error => {
-                        console.error("Error granting extra bonus:", error);
-                        WebApp.showAlert("Failed to add bonus coins. Please contact support.");
-                    });
-                } else {
-                    update(window.dbRef, updates);
-                }
-            }, 15000); // 15 seconds
-        }
-    });
+    extraBonus_adsWatchedCount = 0;
+    showNextExtraAd();
 };
 
+function showNextExtraAd() {
+    if (extraBonus_adsWatchedCount >= extraBonus_settings.requiredCount) {
+        grantExtraBonusReward();
+        return;
+    }
+
+    const modal = document.getElementById('extraAdModal');
+    const iframe = document.getElementById('extraAdFrame');
+    const progressText = document.getElementById('extraAdProgress');
+    const timerText = document.getElementById('extraAdTimer');
+    const continueBtn = document.getElementById('extraAdContinueBtn');
+
+    const adIndex = extraBonus_adsWatchedCount % extraBonus_settings.ads.length;
+    iframe.src = extraBonus_settings.ads[adIndex];
+    
+    progressText.innerText = `Ad ${extraBonus_adsWatchedCount + 1}/${extraBonus_settings.requiredCount} Watched`;
+    continueBtn.disabled = true;
+    modal.style.display = 'block';
+
+    let countdown = extraBonus_adDuration;
+    timerText.innerText = `You can continue in ${countdown}s`;
+
+    clearInterval(extraBonus_timerInterval);
+    extraBonus_timerInterval = setInterval(() => {
+        countdown--;
+        timerText.innerText = `You can continue in ${countdown}s`;
+        if (countdown <= 0) {
+            clearInterval(extraBonus_timerInterval);
+            timerText.innerText = "You can now continue!";
+            continueBtn.disabled = false;
+        }
+    }, 1000);
+
+    continueBtn.onclick = handleExtraAdCompletion;
+}
+
+function handleExtraAdCompletion() {
+    extraBonus_adsWatchedCount++;
+    showNextExtraAd();
+}
+
+function grantExtraBonusReward() {
+    const modal = document.getElementById('extraAdModal');
+    modal.style.display = 'none';
+
+    const newCoinBalance = window.coins + extraBonus_settings.reward;
+    const now = Date.now();
+    
+    const updates = {
+        coins: newCoinBalance,
+        extraBonusClaimedTimestamp: now
+    };
+    const historyRef = push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`));
+    const historyKey = historyRef.key;
+    updates[`coin_history/${historyKey}`] = {
+        reason: 'Extra Bonus Reward',
+        amount: extraBonus_settings.reward,
+        timestamp: now
+    };
+
+    update(window.dbRef, updates).then(() => {
+        playSuccessSound();
+        WebApp.showPopup({ message: `Congratulations! You've earned an extra ${extraBonus_settings.reward} coins!` });
+        document.getElementById('extraBonusBtn').style.display = 'none';
+    }).catch(error => {
+        console.error("Error granting extra bonus:", error);
+        WebApp.showAlert("Failed to add bonus coins. Please try again.");
+    });
+}
 
 window.showWithdrawalModal = () => {
     if (withdrawalSettings.upi.locked) {
@@ -1545,15 +1552,6 @@ document.addEventListener('DOMContentLoaded', () => {
             WebApp.openTelegramLink('https://t.me/MiningFatherhelp');
         });
     });
-
-    // === CHANGE 6: Add a heartbeat to update lastActive time every 60 seconds for live status
-    setInterval(() => {
-        // Only update if the app is visible to the user
-        if (document.visibilityState === 'visible') {
-            update(ref(database, DB_NODE_PATH), { lastActive: Date.now() });
-        }
-    }, 60000); // 60,000 milliseconds = 1 minute
-
 });
 
 window.showSection = (sectionId, button) => {
