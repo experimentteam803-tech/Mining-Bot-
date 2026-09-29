@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
-    <title>Mining Father - NextGen Rewards</title>
-
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Ad Provider SDKs -->
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-    <script src="//libtl.com/sdk.js" data-zone="9969043" data-sdk="show_9969043" async></script>
-    <script src="https://adexora.com/cdn/ads.js?id=1301" async></script>
+    <title>Mining Father - Cloud Mining & Rewards</title>
 
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Web Ad Fallbacks (Agar browser me khule) -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <script src="//libtl.com/sdk.js" data-zone="9969043" data-sdk="show_9969043" async></script>
 
     <style>
         :root {
@@ -38,7 +34,7 @@
 
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
         }
 
         * {
@@ -52,19 +48,17 @@
         body {
             background-color: var(--bg-base);
             background-image: 
-                radial-gradient(ellipse 90% 40% at 50% 0%, rgba(0, 242, 254, 0.07), transparent),
+                radial-gradient(ellipse 90% 40% at 50% 0%, rgba(0, 242, 254, 0.08), transparent),
                 radial-gradient(ellipse 60% 40% at 50% 100%, rgba(79, 172, 254, 0.05), transparent);
             color: var(--text-primary);
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             user-select: none;
-            -webkit-user-select: none;
             display: flex;
             flex-direction: column;
         }
 
-        /* App Wrapper */
         #app {
             display: flex;
             flex-direction: column;
@@ -73,18 +67,16 @@
             overflow: hidden;
         }
 
-        /* Header */
+        /* Top Header */
         header {
             padding: calc(var(--safe-top) + 12px) 16px 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--border);
             z-index: 50;
-            flex-shrink: 0;
         }
 
         .header-profile {
@@ -102,37 +94,14 @@
             object-fit: cover;
         }
 
-        .header-user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-user-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-primary);
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .header-user-tag {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .header-user-info { display: flex; flex-direction: column; }
+        .header-user-name { font-size: 14px; font-weight: 700; color: #FFF; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .header-user-tag { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
 
         .icon-btn {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
-            color: var(--text-primary);
+            color: #FFF;
             width: 38px;
             height: 38px;
             border-radius: 12px;
@@ -141,15 +110,9 @@
             justify-content: center;
             cursor: pointer;
             font-size: 16px;
-            transition: all 0.2s ease;
         }
 
-        .icon-btn:active {
-            transform: scale(0.92);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        /* Scrollable Main Area */
+        /* Scroll Area */
         main {
             flex: 1;
             overflow-y: auto;
@@ -162,39 +125,19 @@
         }
         main::-webkit-scrollbar { display: none; }
 
-        .section-view {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-            animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .section-view { display: none; flex-direction: column; gap: 16px; animation: fadeIn 0.2s ease; }
         .section-view.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Balance Card */
+        /* Balance Hero Card */
         .balance-hero {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95));
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.98));
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .balance-hero::after {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle, rgba(0, 242, 254, 0.15), transparent 70%);
-            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .balance-label {
@@ -206,28 +149,11 @@
             margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
 
-        .primary-balance {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .primary-balance .coin-val {
-            font-size: 34px;
-            font-weight: 800;
-            color: var(--accent-gold);
-            letter-spacing: -0.5px;
-        }
-
-        .primary-balance .coin-symbol {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-secondary);
-        }
+        .primary-balance { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+        .primary-balance .coin-val { font-size: 34px; font-weight: 800; color: var(--accent-gold); }
+        .primary-balance .coin-symbol { font-size: 16px; font-weight: 700; color: var(--text-secondary); }
 
         .secondary-currencies {
             display: grid;
@@ -244,26 +170,11 @@
             padding: 8px 12px;
         }
 
-        .curr-box .curr-title {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
+        .curr-box .curr-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .curr-box .curr-amount { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
 
-        .curr-box .curr-amount {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-top: 2px;
-        }
-
-        /* Quick Action Bar */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
+        /* Quick Actions */
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .quick-action-btn {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -272,28 +183,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
+        .quick-action-btn:active { transform: scale(0.95); }
+        .quick-action-btn .btn-icon { font-size: 20px; }
+        .quick-action-btn .btn-text { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
 
-        .quick-action-btn:active {
-            transform: scale(0.95);
-            background: var(--bg-card-subtle);
-        }
-
-        .quick-action-btn .btn-icon {
-            font-size: 20px;
-        }
-
-        .quick-action-btn .btn-text {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        /* Mining Engine Card */
+        /* Mining Card */
         .mining-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -302,38 +199,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
-        .mining-header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .badge {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-active {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .badge-idle {
-            background: rgba(148, 163, 184, 0.15);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
+        .mining-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .badge-active { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-idle { background: rgba(148, 163, 184, 0.15); color: var(--text-secondary); border: 1px solid var(--border); }
 
         .mining-dial {
             position: relative;
@@ -345,21 +217,11 @@
             margin: 6px 0 16px 0;
         }
 
-        .mining-dial svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-
-        .mining-dial-bg {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.06);
-            stroke-width: 10;
-        }
-
+        .mining-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .mining-dial-bg { fill: none; stroke: rgba(255, 255, 255, 0.06); stroke-width: 10; }
         .mining-dial-progress {
             fill: none;
-            stroke: url(#cyanBlueGrad);
+            stroke: var(--accent-cyan);
             stroke-width: 10;
             stroke-linecap: round;
             stroke-dasharray: 534;
@@ -367,60 +229,15 @@
             transition: stroke-dashoffset 0.8s ease;
         }
 
-        .mining-dial-content {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
+        .mining-dial-content { position: absolute; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .dial-icon { font-size: 36px; margin-bottom: 4px; }
+        .dial-value { font-size: 20px; font-weight: 800; color: #FFF; }
+        .dial-sub { font-size: 11px; font-weight: 600; color: var(--text-muted); }
 
-        .dial-icon {
-            font-size: 36px;
-            margin-bottom: 4px;
-        }
-
-        .dial-value {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .dial-sub {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .mining-stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            width: 100%;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .mini-stat {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .mini-stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .mini-stat-val {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-top: 2px;
-        }
+        .mining-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; gap: 8px; margin-bottom: 16px; }
+        .mini-stat { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 12px; padding: 8px; text-align: center; }
+        .mini-stat-label { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+        .mini-stat-val { font-size: 13px; font-weight: 700; color: #FFF; margin-top: 2px; }
 
         /* Buttons */
         .btn-primary {
@@ -438,64 +255,19 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.2s ease;
         }
+        .btn-primary:disabled { opacity: 0.5; background: #253349; color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
+        .btn-gold { background: linear-gradient(135deg, #FFD200, #F7931A); color: #000; box-shadow: 0 4px 20px rgba(255, 210, 0, 0.25); }
+        .btn-outline { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: #FFF; }
 
-        .btn-primary:active:not(:disabled) {
-            transform: scale(0.98);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-            box-shadow: none;
-            background: #253349;
-            color: var(--text-muted);
-        }
-
-        .btn-gold {
-            background: linear-gradient(135deg, #FFD200, #F7931A);
-            color: #000;
-            box-shadow: 0 4px 20px rgba(255, 210, 0, 0.25);
-        }
-
-        .btn-outline {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-        }
-
-        /* Category Filter Tabs */
-        .filter-scroller {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            scrollbar-width: none;
-        }
+        /* Category Filter Chips */
+        .filter-scroller { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
         .filter-scroller::-webkit-scrollbar { display: none; }
+        .chip-tab { padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; }
+        .chip-tab.active { background: rgba(0, 242, 254, 0.12); color: var(--accent-cyan); border-color: rgba(0, 242, 254, 0.4); }
 
-        .chip-tab {
-            padding: 8px 14px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .chip-tab.active {
-            background: rgba(0, 242, 254, 0.12);
-            color: var(--accent-cyan);
-            border-color: rgba(0, 242, 254, 0.4);
-        }
-
-        /* Task Cards */
-        .task-card {
+        /* Task & Ad Cards */
+        .task-card, .ad-network-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -503,177 +275,26 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            transition: border-color 0.2s ease;
         }
 
-        .task-card-top {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .task-card-top, .ad-card-top { display: flex; justify-content: space-between; align-items: center; }
+        .task-icon { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); }
+        .task-info { flex: 1; margin-left: 12px; }
+        .task-name { font-size: 14px; font-weight: 700; color: #FFF; }
+        .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: 12px; }
 
-        .task-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 1px solid var(--border);
-            background: var(--bg-card-subtle);
-            flex-shrink: 0;
-        }
+        /* Wallet Grid */
+        .wallet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .wallet-card-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 10px; text-align: center; }
+        .wallet-card-cell .label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .wallet-card-cell .val { font-size: 16px; font-weight: 800; color: #FFF; margin-top: 4px; }
 
-        .task-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .swap-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+        .swap-input-group { background: var(--bg-base); border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .swap-input-group input { background: transparent; border: none; color: #FFF; font-size: 18px; font-weight: 700; width: 60%; outline: none; }
+        .swap-input-group select { background: var(--bg-card-subtle); border: 1px solid var(--border); color: #FFF; padding: 6px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; outline: none; }
 
-        .task-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .task-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 3px;
-        }
-
-        .task-reward-tag {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-gold);
-        }
-
-        .task-time {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .task-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        /* Watch Cards */
-        .ad-network-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ad-network-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 3px;
-            width: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
-        }
-
-        .ad-card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .ad-card-title {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .ad-card-subtitle {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        /* Wallet Section Styles */
-        .wallet-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .wallet-card-cell {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 14px 10px;
-            text-align: center;
-        }
-
-        .wallet-card-cell .label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .wallet-card-cell .val {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-top: 4px;
-            word-break: break-all;
-        }
-
-        /* Swap Box */
-        .swap-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .swap-input-group {
-            background: var(--bg-base);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .swap-input-group input {
-            background: transparent;
-            border: none;
-            color: #FFF;
-            font-size: 18px;
-            font-weight: 700;
-            width: 60%;
-            outline: none;
-        }
-
-        .swap-input-group select {
-            background: var(--bg-card-subtle);
-            border: 1px solid var(--border);
-            color: #FFF;
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            outline: none;
-        }
-
-        /* Modals */
+        /* Modals & Bottom Navigation */
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -681,21 +302,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             z-index: 100;
             align-items: flex-end;
             justify-content: center;
-            opacity: 0;
-            transition: opacity 0.25s ease;
         }
-
-        .modal-backdrop.open {
-            display: flex;
-            opacity: 1;
-        }
-
+        .modal-backdrop.open { display: flex; }
         .modal-sheet {
             background: var(--bg-card);
             border-top: 1px solid var(--border);
@@ -705,88 +318,14 @@
             max-width: 500px;
             max-height: 88vh;
             overflow-y: auto;
-            transform: translateY(100%);
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .modal-backdrop.open .modal-sheet {
-            transform: translateY(0);
-        }
+        .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px auto; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+        .form-input { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: #FFF; padding: 12px 14px; border-radius: 12px; font-size: 14px; margin-bottom: 14px; outline: none; }
+        .form-input:focus { border-color: var(--accent-cyan); }
+        .warning-callout { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px; font-size: 12px; color: #FCA5A5; margin-bottom: 14px; }
 
-        .sheet-handle {
-            width: 36px;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            margin: 0 auto 16px auto;
-        }
-
-        .sheet-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .sheet-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 18px;
-            line-height: 1.5;
-        }
-
-        .form-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .form-input {
-            width: 100%;
-            background: var(--bg-base);
-            border: 1px solid var(--border);
-            color: #FFF;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            outline: none;
-            margin-bottom: 14px;
-            transition: border-color 0.2s ease;
-        }
-
-        .form-input:focus {
-            border-color: var(--accent-cyan);
-        }
-
-        .warning-callout {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 12px;
-            color: #FCA5A5;
-            line-height: 1.45;
-            margin-bottom: 14px;
-        }
-
-        .checkbox-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .checkbox-row input {
-            accent-color: var(--accent-cyan);
-            margin-top: 2px;
-        }
-
-        /* Bottom Nav */
         nav.bottom-nav {
             position: fixed;
             bottom: 0;
@@ -794,145 +333,73 @@
             width: 100%;
             height: calc(var(--safe-bottom) + 64px);
             padding-bottom: var(--safe-bottom);
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border-top: 1px solid var(--border);
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             align-items: center;
             z-index: 50;
         }
+        .nav-tab { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-tab.active { color: var(--accent-cyan); }
+        .nav-tab .tab-icon { font-size: 20px; }
+        .nav-tab .tab-name { font-size: 10px; font-weight: 700; }
 
-        .nav-tab {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 6px 0;
-            transition: all 0.2s ease;
-        }
-
-        .nav-tab .tab-icon {
-            font-size: 20px;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-tab .tab-name {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.2px;
-        }
-
-        .nav-tab.active {
-            color: var(--accent-cyan);
-        }
-
-        .nav-tab.active .tab-icon {
-            transform: translateY(-2px);
-        }
-
-        /* Toast Engine */
-        #toast-container {
-            position: fixed;
-            top: calc(var(--safe-top) + 20px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-            width: calc(100% - 32px);
-            max-width: 360px;
-        }
-
-        .toast {
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #FFF;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideDown 0.25s ease forwards;
-            pointer-events: auto;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Empty / Loading States */
-        .state-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            text-align: center;
-            color: var(--text-muted);
-            gap: 10px;
-        }
-
-        .state-empty-icon { font-size: 40px; }
-        .state-empty-text { font-size: 13px; font-weight: 500; }
-
-        .history-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* Toast Container */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 360px; pointer-events: none; }
+        .toast { background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; font-size: 13px; font-weight: 600; color: #FFF; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        
+        .history-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <svg width="0" height="0" style="position:absolute">
-        <defs>
-            <linearGradient id="cyanBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#00F2FE" />
-                <stop offset="100%" stop-color="#4FACFE" />
-            </linearGradient>
-        </defs>
-    </svg>
-
     <div id="toast-container"></div>
 
+    <!-- Login / Registration Modal (Runs on fresh install) -->
+    <div class="modal-backdrop" id="modal-auth" style="z-index: 300;">
+        <div class="modal-sheet" style="border-radius: 24px; margin-bottom: auto; margin-top: auto; max-width: 380px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="font-size: 22px; font-weight: 800; color: #FFF;">Mining <span style="color:var(--accent-cyan);">Father</span></h2>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Sign in to access your cloud wallet & mining session</p>
+            </div>
+
+            <label class="form-label">PHONE NUMBER OR USERNAME</label>
+            <input type="text" class="form-input" id="auth-username" placeholder="e.g. 9876543210">
+
+            <label class="form-label">PIN / PASSWORD</label>
+            <input type="password" class="form-input" id="auth-password" placeholder="Enter 4-6 digit PIN">
+
+            <div id="auth-referral-group">
+                <label class="form-label">INVITE / REFERRAL CODE (OPTIONAL)</label>
+                <input type="text" class="form-input" id="auth-ref-code" placeholder="Enter Friend's Code">
+            </div>
+
+            <button class="btn-primary" id="btn-auth-submit" onclick="App.handleAuth()" style="margin-top: 8px;">
+                🚀 Login / Create Account
+            </button>
+            <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 14px;">100% Free & Secure. Protected by Cloud Firewall.</p>
+        </div>
+    </div>
+
     <div id="app">
-        <!-- Persistent Top Header -->
         <header>
             <div class="header-profile" onclick="App.openProfileModal()">
                 <img id="user-avatar" src="https://i.pravatar.cc/100" alt="Avatar">
                 <div class="header-user-info">
-                    <span class="header-user-name" id="user-display-name">Mining Miner</span>
-                    <span class="header-user-tag" id="user-display-tag">@loading</span>
+                    <span class="header-user-name" id="user-display-name">Miner</span>
+                    <span class="header-user-tag" id="user-display-tag">UID: Loading</span>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="icon-btn" onclick="App.openSupportLink()" title="Support">🎧</button>
+                <button class="icon-btn" onclick="App.openSupportLink()" title="Help">🎧</button>
             </div>
         </header>
 
-        <!-- Main Body / View Switcher -->
         <main>
-            <!-- ================= HOME SECTION ================= -->
+            <!-- 🏠 HOME SECTION -->
             <section id="view-home" class="section-view active">
-                
-                <!-- Balance Summary Hero -->
                 <div class="balance-hero">
                     <div class="balance-label">
                         <span>Total Portfolio</span>
@@ -944,17 +411,16 @@
                     </div>
                     <div class="secondary-currencies">
                         <div class="curr-box">
-                            <div class="curr-title">INR Balance</div>
+                            <div class="curr-title">INR Available</div>
                             <div class="curr-amount" id="home-inr-balance">₹ 0.00</div>
                         </div>
                         <div class="curr-box">
-                            <div class="curr-title">USDT Balance</div>
+                            <div class="curr-title">USDT Available</div>
                             <div class="curr-amount" id="home-usdt-balance">$ 0.00</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Action Buttons -->
                 <div class="quick-actions">
                     <div class="quick-action-btn" onclick="App.switchTab('view-tasks')">
                         <span class="btn-icon">📋</span>
@@ -974,17 +440,16 @@
                     </div>
                 </div>
 
-                <!-- Mining Station Card -->
+                <!-- Mining Card -->
                 <div class="mining-card">
                     <div class="mining-header">
                         <div>
-                            <h3 style="font-size: 15px; font-weight: 800;">Mining Station</h3>
-                            <span style="font-size: 11px; color: var(--text-muted);" id="mining-cooldown-text">Session: 1 Hour</span>
+                            <h3 style="font-size: 15px; font-weight: 800;">Cloud Mining</h3>
+                            <span style="font-size: 11px; color: var(--text-muted);">Session Duration: 1 Hour</span>
                         </div>
                         <span class="badge badge-idle" id="mining-status-badge">READY</span>
                     </div>
 
-                    <!-- Circular Progress Dial -->
                     <div class="mining-dial">
                         <svg viewBox="0 0 190 190">
                             <circle class="mining-dial-bg" cx="95" cy="95" r="85"></circle>
@@ -997,15 +462,14 @@
                         </div>
                     </div>
 
-                    <!-- Mini Stats Grid -->
                     <div class="mining-stats-row">
                         <div class="mini-stat">
                             <div class="mini-stat-label">RATE</div>
-                            <div class="mini-stat-val" id="mining-rate-label">+0.10/tick</div>
+                            <div class="mini-stat-val">+0.15/sec</div>
                         </div>
                         <div class="mini-stat">
                             <div class="mini-stat-label">SESSION REWARD</div>
-                            <div class="mini-stat-val" id="mining-earned-display">+0.00</div>
+                            <div class="mini-stat-val">+540 Coins</div>
                         </div>
                         <div class="mini-stat">
                             <div class="mini-stat-label">REQUIRED ADS</div>
@@ -1013,102 +477,72 @@
                         </div>
                     </div>
 
-                    <!-- Mining Action Button -->
                     <button class="btn-primary" id="btn-mine-action" onclick="App.handleMiningAction()">
-                        <span>🪙</span> <span id="btn-mine-label">Watch Ads to Mine (0/5)</span>
+                        <span>🪙</span> <span id="btn-mine-label">Watch Ads to Unlock Mining (0/5)</span>
                     </button>
                 </div>
             </section>
 
-            <!-- ================= TASKS SECTION ================= -->
+            <!-- 📋 TASKS SECTION -->
             <section id="view-tasks" class="section-view">
                 <div>
                     <h2 style="font-size:18px; font-weight:800;">Task Center</h2>
-                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Complete tasks and earn instant coin rewards.</p>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Complete partner tasks to earn instant coins.</p>
                 </div>
 
-                <!-- Category Chips -->
                 <div class="filter-scroller" id="task-category-chips">
                     <div class="chip-tab active" onclick="App.filterTasks('all', this)">🔥 All</div>
-                    <div class="chip-tab" onclick="App.filterTasks('featured', this)">⭐ Featured</div>
                     <div class="chip-tab" onclick="App.filterTasks('daily', this)">📅 Daily</div>
-                    <div class="chip-tab" onclick="App.filterTasks('premium', this)">👑 Premium</div>
                     <div class="chip-tab" onclick="App.filterTasks('social', this)">🎯 Social</div>
                     <div class="chip-tab" onclick="App.filterTasks('app', this)">📱 App Installs</div>
                 </div>
 
-                <!-- Task Cards Container -->
-                <div id="tasks-container" style="display:flex; flex-direction:column; gap:12px;">
-                    <div class="state-empty">
-                        <span class="state-empty-icon">⏳</span>
-                        <span class="state-empty-text">Loading available tasks...</span>
-                    </div>
-                </div>
+                <div id="tasks-container" style="display:flex; flex-direction:column; gap:12px;"></div>
             </section>
 
-            <!-- ================= WATCH & EARN SECTION ================= -->
+            <!-- 📺 WATCH & EARN -->
             <section id="view-watch" class="section-view">
                 <div>
                     <h2 style="font-size:18px; font-weight:800;">Watch & Earn</h2>
-                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Earn coins continuously by viewing partner ads.</p>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">View native HD ads & claim real coin rewards.</p>
                 </div>
 
-                <div id="ad-networks-container" style="display:flex; flex-direction:column; gap:14px;">
-                    <!-- Adsgram Card -->
-                    <div class="ad-network-card">
-                        <div class="ad-card-top">
-                            <div>
-                                <div class="ad-card-title">Adsgram Video</div>
-                                <div class="ad-card-subtitle">Official Telegram partner rewards</div>
-                            </div>
-                            <span class="badge badge-active">+50 Coins</span>
+                <div class="ad-network-card">
+                    <div class="ad-card-top">
+                        <div>
+                            <div style="font-size: 15px; font-weight: 700;">Native Android Video Ad</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Direct High-Paying Sponsor Ad</div>
                         </div>
-                        <p style="font-size:12px; color:var(--text-secondary);">Watch a short 15-second sponsor video to claim your reward.</p>
-                        <button class="btn-primary btn-gold" onclick="App.watchPartnerAd('adsgram')">
-                            🎬 Watch Adsgram Video
-                        </button>
+                        <span class="badge badge-active">+50 Coins</span>
                     </div>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Watch a complete video ad without skipping to claim coins.</p>
+                    <button class="btn-primary btn-gold" onclick="App.watchNativeRewardedAd()">
+                        🎬 Watch Native Ad (+50 Coins)
+                    </button>
+                </div>
 
-                    <!-- Monetag Card -->
-                    <div class="ad-network-card">
-                        <div class="ad-card-top">
-                            <div>
-                                <div class="ad-card-title">Monetag Rewards</div>
-                                <div class="ad-card-subtitle">Interactive web sponsor tasks</div>
-                            </div>
-                            <span class="badge badge-active">+40 Coins</span>
+                <div class="ad-network-card">
+                    <div class="ad-card-top">
+                        <div>
+                            <div style="font-size: 15px; font-weight: 700;">Interactive Web Sponsor</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Fast Bonus Sponsor Task</div>
                         </div>
-                        <p style="font-size:12px; color:var(--text-secondary);">Interact with the sponsor page to earn instant bonus coins.</p>
-                        <button class="btn-primary" onclick="App.watchPartnerAd('monetag')">
-                            🌐 Watch Monetag Ad
-                        </button>
+                        <span class="badge badge-active">+30 Coins</span>
                     </div>
-
-                    <!-- RichAds Card -->
-                    <div class="ad-network-card">
-                        <div class="ad-card-top">
-                            <div>
-                                <div class="ad-card-title">RichAds / Adexora</div>
-                                <div class="ad-card-subtitle">High reward promotional ad</div>
-                            </div>
-                            <span class="badge badge-active">+60 Coins</span>
-                        </div>
-                        <p style="font-size:12px; color:var(--text-secondary);">Engage with high-yield promotional partner ads.</p>
-                        <button class="btn-primary btn-outline" onclick="App.watchPartnerAd('adexora')">
-                            ⚡ Watch Adexora Ad
-                        </button>
-                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary);">Check promotional offers and earn instant bonus.</p>
+                    <button class="btn-primary" onclick="App.watchWebAd()">
+                        ⚡ Watch Sponsor Offer (+30 Coins)
+                    </button>
                 </div>
             </section>
 
-            <!-- ================= WALLET SECTION ================= -->
+            <!-- 💰 WALLET & EXCHANGES -->
             <section id="view-wallet" class="section-view">
                 <div>
-                    <h2 style="font-size:18px; font-weight:800;">Treasury & Wallet</h2>
-                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Exchange your mined coins into INR or USDT and withdraw.</p>
+                    <h2 style="font-size:18px; font-weight:800;">Treasury & Cashout</h2>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Exchange Coins to INR or USDT and request payout.</p>
                 </div>
 
-                <!-- Tri-Balance Cells -->
                 <div class="wallet-grid">
                     <div class="wallet-card-cell">
                         <div class="label">COINS</div>
@@ -1124,11 +558,11 @@
                     </div>
                 </div>
 
-                <!-- Currency Exchange (Swap) Card -->
+                <!-- Swap Card -->
                 <div class="swap-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h4 style="font-size:14px; font-weight:700;">💱 Currency Swap</h4>
-                        <span style="font-size:11px; color:var(--accent-cyan);">Requires 1 Ad Watch</span>
+                        <span style="font-size:11px; color:var(--accent-cyan);">Requires 1 Ad</span>
                     </div>
 
                     <div class="swap-input-group">
@@ -1147,78 +581,65 @@
                     </div>
 
                     <button class="btn-primary" onclick="App.triggerCoinExchange()">
-                        💱 Watch Ad & Exchange
+                        💱 Watch Ad & Swap Currency
                     </button>
                 </div>
 
-                <!-- Withdrawal Option Triggers -->
+                <!-- Payout Options -->
                 <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
                     <button class="btn-primary btn-outline" style="justify-content:space-between;" onclick="App.openWithdrawModal('UPI')">
-                        <span style="display:flex; align-items:center; gap:8px;">🇮🇳 UPI Cashout (INR)</span>
-                        <span style="font-size:12px; color:var(--text-muted);">From ₹ balance →</span>
+                        <span>🇮🇳 UPI Bank Cashout (PhonePe/GPay)</span>
+                        <span style="font-size:12px; color:var(--text-muted);">From ₹ Balance →</span>
                     </button>
                     <button class="btn-primary btn-outline" style="justify-content:space-between;" onclick="App.openWithdrawModal('CRYPTO')">
-                        <span style="display:flex; align-items:center; gap:8px;">₿ Crypto / USDT (TRC20/BEP20)</span>
-                        <span style="font-size:12px; color:var(--text-muted);">From $ balance →</span>
-                    </button>
-                    <button class="btn-primary btn-outline" style="justify-content:space-between;" onclick="App.openWithdrawModal('PAYPAL')">
-                        <span style="display:flex; align-items:center; gap:8px;">💵 PayPal Global (USDT)</span>
-                        <span style="font-size:12px; color:var(--text-muted);">From $ balance →</span>
+                        <span>₿ USDT Payout (TRC20 / BEP20)</span>
+                        <span style="font-size:12px; color:var(--text-muted);">From $ Balance →</span>
                     </button>
                 </div>
 
-                <!-- Transaction Logs -->
                 <div>
                     <h4 style="font-size:14px; font-weight:700; margin: 10px 0;">Recent Transactions</h4>
-                    <div id="tx-history-container" style="display:flex; flex-direction:column; gap:8px;">
-                        <div class="state-empty">
-                            <span class="state-empty-icon">📜</span>
-                            <span class="state-empty-text">No transaction logs yet</span>
-                        </div>
-                    </div>
+                    <div id="tx-history-container" style="display:flex; flex-direction:column; gap:8px;"></div>
                 </div>
             </section>
 
-            <!-- ================= REFERRAL SECTION ================= -->
+            <!-- 👥 REFERRAL -->
             <section id="view-refer" class="section-view">
                 <div>
                     <h2 style="font-size:18px; font-weight:800;">Invite & Earn</h2>
-                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Get 10% lifetime coin bonus when your invited friends earn.</p>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Share your code. Earn 10% lifetime coin commissions.</p>
                 </div>
 
-                <!-- Referral Hero Card -->
                 <div class="balance-hero" style="border-color: rgba(255, 210, 0, 0.3);">
                     <div class="balance-label">
-                        <span>Your Referral Link</span>
-                        <span>Tier 1 Active</span>
+                        <span>Your Referral Code</span>
+                        <span id="ref-tier-badge">Tier 1 Active</span>
                     </div>
-                    <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:12px; padding:10px; font-size:12px; color:var(--accent-cyan); word-break:break-all; margin:8px 0;" id="ref-link-display">
-                        https://t.me/MiningFather12bot/miningfather?startapp=...
+                    <div style="background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:12px; padding:12px; font-size:18px; font-weight:800; color:var(--accent-gold); letter-spacing:2px; text-align:center; margin:10px 0;" id="user-ref-code-display">
+                        MINE123
                     </div>
-                    <button class="btn-primary btn-gold" onclick="App.copyReferralLink()">
-                        📋 Copy Invite Link
+                    <button class="btn-primary btn-gold" onclick="App.copyReferralCode()">
+                        📋 Copy Invite Code
                     </button>
                 </div>
 
-                <!-- Referral Stats -->
                 <div class="wallet-grid">
                     <div class="wallet-card-cell">
                         <div class="label">INVITED</div>
-                        <div class="val" id="ref-total-count">0</div>
+                        <div class="val" id="ref-invited-count">0</div>
                     </div>
                     <div class="wallet-card-cell">
                         <div class="label">ACTIVE</div>
                         <div class="val" id="ref-active-count">0</div>
                     </div>
                     <div class="wallet-card-cell">
-                        <div class="label">EARNED</div>
-                        <div class="val" id="ref-earned-coins" style="color:var(--accent-gold);">0 C</div>
+                        <div class="label">COMMISSION</div>
+                        <div class="val" id="ref-commission-val" style="color:var(--accent-gold);">0 C</div>
                     </div>
                 </div>
             </section>
         </main>
 
-        <!-- Persistent Bottom Navigation -->
         <nav class="bottom-nav">
             <button class="nav-tab active" onclick="App.switchTab('view-home')">
                 <span class="tab-icon">🏠</span>
@@ -1243,112 +664,45 @@
         </nav>
     </div>
 
-    <!-- ================= MODALS & SHEETS ================= -->
-
-    <!-- Profile Modal -->
-    <div class="modal-backdrop" id="modal-profile">
-        <div class="modal-sheet">
-            <div class="sheet-handle"></div>
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                <img id="modal-profile-img" src="https://i.pravatar.cc/100" style="width:54px; height:54px; border-radius:50%; border:2px solid var(--accent-cyan);">
-                <div>
-                    <h3 id="modal-profile-name" style="font-size:16px; font-weight:800;">User Profile</h3>
-                    <span id="modal-profile-id" style="font-size:12px; color:var(--text-muted);">ID: 00000000</span>
-                </div>
-            </div>
-            <div class="wallet-card-cell" style="text-align:left; margin-bottom:14px;">
-                <div class="label">ACCOUNT STATUS</div>
-                <div style="font-size:14px; font-weight:700; color:var(--accent-green); margin-top:2px;">Verified Member ✅</div>
-            </div>
-            <button class="btn-primary btn-outline" style="margin-bottom:10px;" onclick="App.openSupportLink()">🎧 Contact Customer Support</button>
-            <button class="btn-primary" onclick="App.closeAllModals()">Close</button>
-        </div>
-    </div>
-
-    <!-- Task Detail Modal -->
-    <div class="modal-backdrop" id="modal-task-detail">
-        <div class="modal-sheet">
-            <div class="sheet-handle"></div>
-            <h3 class="sheet-title" id="modal-task-title">Task Verification</h3>
-            <p class="sheet-desc" id="modal-task-desc">Complete the following steps to receive your reward.</p>
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:14px;">
-                <div style="font-size:11px; color:var(--text-muted); font-weight:600;">REWARD</div>
-                <div style="font-size:18px; font-weight:800; color:var(--accent-gold);" id="modal-task-reward">+0 Coins</div>
-            </div>
-            <div id="modal-task-instructions" style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom:16px;"></div>
-            <div class="task-actions" style="grid-template-columns:1fr 1fr;">
-                <button class="btn-primary btn-outline" id="modal-task-guide-btn">🎬 Guide</button>
-                <button class="btn-primary" id="modal-task-start-btn">🚀 Start Task</button>
-            </div>
-            <button class="btn-primary btn-gold" id="modal-task-verify-btn" style="margin-top:10px; width:100%;">✅ Verify Submission</button>
-        </div>
-    </div>
-
-    <!-- Payout / Withdrawal Modal -->
+    <!-- Payout Modal -->
     <div class="modal-backdrop" id="modal-withdraw">
         <div class="modal-sheet">
             <div class="sheet-handle"></div>
-            <h3 class="sheet-title" id="modal-withdraw-title">Request Cashout</h3>
-            <p class="sheet-desc" id="modal-withdraw-desc">Select your details carefully.</p>
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:6px;" id="modal-withdraw-title">Request Cashout</h3>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Minimum limits apply. Processed safely via automated payout queue.</p>
 
             <div id="crypto-network-group" style="display:none; margin-bottom:14px;">
-                <label class="form-label">SELECT NETWORK</label>
-                <select class="form-input" id="withdraw-crypto-network" onchange="App.onCryptoNetworkChange()">
-                    <option value="TRC20">USDT - TRC20 (Tron Network)</option>
+                <label class="form-label">SELECT CRYPTO NETWORK</label>
+                <select class="form-input" id="withdraw-crypto-network" onchange="App.onNetworkChange()">
+                    <option value="TRC20">USDT - TRC20 (Tron Network - Low Fee)</option>
                     <option value="BEP20">USDT - BEP20 (BNB Smart Chain)</option>
-                    <option value="ERC20">USDT - ERC20 (Ethereum)</option>
                 </select>
             </div>
 
             <div class="warning-callout" id="withdraw-network-warning" style="display:none;">
-                ⚠️ <strong>CRITICAL SAFETY WARNING:</strong> Only send your withdrawal to an address matching the selected network. Sending to wrong networks will cause permanent fund loss.
+                ⚠️ <strong>CRITICAL WARNING:</strong> Verify your wallet network carefully. Sending funds to an incorrect network address leads to permanent coin loss.
             </div>
 
-            <label class="form-label" id="withdraw-dest-label">PAYMENT ADDRESS / ID</label>
-            <input type="text" class="form-input" id="withdraw-dest-input" placeholder="e.g. UPI ID or Wallet">
+            <label class="form-label" id="withdraw-dest-label">PAYMENT DESTINATION</label>
+            <input type="text" class="form-input" id="withdraw-dest-input" placeholder="Enter UPI ID or Wallet">
 
-            <label class="form-label">AMOUNT TO WITHDRAW</label>
+            <label class="form-label">CASHOUT AMOUNT</label>
             <input type="number" class="form-input" id="withdraw-amount-input" placeholder="0.00">
 
-            <div class="checkbox-row" id="withdraw-confirm-group" style="display:none;">
-                <input type="checkbox" id="withdraw-confirm-checkbox">
-                <label for="withdraw-confirm-checkbox">I confirm that my destination address belongs to the selected network.</label>
-            </div>
-
-            <button class="btn-primary" id="btn-submit-payout" onclick="App.processPayoutSubmit()">
-                💸 Confirm & Request Payout
+            <button class="btn-primary" onclick="App.submitPayoutRequest()">
+                💸 Confirm Withdrawal
             </button>
+            <button class="btn-primary btn-outline" style="margin-top:10px;" onclick="App.closeModals()">Cancel</button>
         </div>
     </div>
 
-    <!-- Firebase SDK (Modular v9 via ESM) -->
+    <!-- Firebase SDK (Modular v9) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { 
             getDatabase, ref, set, get, update, push, onValue, runTransaction, query, orderByChild, equalTo 
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-        // ================= APP INITIALIZATION & TELEGRAM =================
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            try { tg.enableClosingConfirmation(); } catch(e){}
-        }
-
-        const user = tg?.initDataUnsafe?.user || {
-            id: "777888999",
-            first_name: "Demo",
-            last_name: "Miner",
-            username: "demominer",
-            photo_url: "https://i.pravatar.cc/100"
-        };
-
-        const TELEGRAM_USER_ID = String(user.id);
-        const USER_NAME = `${user.first_name || ''} ${user.last_name || ''}`.trim() || "Miner";
-        const USER_TAG = user.username ? `@${user.username}` : `ID: ${TELEGRAM_USER_ID}`;
-
-        // Firebase Configuration (Matching Existing Database)
         const firebaseConfig = {
             apiKey: "AIzaSyCcgl31JqffVd8bW8G23UurFhxH8IFlEfM",
             authDomain: "mining-bot-276d0.firebaseapp.com",
@@ -1362,266 +716,207 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Database References
-        const userRef = ref(database, `users/${TELEGRAM_USER_ID}`);
-        const tasksRef = ref(database, 'tasks');
-        const adminSettingsRef = ref(database, 'admin_settings');
-        const withdrawalsRef = ref(database, 'withdrawals');
-
-        // ================= GLOBAL STATE =================
+        // State Machine
         const State = {
+            userId: localStorage.getItem('mf_user_id') || null,
+            userName: localStorage.getItem('mf_user_name') || 'Miner',
             coins: 0,
             inr: 0,
             usdt: 0,
             miningEndTime: 0,
-            miningStartTime: 0,
             miningAdsWatched: 0,
-            rates: {
-                coinToInr: 100, // 100 Coins = 1 INR
-                coinToUsdt: 9000 // 9000 Coins = 1 USDT ($)
-            },
-            settings: {
-                miningAdsRequired: 5,
-                exchangeAdsRequired: 1,
-                miningDurationMs: 60 * 60 * 1000,
-                minUpiWithdrawInr: 300,
-                minCryptoWithdrawUsdt: 10,
-                minPaypalWithdrawUsdt: 10
-            },
-            currentActiveTask: null,
-            currentWithdrawType: null,
-            tasksList: {},
-            activeFilter: 'all'
+            rates: { coinToInr: 100, coinToUsdt: 9000 },
+            currentWithdrawType: 'UPI',
+            lastAdWatchTime: 0
         };
 
-        // ================= AD PROVIDER ABSTRACTION LAYER =================
-        const AdProvider = {
-            showAdsgram: function(blockId = "19245") {
-                return new Promise((resolve, reject) => {
-                    if (window.Adsgram) {
-                        window.Adsgram.init({ blockId: String(blockId) }).show()
-                            .then(res => resolve(res))
-                            .catch(err => reject(err));
-                    } else {
-                        reject(new Error("Adsgram SDK not loaded"));
-                    }
-                });
-            },
-            showMonetag: function() {
-                return new Promise((resolve, reject) => {
-                    if (typeof window.show_9969043 === 'function') {
-                        try {
-                            window.show_9969043().then(resolve).catch(reject);
-                        } catch(e) {
-                            resolve(true); // Fallback resolution for non-promise wrappers
-                        }
-                    } else {
-                        // Soft fallback for testing
-                        setTimeout(resolve, 1500);
-                    }
-                });
-            },
-            showAdexora: function() {
-                return new Promise((resolve, reject) => {
-                    if (typeof window.showAdexora === 'function') {
-                        window.showAdexora().then(resolve).catch(reject);
-                    } else {
-                        setTimeout(resolve, 1500);
-                    }
-                });
-            }
-        };
-
-        // ================= CORE APPLICATION LOGIC =================
         window.App = {
             init: function() {
-                this.bindUI();
-                this.listenToUserData();
-                this.listenToSettings();
-                this.listenToTasks();
-                this.listenToWithdrawals();
-                this.startMiningTicker();
-            },
-
-            bindUI: function() {
-                document.getElementById('user-display-name').innerText = USER_NAME;
-                document.getElementById('user-display-tag').innerText = USER_TAG;
-                if (user.photo_url) {
-                    document.getElementById('user-avatar').src = user.photo_url;
-                    document.getElementById('modal-profile-img').src = user.photo_url;
+                if (!State.userId) {
+                    document.getElementById('modal-auth').classList.add('open');
+                } else {
+                    this.attachUserSession();
                 }
-                document.getElementById('modal-profile-name').innerText = USER_NAME;
-                document.getElementById('modal-profile-id').innerText = `ID: ${TELEGRAM_USER_ID}`;
-                
-                const refLink = `https://t.me/MiningFather12bot/miningfather?startapp=ref_${TELEGRAM_USER_ID}`;
-                document.getElementById('ref-link-display').innerText = refLink;
+                this.startMiningClock();
             },
 
-            toast: function(message, type = 'info') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
-                toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-                container.appendChild(toast);
-                try { tg?.HapticFeedback?.notificationOccurred(type === 'error' ? 'error' : 'success'); } catch(e){}
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(-10px)';
-                    toast.style.transition = 'all 0.25s ease';
-                    setTimeout(() => toast.remove(), 250);
-                }, 3000);
-            },
+            handleAuth: async function() {
+                const username = document.getElementById('auth-username').value.trim();
+                const pin = document.getElementById('auth-password').value.trim();
+                const refCode = document.getElementById('auth-ref-code').value.trim();
 
-            switchTab: function(viewId) {
-                try { tg?.HapticFeedback?.impactOccurred('light'); } catch(e){}
-                document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
-                const target = document.getElementById(viewId);
-                if (target) target.classList.add('active');
-
-                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                const navIndex = ['view-home', 'view-tasks', 'view-watch', 'view-wallet', 'view-refer'].indexOf(viewId);
-                if (navIndex >= 0) {
-                    document.querySelectorAll('.bottom-nav .nav-tab')[navIndex].classList.add('active');
+                if (username.length < 3 || pin.length < 4) {
+                    this.toast("Enter a valid username/number & 4-digit PIN", "error");
+                    return;
                 }
-            },
 
-            // Database Listeners
-            listenToUserData: function() {
-                onValue(userRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (!data) {
-                        // Initialize new user profile cleanly
-                        const initialPayload = {
-                            telegramId: TELEGRAM_USER_ID,
-                            userName: USER_NAME,
-                            coins: 0,
-                            inr_balance: 0,
-                            usdt_balance: 0,
-                            miningEndTime: 0,
-                            miningStartTime: 0,
-                            miningAdsWatched: 0,
-                            joinDate: Date.now(),
-                            lastActive: Date.now()
-                        };
-                        set(userRef, initialPayload);
+                // Clean alphanumeric user key
+                const userKey = username.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
+                const userSnapshot = await get(ref(database, `users/${userKey}`));
+
+                if (userSnapshot.exists()) {
+                    const uData = userSnapshot.val();
+                    if (uData.pin && uData.pin !== pin) {
+                        this.toast("Incorrect PIN for this account", "error");
                         return;
                     }
+                } else {
+                    // Register new profile
+                    await set(ref(database, `users/${userKey}`), {
+                        userId: userKey,
+                        userName: username,
+                        pin: pin,
+                        coins: 100, // Welcome Bonus
+                        inr_balance: 0,
+                        usdt_balance: 0,
+                        miningEndTime: 0,
+                        miningAdsWatched: 0,
+                        referredBy: refCode || 'NONE',
+                        createdDate: Date.now()
+                    });
+                }
 
-                    State.coins = parseFloat(data.coins) || 0;
-                    State.inr = parseFloat(data.inr_balance) || 0;
-                    State.usdt = parseFloat(data.usdt_balance) || 0;
-                    State.miningEndTime = parseInt(data.miningEndTime) || 0;
-                    State.miningStartTime = parseInt(data.miningStartTime) || 0;
-                    State.miningAdsWatched = parseInt(data.miningAdsWatched) || 0;
+                localStorage.setItem('mf_user_id', userKey);
+                localStorage.setItem('mf_user_name', username);
+                State.userId = userKey;
+                State.userName = username;
 
-                    this.renderBalances();
-                    this.updateMiningUI();
-                });
+                document.getElementById('modal-auth').classList.remove('open');
+                this.attachUserSession();
+                this.toast("Welcome to Mining Father!", "success");
             },
 
-            listenToSettings: function() {
-                onValue(adminSettingsRef, (snapshot) => {
-                    const s = snapshot.val();
-                    if (s) {
-                        if (s.rates) {
-                            State.rates.coinToInr = s.rates.coin_to_inr || 100;
-                            State.rates.coinToUsdt = s.rates.coin_to_usdt || 9000;
-                        }
-                        if (s.miningAdsRequired) State.settings.miningAdsRequired = s.miningAdsRequired;
-                        if (s.exchangeAdsRequired) State.settings.exchangeAdsRequired = s.exchangeAdsRequired;
+            attachUserSession: function() {
+                document.getElementById('user-display-name').innerText = State.userName;
+                document.getElementById('user-display-tag').innerText = `ID: ${State.userId}`;
+                document.getElementById('user-ref-code-display').innerText = State.userId.toUpperCase();
+
+                const userRef = ref(database, `users/${State.userId}`);
+                onValue(userRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        State.coins = parseFloat(data.coins) || 0;
+                        State.inr = parseFloat(data.inr_balance) || 0;
+                        State.usdt = parseFloat(data.usdt_balance) || 0;
+                        State.miningEndTime = parseInt(data.miningEndTime) || 0;
+                        State.miningAdsWatched = parseInt(data.miningAdsWatched) || 0;
+
+                        this.renderBalances();
+                        this.updateMiningUI();
                     }
-                    this.renderBalances();
-                    this.updateMiningUI();
                 });
+
+                this.listenToTasks();
+                this.listenToHistory();
             },
 
             renderBalances: function() {
                 document.getElementById('home-coin-balance').innerText = Math.floor(State.coins).toLocaleString();
                 document.getElementById('wallet-coins-val').innerText = Math.floor(State.coins).toLocaleString();
-
-                const inrDisplay = `₹ ${State.inr.toFixed(2)}`;
-                document.getElementById('home-inr-balance').innerText = inrDisplay;
-                document.getElementById('wallet-inr-val').innerText = inrDisplay;
-
-                const usdtDisplay = `$ ${State.usdt.toFixed(2)}`;
-                document.getElementById('home-usdt-balance').innerText = usdtDisplay;
-                document.getElementById('wallet-usdt-val').innerText = usdtDisplay;
+                document.getElementById('home-inr-balance').innerText = `₹ ${State.inr.toFixed(2)}`;
+                document.getElementById('wallet-inr-val').innerText = `₹ ${State.inr.toFixed(2)}`;
+                document.getElementById('home-usdt-balance').innerText = `$ ${State.usdt.toFixed(2)}`;
+                document.getElementById('wallet-usdt-val').innerText = `$ ${State.usdt.toFixed(2)}`;
             },
 
-            // ================= MINING ENGINE =================
-            handleMiningAction: async function() {
-                try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
+            // Native Android Ad Trigger with Bridge
+            watchNativeRewardedAd: function() {
                 const now = Date.now();
-
-                // If currently mining, do nothing
-                if (State.miningEndTime > now) {
-                    this.toast("Mining is currently active! Earn coins automatically.", "info");
+                if (now - State.lastAdWatchTime < 15000) {
+                    this.toast("Please wait 15 seconds between ads", "info");
                     return;
                 }
 
-                // If ads are not yet completed
-                const reqAds = State.settings.miningAdsRequired;
-                if (State.miningAdsWatched < reqAds) {
-                    try {
-                        await AdProvider.showAdsgram("19245");
-                        const newCount = State.miningAdsWatched + 1;
-                        await update(userRef, { miningAdsWatched: newCount });
-                        this.toast(`Ad viewed! (${newCount}/${reqAds})`, 'success');
-                    } catch(err) {
-                        this.toast("Ad skipped or unavailable. Try again.", "error");
+                // Check if running inside Android WebView with Native Bridge
+                if (window.AndroidBridge && typeof window.AndroidBridge.showRewardedAd === 'function') {
+                    window.AndroidBridge.showRewardedAd();
+                } else {
+                    // Browser Fallback (Adsgram / Monetag)
+                    if (window.Adsgram) {
+                        window.Adsgram.init({ blockId: "19245" }).show()
+                            .then(() => window.onNativeAdRewarded())
+                            .catch(() => this.toast("Ad cancelled or unavailable", "error"));
+                    } else {
+                        // Testing mock
+                        setTimeout(() => window.onNativeAdRewarded(), 1500);
                     }
-                    return;
                 }
-
-                // Start 1-hour mining session
-                const duration = State.settings.miningDurationMs;
-                const endTime = now + duration;
-                await update(userRef, {
-                    miningStartTime: now,
-                    miningEndTime: endTime,
-                    miningAdsWatched: 0 // Reset ad counter for next session
-                });
-
-                this.toast("Mining session activated! +Coins will accumulate.", "success");
             },
 
-            startMiningTicker: function() {
+            watchWebAd: function() {
+                if (typeof window.show_9969043 === 'function') {
+                    try { window.show_9969043(); } catch(e){}
+                }
+                this.creditCoins(30, "Sponsor Task Bonus");
+            },
+
+            // Anti-Fraud Atomic Crediting
+            creditCoins: async function(amount, reason) {
+                State.lastAdWatchTime = Date.now();
+                await runTransaction(ref(database, `users/${State.userId}/coins`), (curr) => {
+                    return (parseFloat(curr) || 0) + amount;
+                });
+                push(ref(database, `users/${State.userId}/coin_history`), {
+                    amount: amount,
+                    reason: reason,
+                    timestamp: Date.now()
+                });
+                this.toast(`+${amount} Coins Credited!`, "success");
+            },
+
+            // Mining Mechanism
+            handleMiningAction: async function() {
+                const now = Date.now();
+                if (State.miningEndTime > now) {
+                    this.toast("Mining session is actively running", "info");
+                    return;
+                }
+
+                const requiredAds = 5;
+                if (State.miningAdsWatched < requiredAds) {
+                    this.watchNativeRewardedAd();
+                    return;
+                }
+
+                // Start 1-hour session
+                const oneHour = 60 * 60 * 1000;
+                await update(ref(database, `users/${State.userId}`), {
+                    miningStartTime: now,
+                    miningEndTime: now + oneHour,
+                    miningAdsWatched: 0
+                });
+                this.toast("Mining session started! Coins will accumulate.", "success");
+            },
+
+            startMiningClock: function() {
                 setInterval(() => {
                     const now = Date.now();
-                    const circle = document.getElementById('dial-progress-circle');
                     const timerText = document.getElementById('mining-timer-display');
-                    const icon = document.getElementById('mining-dial-icon');
-                    const statusBadge = document.getElementById('mining-status-badge');
+                    const badge = document.getElementById('mining-status-badge');
+                    const circle = document.getElementById('dial-progress-circle');
 
                     if (State.miningEndTime > now) {
-                        const total = State.settings.miningDurationMs;
                         const remaining = State.miningEndTime - now;
-                        const progress = 1 - (remaining / total);
-                        
-                        // Circle circumference = 2 * PI * 85 = 534
-                        circle.style.strokeDashoffset = 534 - (534 * progress);
-                        
                         const mins = Math.floor(remaining / 60000);
                         const secs = Math.floor((remaining % 60000) / 1000);
                         timerText.innerText = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-                        icon.innerText = "⚡";
+                        badge.className = "badge badge-active";
+                        badge.innerText = "ACTIVE";
 
-                        statusBadge.className = "badge badge-active";
-                        statusBadge.innerText = "MINING ACTIVE";
+                        const progress = 1 - (remaining / 3600000);
+                        circle.style.strokeDashoffset = 534 - (534 * progress);
 
-                        // Incremental live coins accumulation in DB every 3 seconds
-                        if (Math.floor(remaining / 1000) % 3 === 0) {
-                            runTransaction(ref(database, `users/${TELEGRAM_USER_ID}/coins`), (current) => {
-                                return (parseFloat(current) || 0) + 0.15;
+                        // Accumulate 0.15 coins every second atomically
+                        if (Math.floor(remaining / 1000) % 2 === 0) {
+                            runTransaction(ref(database, `users/${State.userId}/coins`), (curr) => {
+                                return (parseFloat(curr) || 0) + 0.3;
                             });
                         }
                     } else {
-                        circle.style.strokeDashoffset = 534;
                         timerText.innerText = "01:00:00";
-                        icon.innerText = "⛏️";
-                        statusBadge.className = "badge badge-idle";
-                        statusBadge.innerText = "READY";
+                        badge.className = "badge badge-idle";
+                        badge.innerText = "READY";
+                        circle.style.strokeDashoffset = 534;
                     }
                 }, 1000);
             },
@@ -1629,229 +924,59 @@
             updateMiningUI: function() {
                 const now = Date.now();
                 const btnLabel = document.getElementById('btn-mine-label');
-                const reqAds = State.settings.miningAdsRequired;
-                const watched = State.miningAdsWatched;
-
-                document.getElementById('mining-ads-status').innerText = `${watched}/${reqAds}`;
+                const reqAds = 5;
+                document.getElementById('mining-ads-status').innerText = `${State.miningAdsWatched}/${reqAds}`;
 
                 if (State.miningEndTime > now) {
                     btnLabel.innerText = "Mining In Progress...";
                     document.getElementById('btn-mine-action').disabled = true;
-                } else if (watched < reqAds) {
-                    btnLabel.innerText = `Watch Ads to Mine (${watched}/${reqAds})`;
+                } else if (State.miningAdsWatched < reqAds) {
+                    btnLabel.innerText = `Watch Ad to Unlock (${State.miningAdsWatched}/${reqAds})`;
                     document.getElementById('btn-mine-action').disabled = false;
                 } else {
-                    btnLabel.innerText = "Start Mining Session";
+                    btnLabel.innerText = "Start 1-Hour Mining";
                     document.getElementById('btn-mine-action').disabled = false;
                 }
             },
 
-            // ================= CURRENCY SWAP ENGINE =================
+            // Currency Swap
             calculateSwapPreview: function() {
                 const amount = parseFloat(document.getElementById('swap-coins-input').value) || 0;
                 const target = document.getElementById('swap-target-currency').value;
-                const outInput = document.getElementById('swap-output-preview');
+                const out = document.getElementById('swap-output-preview');
 
-                if (target === 'INR') {
-                    const inrVal = (amount / State.rates.coinToInr).toFixed(2);
-                    outInput.value = `₹ ${inrVal}`;
-                } else {
-                    const usdtVal = (amount / State.rates.coinToUsdt).toFixed(3);
-                    outInput.value = `$ ${usdtVal}`;
-                }
+                if (target === 'INR') out.value = `₹ ${(amount / State.rates.coinToInr).toFixed(2)}`;
+                else out.value = `$ ${(amount / State.rates.coinToUsdt).toFixed(3)}`;
             },
 
             triggerCoinExchange: async function() {
                 const coinsToSwap = parseFloat(document.getElementById('swap-coins-input').value) || 0;
-                const targetCurrency = document.getElementById('swap-target-currency').value;
+                const target = document.getElementById('swap-target-currency').value;
 
-                if (coinsToSwap <= 0) {
-                    this.toast("Enter a valid coin amount to swap", "error");
+                if (coinsToSwap < 100) {
+                    this.toast("Minimum swap is 100 Coins", "error");
                     return;
                 }
                 if (coinsToSwap > State.coins) {
-                    this.toast("Insufficient Coins balance", "error");
+                    this.toast("Insufficient coin balance", "error");
                     return;
                 }
 
-                // Gated by 1 Adsgram ad
-                try {
-                    this.toast("Loading required sponsor ad before exchange...", "info");
-                    await AdProvider.showAdsgram("19245");
-                } catch(e) {
-                    this.toast("You must view the ad to complete currency exchange", "error");
-                    return;
-                }
-
-                // Atomic transaction for safe balance swapping
-                try {
-                    await runTransaction(userRef, (userData) => {
-                        if (!userData) return userData;
-                        const currentCoins = parseFloat(userData.coins) || 0;
-                        if (currentCoins < coinsToSwap) return; // Abort
-
-                        userData.coins = currentCoins - coinsToSwap;
-
-                        if (targetCurrency === 'INR') {
-                            const inrGain = coinsToSwap / State.rates.coinToInr;
-                            userData.inr_balance = (parseFloat(userData.inr_balance) || 0) + inrGain;
-                        } else {
-                            const usdtGain = coinsToSwap / State.rates.coinToUsdt;
-                            userData.usdt_balance = (parseFloat(userData.usdt_balance) || 0) + usdtGain;
-                        }
-                        return userData;
-                    });
-
-                    // Log to exchange history
-                    push(ref(database, `users/${TELEGRAM_USER_ID}/exchange_history`), {
-                        coinsExchanged: coinsToSwap,
-                        targetCurrency: targetCurrency,
-                        timestamp: Date.now()
-                    });
-
-                    document.getElementById('swap-coins-input').value = '';
-                    document.getElementById('swap-output-preview').value = '';
-                    this.toast("Exchange successful! Balances updated.", "success");
-                } catch(err) {
-                    this.toast("Exchange failed. Try again.", "error");
-                }
-            },
-
-            // ================= PARTNER ADS (WATCH & EARN) =================
-            watchPartnerAd: async function(network) {
-                try { tg?.HapticFeedback?.impactOccurred('medium'); } catch(e){}
-                try {
-                    if (network === 'adsgram') {
-                        await AdProvider.showAdsgram("19245");
-                        await this.creditAdReward(50, 'Adsgram Reward');
-                    } else if (network === 'monetag') {
-                        await AdProvider.showMonetag();
-                        await this.creditAdReward(40, 'Monetag Reward');
-                    } else {
-                        await AdProvider.showAdexora();
-                        await this.creditAdReward(60, 'Adexora Reward');
-                    }
-                } catch(e) {
-                    this.toast("Ad interrupted or unavailable", "error");
-                }
-            },
-
-            creditAdReward: async function(rewardCoins, reason) {
-                await runTransaction(ref(database, `users/${TELEGRAM_USER_ID}/coins`), (curr) => {
-                    return (parseFloat(curr) || 0) + rewardCoins;
+                // Safe transaction deduction
+                await runTransaction(ref(database, `users/${State.userId}`), (u) => {
+                    if (!u || u.coins < coinsToSwap) return;
+                    u.coins -= coinsToSwap;
+                    if (target === 'INR') u.inr_balance = (parseFloat(u.inr_balance) || 0) + (coinsToSwap / State.rates.coinToInr);
+                    else u.usdt_balance = (parseFloat(u.usdt_balance) || 0) + (coinsToSwap / State.rates.coinToUsdt);
+                    return u;
                 });
-                push(ref(database, `users/${TELEGRAM_USER_ID}/coin_history`), {
-                    amount: rewardCoins,
-                    reason: reason,
-                    timestamp: Date.now()
-                });
-                this.toast(`+${rewardCoins} Coins Credited!`, "success");
+
+                document.getElementById('swap-coins-input').value = '';
+                document.getElementById('swap-output-preview').value = '';
+                this.toast("Currency swapped successfully!", "success");
             },
 
-            // ================= TASKS LISTENER & SYSTEM =================
-            listenToTasks: function() {
-                onValue(tasksRef, (snapshot) => {
-                    State.tasksList = snapshot.val() || {};
-                    this.renderTaskList();
-                });
-            },
-
-            filterTasks: function(category, element) {
-                State.activeFilter = category;
-                document.querySelectorAll('#task-category-chips .chip-tab').forEach(c => c.classList.remove('active'));
-                if (element) element.classList.add('active');
-                this.renderTaskList();
-            },
-
-            renderTaskList: function() {
-                const container = document.getElementById('tasks-container');
-                container.innerHTML = '';
-                const tasks = State.tasksList;
-                let keys = Object.keys(tasks);
-
-                if (State.activeFilter !== 'all') {
-                    keys = keys.filter(k => tasks[k].category === State.activeFilter || (State.activeFilter === 'premium' && tasks[k].isPremium));
-                }
-
-                if (keys.length === 0) {
-                    container.innerHTML = `
-                        <div class="state-empty">
-                            <span class="state-empty-icon">📂</span>
-                            <span class="state-empty-text">No tasks available in this category.</span>
-                        </div>`;
-                    return;
-                }
-
-                keys.forEach(taskId => {
-                    const t = tasks[taskId];
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.innerHTML = `
-                        <div class="task-card-top">
-                            <img class="task-icon" src="${t.logoUrl || 'https://via.placeholder.com/44'}" alt="task">
-                            <div class="task-info">
-                                <div class="task-name">${t.name}</div>
-                                <div class="task-meta">
-                                    <span class="task-reward-tag">+${t.reward || 100} Coins</span>
-                                    <span class="task-time">⏱️ ~2 mins</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="btn-primary btn-outline" onclick="App.openTaskDetails('${taskId}')">View Details</button>
-                            <button class="btn-primary" onclick="App.startExternalTask('${taskId}')">Start Task</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            },
-
-            openTaskDetails: function(taskId) {
-                const t = State.tasksList[taskId];
-                if (!t) return;
-                State.currentActiveTask = taskId;
-
-                document.getElementById('modal-task-title').innerText = t.name;
-                document.getElementById('modal-task-desc').innerText = t.description || 'Follow all steps precisely.';
-                document.getElementById('modal-task-reward').innerText = `+${t.reward || 100} Coins`;
-                
-                const instructions = t.instructions && Array.isArray(t.instructions) 
-                    ? t.instructions.map((ins, i) => `<div>${i+1}. ${ins}</div>`).join('')
-                    : '<div>Complete all instructions to earn verification reward.</div>';
-                document.getElementById('modal-task-instructions').innerHTML = instructions;
-
-                document.getElementById('modal-task-start-btn').onclick = () => this.startExternalTask(taskId);
-                document.getElementById('modal-task-guide-btn').onclick = () => {
-                    if (t.videoGuideUrl) tg?.openLink(t.videoGuideUrl);
-                    else this.toast("No video tutorial attached to this task", "info");
-                };
-                document.getElementById('modal-task-verify-btn').onclick = () => this.verifyTaskSubmission(taskId);
-
-                document.getElementById('modal-task-detail').classList.add('open');
-            },
-
-            startExternalTask: function(taskId) {
-                const t = State.tasksList[taskId];
-                if (!t) return;
-                if (t.link) tg?.openLink(t.link);
-                set(ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`), Date.now());
-                this.toast("Task initiated! Complete it and press verify.", "info");
-            },
-
-            verifyTaskSubmission: function(taskId) {
-                push(ref(database, 'task_verifications'), {
-                    userId: TELEGRAM_USER_ID,
-                    userName: USER_NAME,
-                    taskId: taskId,
-                    timestamp: Date.now(),
-                    status: 'pending'
-                });
-                set(ref(database, `users/${TELEGRAM_USER_ID}/startedTasks/${taskId}`), 'pending');
-                this.closeAllModals();
-                this.toast("Submitted for verification! Reward credited after approval.", "success");
-            },
-
-            // ================= WITHDRAWALS & CRYPTO ENGINE =================
+            // Withdrawals
             openWithdrawModal: function(type) {
                 State.currentWithdrawType = type;
                 const modal = document.getElementById('modal-withdraw');
@@ -1860,175 +985,174 @@
                 const destInput = document.getElementById('withdraw-dest-input');
                 const cryptoGroup = document.getElementById('crypto-network-group');
                 const warning = document.getElementById('withdraw-network-warning');
-                const confirmGroup = document.getElementById('withdraw-confirm-group');
 
                 destInput.value = '';
                 document.getElementById('withdraw-amount-input').value = '';
 
                 if (type === 'UPI') {
-                    title.innerText = '🇮🇳 UPI INR Cashout';
-                    destLabel.innerText = 'YOUR UPI ID (VPA)';
-                    destInput.placeholder = 'username@okhdfcbank';
+                    title.innerText = "🇮🇳 UPI Bank Cashout";
+                    destLabel.innerText = "ENTER YOUR UPI ID";
+                    destInput.placeholder = "username@okhdfcbank";
                     cryptoGroup.style.display = 'none';
                     warning.style.display = 'none';
-                    confirmGroup.style.display = 'none';
-                } else if (type === 'CRYPTO') {
-                    title.innerText = '₿ Crypto USDT Cashout';
-                    destLabel.innerText = 'USDT RECIPIENT ADDRESS';
-                    destInput.placeholder = 'T... (TRC20 Wallet Address)';
+                } else {
+                    title.innerText = "₿ Crypto USDT Cashout";
+                    destLabel.innerText = "USDT WALLET ADDRESS";
+                    destInput.placeholder = "T... (Tron or BSC Address)";
                     cryptoGroup.style.display = 'block';
                     warning.style.display = 'block';
-                    confirmGroup.style.display = 'flex';
-                    this.onCryptoNetworkChange();
-                } else {
-                    title.innerText = '💵 PayPal Cashout';
-                    destLabel.innerText = 'PAYPAL ACCOUNT EMAIL';
-                    destInput.placeholder = 'you@example.com';
-                    cryptoGroup.style.display = 'none';
-                    warning.style.display = 'none';
-                    confirmGroup.style.display = 'none';
                 }
-
                 modal.classList.add('open');
             },
 
-            onCryptoNetworkChange: function() {
-                const network = document.getElementById('withdraw-crypto-network').value;
-                const warning = document.getElementById('withdraw-network-warning');
-                warning.innerHTML = `⚠️ <strong>CRITICAL SAFETY WARNING:</strong> You have chosen <strong>${network}</strong>. Sending tokens to an address outside ${network} will result in permanent loss of funds.`;
-            },
-
-            processPayoutSubmit: async function() {
-                const type = State.currentWithdrawType;
+            submitPayoutRequest: async function() {
                 const dest = document.getElementById('withdraw-dest-input').value.trim();
                 const amount = parseFloat(document.getElementById('withdraw-amount-input').value) || 0;
+                const type = State.currentWithdrawType;
 
-                if (!dest) {
-                    this.toast("Please enter your payout destination", "error");
-                    return;
-                }
-                if (amount <= 0) {
-                    this.toast("Enter a valid withdrawal amount", "error");
+                if (!dest || amount <= 0) {
+                    this.toast("Enter valid details & amount", "error");
                     return;
                 }
 
-                // Balance validation against respective pools
-                if (type === 'UPI') {
-                    if (amount > State.inr) {
-                        this.toast("Insufficient INR balance. Swap coins first.", "error");
-                        return;
-                    }
-                } else {
-                    if (amount > State.usdt) {
-                        this.toast("Insufficient USDT balance. Swap coins first.", "error");
-                        return;
-                    }
+                if (type === 'UPI' && (amount > State.inr || amount < 50)) {
+                    this.toast("Min UPI withdrawal is ₹50", "error");
+                    return;
+                }
+                if (type === 'CRYPTO' && (amount > State.usdt || amount < 5)) {
+                    this.toast("Min Crypto withdrawal is $5 USDT", "error");
+                    return;
                 }
 
-                if (type === 'CRYPTO') {
-                    const isChecked = document.getElementById('withdraw-confirm-checkbox').checked;
-                    if (!isChecked) {
-                        this.toast("You must confirm the network safety declaration", "error");
-                        return;
-                    }
-                }
+                // Atomic deduction
+                await runTransaction(ref(database, `users/${State.userId}`), (u) => {
+                    if (!u) return;
+                    if (type === 'UPI') u.inr_balance -= amount;
+                    else u.usdt_balance -= amount;
+                    return u;
+                });
 
-                // Deduct balance and record withdrawal
-                try {
-                    await runTransaction(userRef, (userData) => {
-                        if (!userData) return userData;
-                        if (type === 'UPI') {
-                            userData.inr_balance = (parseFloat(userData.inr_balance) || 0) - amount;
-                        } else {
-                            userData.usdt_balance = (parseFloat(userData.usdt_balance) || 0) - amount;
-                        }
-                        return userData;
-                    });
+                await push(ref(database, 'withdrawals'), {
+                    userId: State.userId,
+                    amount: amount,
+                    type: type,
+                    destination: dest,
+                    network: type === 'CRYPTO' ? document.getElementById('withdraw-crypto-network').value : 'UPI',
+                    status: 'Pending',
+                    timestamp: Date.now()
+                });
 
-                    const payload = {
-                        userId: TELEGRAM_USER_ID,
-                        userName: USER_NAME,
-                        amount: amount,
-                        type: type,
-                        destination: dest,
-                        network: type === 'CRYPTO' ? document.getElementById('withdraw-crypto-network').value : 'N/A',
-                        status: 'Pending',
-                        timestamp: Date.now()
-                    };
-
-                    await push(withdrawalsRef, payload);
-                    this.closeAllModals();
-                    this.toast("Withdrawal submitted! Processed within 24-48 hours.", "success");
-                } catch(err) {
-                    this.toast("Failed to submit withdrawal request", "error");
-                }
+                this.closeModals();
+                this.toast("Withdrawal queued! Payout dispatched within 24h.", "success");
             },
 
-            listenToWithdrawals: function() {
-                const q = query(withdrawalsRef, orderByChild('userId'), equalTo(TELEGRAM_USER_ID));
+            listenToHistory: function() {
+                const q = query(ref(database, 'withdrawals'), orderByChild('userId'), equalTo(State.userId));
                 onValue(q, (snapshot) => {
-                    const container = document.getElementById('tx-history-container');
-                    container.innerHTML = '';
+                    const c = document.getElementById('tx-history-container');
+                    c.innerHTML = '';
                     const data = snapshot.val();
                     if (!data) {
-                        container.innerHTML = `
-                            <div class="state-empty">
-                                <span class="state-empty-icon">📜</span>
-                                <span class="state-empty-text">No recent transactions</span>
-                            </div>`;
+                        c.innerHTML = `<p style="font-size:12px; color:var(--text-muted); text-align:center;">No recent withdrawals</p>`;
                         return;
                     }
-
                     Object.values(data).sort((a,b) => b.timestamp - a.timestamp).forEach(item => {
                         const el = document.createElement('div');
                         el.className = 'history-item';
-                        const isINR = item.type === 'UPI';
                         el.innerHTML = `
                             <div>
-                                <div style="font-size:13px; font-weight:700;">${item.type} Payout</div>
+                                <div style="font-size:13px; font-weight:700;">${item.type} Cashout</div>
                                 <div style="font-size:11px; color:var(--text-muted);">${new Date(item.timestamp).toLocaleDateString()}</div>
                             </div>
                             <div style="text-align:right;">
-                                <div style="font-size:13px; font-weight:800;">${isINR ? '₹' : '$'}${item.amount}</div>
+                                <div style="font-size:13px; font-weight:800;">${item.type === 'UPI' ? '₹' : '$'}${item.amount}</div>
                                 <div style="font-size:11px; color:var(--accent-gold); font-weight:700;">${item.status}</div>
                             </div>
                         `;
-                        container.appendChild(el);
+                        c.appendChild(el);
                     });
                 });
             },
 
-            // ================= REFERRALS & PROFILE =================
-            copyReferralLink: function() {
-                const link = `https://t.me/MiningFather12bot/miningfather?startapp=ref_${TELEGRAM_USER_ID}`;
-                navigator.clipboard.writeText(link).then(() => {
-                    this.toast("Invite link copied to clipboard!", "success");
-                }).catch(() => {
-                    this.toast(link, "info");
+            listenToTasks: function() {
+                onValue(ref(database, 'tasks'), (snap) => {
+                    const c = document.getElementById('tasks-container');
+                    c.innerHTML = '';
+                    const tasks = snap.val();
+                    if (!tasks) {
+                        c.innerHTML = `<p style="font-size:12px; color:var(--text-muted); text-align:center;">No new tasks today.</p>`;
+                        return;
+                    }
+                    Object.keys(tasks).forEach(id => {
+                        const t = tasks[id];
+                        const card = document.createElement('div');
+                        card.className = 'task-card';
+                        card.innerHTML = `
+                            <div class="task-card-top">
+                                <img class="task-icon" src="${t.logoUrl || 'https://via.placeholder.com/44'}">
+                                <div class="task-info">
+                                    <div class="task-name">${t.name}</div>
+                                    <div class="task-meta">
+                                        <span style="color:var(--accent-gold); font-weight:700;">+${t.reward} Coins</span>
+                                        <span style="color:var(--text-muted);">~2 mins</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-primary" onclick="window.open('${t.link || '#'}', '_blank')">Complete Task</button>
+                        `;
+                        c.appendChild(card);
+                    });
                 });
             },
 
+            switchTab: function(viewId) {
+                document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(viewId)?.classList.add('active');
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                const idx = ['view-home', 'view-tasks', 'view-watch', 'view-wallet', 'view-refer'].indexOf(viewId);
+                if (idx >= 0) document.querySelectorAll('.bottom-nav .nav-tab')[idx].classList.add('active');
+            },
+
+            copyReferralCode: function() {
+                navigator.clipboard.writeText(State.userId.toUpperCase());
+                this.toast("Invite code copied to clipboard!", "success");
+            },
+
             openProfileModal: function() {
-                document.getElementById('modal-profile').classList.add('open');
+                this.toast(`Signed in as: ${State.userName}`, "info");
             },
 
             openSupportLink: function() {
-                tg?.openTelegramLink('https://t.me/MiningFatherhelp');
+                window.open("https://t.me/MiningFatherhelp", "_blank");
             },
 
-            closeAllModals: function() {
+            closeModals: function() {
                 document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+            },
+
+            toast: function(msg, type = 'info') {
+                const c = document.getElementById('toast-container');
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.innerHTML = `<span>${type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️')}</span> <span>${msg}</span>`;
+                c.appendChild(t);
+                setTimeout(() => t.remove(), 3200);
             }
         };
 
-        // Window dismiss on backdrop click
-        window.onclick = function(e) {
-            if (e.target.classList.contains('modal-backdrop')) {
-                App.closeAllModals();
+        // Bridge Callback triggered strictly by Native Android Studio Code
+        window.onNativeAdRewarded = function() {
+            // Check if it was for mining ad or general ad
+            if (State.miningEndTime <= Date.now() && State.miningAdsWatched < 5) {
+                runTransaction(ref(database, `users/${State.userId}/miningAdsWatched`), (curr) => {
+                    return (parseInt(curr) || 0) + 1;
+                });
+                App.toast("Ad Completed! Step added toward mining session.", "success");
+            } else {
+                App.creditCoins(50, "Native Android Video Ad");
             }
         };
 
-        // Boot the App
         document.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
